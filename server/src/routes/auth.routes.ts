@@ -1,23 +1,22 @@
 import { FastifyInstance } from 'fastify';
-import AuthController from '../controllers/auth.controller';
-import { authenticate, checkRole } from '../middleware/auth.middleware';
+import authController from '../api/auth/auth.controller';
+import userController from '../api/user/user.controller';
+import { authenticate } from '../api/middleware/auth.middleware';
 
-export default async function authRoutes(fastify: FastifyInstance) {
-  fastify.post('/register', AuthController.register);
+export default function(fastify: FastifyInstance, _opts: any, done: () => void) {
+  // Маршрути автентифікації
+  fastify.post('/api/auth/register', authController.register);
+  fastify.post('/api/auth/login', authController.login);
+  fastify.get('/api/auth/logout', authController.logout);
 
-  fastify.post('/login', AuthController.login);
+  // Маршрути користувачів
+  fastify.get('/api/auth/me', {
+    preValidation: [authenticate]
+  }, userController.getCurrentUser);
 
-  fastify.get('/me', {
-    preHandler: [authenticate],
-  }, AuthController.getCurrentUser);
+  fastify.get('/api/users', {
+    preValidation: [authenticate]
+  }, userController.getAllUsers);
 
-  fastify.get('/users', {
-    preHandler: [authenticate, checkRole(['admin'])]
-  }, AuthController.getAllUsers);
-
-  fastify.post('/logout', AuthController.logout);
-
-  //TODO: Додати ендпоінт для оновлення користувачів.
-  //TODO: Додати ендпоінт для видаллення користувачів.
-  //TODO: Додати ендпоінт для пошуку користувачів по id.
+  done();
 }

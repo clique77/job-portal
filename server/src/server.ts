@@ -1,5 +1,5 @@
 import app from './app';
-import database from './database';
+import database from './data/mongodbConnection';
 
 const start = async () => {
   try {
