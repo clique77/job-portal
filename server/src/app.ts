@@ -3,6 +3,7 @@ import jwt from '@fastify/jwt';
 import cookie from '@fastify/cookie';
 import config from './config';
 import routes from './routes';
+import cors from '@fastify/cors';
 
 const app = fastify({
   logger: true,
@@ -11,6 +12,13 @@ const app = fastify({
 if (!config.jwtSecret) {
   throw new Error('JWT_SECRET is not defined');
 }
+
+app.register(cors, {
+  origin: config.clientUrl,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+});
 
 app.register(jwt, {
   secret: config.jwtSecret,

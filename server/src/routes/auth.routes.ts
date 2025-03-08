@@ -17,6 +17,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
 
   fastify.post('/logout', AuthController.logout);
 
-  //Додати ендпоінт для оновлення користувачів.
+  //TODO: Додати ендпоінт для оновлення користувачів.
+  //TODO: Додати ендпоінт для видаллення користувачів.
+  //TODO: Додати ендпоінт для пошуку користувачів по id.
 }
-

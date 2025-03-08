@@ -1,4 +1,4 @@
-import { FastifyRequest, FastifyReply} from 'fastify';
+import { FastifyRequest, FastifyReply } from 'fastify';
 
 export const authenticate = async (request: FastifyRequest, reply: FastifyReply) => {
   try {
