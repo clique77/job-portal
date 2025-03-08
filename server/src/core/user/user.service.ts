@@ -1,8 +1,9 @@
 import { IUser } from '../../data/models/User';
 import { IUserRepository, getUserRepository } from '../../data/repositories';
+import { IUserService } from './user.service.interface';
 import mongoose from 'mongoose';
 
-export class UserService {
+export class UserService implements IUserService {
   private userRepository: IUserRepository;
 
   constructor() {
@@ -17,10 +18,7 @@ export class UserService {
     return userWithoutPassword as Omit<IUser, 'password'>;
   }
 
-  async getAllUsers(page: number = 1, limit: number = 10): Promise<{
-    users: Omit<IUser, 'password'>[],
-    total: number
-  }> {
+  async getAllUsers(page: number = 1, limit: number = 10): Promise<{ users: Omit<IUser, 'password'>[],total: number }> {
     const skip = (page - 1) * limit;
 
     const users = await this.userRepository.findAll(skip, limit);

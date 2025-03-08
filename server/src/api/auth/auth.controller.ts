@@ -1,8 +1,8 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import authService from '../../core/auth/auth.service';
-import cookieService from '../../core/common/cookie.service';
-import errorHandlerService from '../../core/common/error-handler.service';
 import { UserRole } from '../../data/models/User';
+import { IAuthService } from '../../core/auth/auth.service.interface';
+import { ICookieService } from '../../core/common/cookie/cookie.service.interface';
+import { IErrorHandlerService } from '../../core/common/error-handler/error-handler.interface';
 
 interface RegisterRequest {
   name: string;
@@ -17,7 +17,14 @@ interface LoginRequest {
 }
 
 export class AuthController {
-  constructor() {
+  private authService: IAuthService;
+  private cookieService: ICookieService;
+  private errorHandlerService: IErrorHandlerService;
+
+  constructor(authService: IAuthService, cookieService: ICookieService, errorHandlerService: IErrorHandlerService) {
+    this.authService = authService;
+    this.cookieService = cookieService;
+    this.errorHandlerService = errorHandlerService;
     this.register = this.register.bind(this);
     this.login = this.login.bind(this);
     this.logout = this.logout.bind(this);
@@ -26,32 +33,36 @@ export class AuthController {
   async register(request: FastifyRequest<{ Body: RegisterRequest }>, reply: FastifyReply) {
     try {
       const userData = request.body;
-      const result = await authService.register(userData);
+      const result = await this.authService.register(userData);
 
-      cookieService.setAuthCookie(reply, result.token);
+      this.cookieService.setAuthCookie(reply, result.token);
       return result;
     } catch (error) {
-      return errorHandlerService.handleError(request, reply, error, 400);
+      return this.errorHandlerService.handleError(request, reply, error as Error, 400);
     }
   }
 
   async login(request: FastifyRequest<{ Body: LoginRequest }>, reply: FastifyReply) {
     try {
       const { email, password } = request.body;
-      const result = await authService.login({ email, password });
+      const result = await this.authService.login({ email, password });
 
-      cookieService.setAuthCookie(reply, result.token);
+      this.cookieService.setAuthCookie(reply, result.token);
       return result;
     } catch (error) {
-      return errorHandlerService.handleError(request, reply, error, 401);
+      return this.errorHandlerService.handleError(request, reply, error as Error, 401);
     }
   }
 
   async logout(_request: FastifyRequest, reply: FastifyReply) {
-    cookieService.clearAuthCookie(reply);
+    this.cookieService.clearAuthCookie(reply);
     return { message: 'Successfully logged out' };
   }
 }
 
-export const authController = new AuthController();
+import authService from '../../core/auth/auth.service';
+import cookieService from '../../core/common/cookie/cookie.service';
+import errorHandlerService from '../../core/common/error-handler/error-handler.service';
+
+export const authController = new AuthController(authService, cookieService, errorHandlerService);
 export default authController;
