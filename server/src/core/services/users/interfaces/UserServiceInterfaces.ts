@@ -1,4 +1,4 @@
-import { IUser, UserRole } from "../../data/models/User";
+import { IUser, UserRole } from "../../../../data/models/User";
 
 export interface CreateUserData {
   name: string;

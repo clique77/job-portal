@@ -1,5 +1,5 @@
 import { FastifyRequest } from 'fastify';
-import { IPaginationService, PaginationParams, PaginationResult } from './PaginationServiceInterfaces';
+import { IPaginationService, PaginationParams, PaginationResult } from './interfaces/PaginationServiceInterfaces';
 
 export class PaginationService implements IPaginationService {
   getPaginationParams(request: FastifyRequest): PaginationParams {

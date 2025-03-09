@@ -123,3 +123,5 @@ class JobMongoDBRepository implements IJobRepository {
     return query;
   }
 }
+
+export default JobMongoDBRepository;

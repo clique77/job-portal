@@ -1,6 +1,6 @@
 import { IJobRepository, JobUpdateDTO } from '../../../data/repositories/jobs/JobRepository';
 import { IJob } from '../../../data/models/Jobs';
-import { UserService } from '../../user/UserService';
+import { UserService } from '../../services/users/UserService';
 import { JobValidator } from './utils/JobValidator';
 
 export class UpdateJobAction {

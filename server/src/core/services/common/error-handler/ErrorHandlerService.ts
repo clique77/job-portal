@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { IErrorHandlerService } from './ErrorHandlerInterfaces';
+import { IErrorHandlerService } from './interfaces/ErrorHandlerInterfaces';
 
 export class ErrorHandlerService implements IErrorHandlerService {
   handleError(

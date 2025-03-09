@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import authRoutes from './auth/AuthRoutes'
-import userRoutes from './user/user.routes';
+import userRoutes from './user/UserRoutes';
 
 export default async function routes(fastify: FastifyInstance) {
   fastify.register(authRoutes);

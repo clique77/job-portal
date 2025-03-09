@@ -1,15 +1,16 @@
 import { IJob } from "../../../data/models/Jobs";
 import { getJobRepository, JobCreateData, JobFilter, JobUpdateDTO } from "../../../data/repositories/jobs/JobRepository";
-import UserService from "../../user/UserService";
-import { CreateJobAction } from "./CreateJobAction";
-import { DeleteJobAction } from "./DeleteJobAction";
-import { GetJobByIdAction } from "./GetJobByIdAction";
-import { ListJobsAction } from "./ListJobAction";
-import { UpdateJobAction } from "./UpdateJobAction";
-import { JobFilterBuilder } from "./utils/JobFilterBuilder";
-import { JobValidator } from "./utils/JobValidator";
+import UserService from "../users/UserService";
+import { CreateJobAction } from "../../actions/jobs/CreateJobAction";
+import { DeleteJobAction } from "../../actions/jobs/DeleteJobAction";
+import { GetJobByIdAction } from "../../actions/jobs/GetJobByIdAction";
+import { ListJobsAction } from "../../actions/jobs/ListJobAction";
+import { UpdateJobAction } from "../../actions/jobs/UpdateJobAction";
+import { JobFilterBuilder } from "../../actions/jobs/utils/JobFilterBuilder";
+import { JobValidator } from "../../actions/jobs/utils/JobValidator";
+import { IJobService } from "./interfaces/JobServiceInterfaces";
 
-export class JobService {
+export class JobService implements IJobService {
   private createJobAction: CreateJobAction;
   private updateJobAction: UpdateJobAction;
   private getJobByIdAction: GetJobByIdAction;

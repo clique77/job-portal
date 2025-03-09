@@ -1,4 +1,5 @@
 import { IUser } from '../../models/User';
+import { UserMongoDBRepository } from './UserMongoDbrepository';
 
 export interface UserCreateData {
   name: string;
@@ -14,3 +15,5 @@ export interface IUserRepository {
   findAll(page: number, limit: number): Promise<IUser[]>;
   count(): Promise<number>;
 }
+
+export const userRepository: IUserRepository = new UserMongoDBRepository();

@@ -1,7 +1,8 @@
 import { IJobRepository } from '../../../data/repositories/jobs/JobRepository';
 import { IJob } from '../../../data/models/Jobs';
+import { IGetJobByIdAction } from './interfaces/IJobActions';
 
-export class GetJobByIdAction {
+export class GetJobByIdAction implements IGetJobByIdAction {
   private jobRepository: IJobRepository;
 
   constructor(jobRepository: IJobRepository) {

@@ -1,4 +1,4 @@
-import { UserRole } from "../../data/models/User";
+import { UserRole } from "../../../../data/models/User";
 
 export interface RegisterData {
   name: string;

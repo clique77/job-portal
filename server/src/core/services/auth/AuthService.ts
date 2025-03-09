@@ -1,15 +1,15 @@
-import { IUserRepository, getUserRepository } from '../../data/repositories/UserRepositoryFactory';
-import { IAuthService, RegisterData, LoginData, AuthResponse } from './AuthServiceInterfaces';
-import { IUserService } from '../user/UserServiceInterfaces';
-import { ITokenService } from '../token/TokenServiceInterfaces';
+import { IUserRepository } from '../../../data/repositories/user/UserRepository';
+import { IAuthService, RegisterData, LoginData, AuthResponse } from '../../services/auth/interfaces/AuthServiceInterfaces';
+import { ITokenService } from '../../services/common/token/interfaces/TokenServiceInterfaces';
+import { IUserService } from '../users/interfaces/UserServiceInterfaces';
 
 export class AuthService implements IAuthService {
   private userRepository: IUserRepository;
   private userService: IUserService;
   private tokenService: ITokenService;
 
-  constructor(userService: IUserService, tokenService: ITokenService) {
-    this.userRepository = getUserRepository();
+  constructor(userRepository: IUserRepository, userService: IUserService, tokenService: ITokenService) {
+    this.userRepository = userRepository;
     this.userService = userService;
     this.tokenService = tokenService;
   }
@@ -50,8 +50,9 @@ export class AuthService implements IAuthService {
   }
 }
 
-import tokenService from '../token/TokenService';
-import userService from '../user/UserService';
+import tokenService from '../../services/common/token/TokenService';
+import userService from '../users/UserService';
+import { userRepository } from '../../../data/repositories/user/UserRepository';
 
-export const authService = new AuthService(userService, tokenService);
+export const authService = new AuthService(userRepository, userService, tokenService);
 export default authService;
