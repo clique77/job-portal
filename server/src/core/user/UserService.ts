@@ -1,6 +1,6 @@
 import { IUser } from '../../data/models/User';
-import { IUserRepository, getUserRepository } from '../../data/repositories';
-import { IUserService } from './user.service.interface';
+import { IUserRepository, getUserRepository } from '../../data/repositories/UserRepositoryFactory';
+import { IUserService } from './UserServiceInterfaces';
 import mongoose from 'mongoose';
 
 export class UserService implements IUserService {
@@ -33,6 +33,22 @@ export class UserService implements IUserService {
       users: usersWithoutPassword as Omit<IUser, 'password'>[],
       total,
     };
+  }
+
+  async validateCredentials(email: string, password: string): Promise<IUser | null> {
+    const user = await this.userRepository.findByEmail(email);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const passwordMatch = await user.comparePassword(password);
+
+    if (!passwordMatch) {
+      throw new Error('Invalid credentials');
+    }
+
+    return user;
   }
 
   formatUser(user: IUser) {

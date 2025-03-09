@@ -23,4 +23,5 @@ export interface IUserService {
   getUserById(userId: string): Promise<Omit<IUser, 'password'> | null>;
   getAllUsers(page?: number, limit?: number): Promise<{ users: Omit<IUser, 'password'>[],total: number }>
   formatUser(user: IUser): UserResponse;
+  validateCredentials(email: string, password: string): Promise<IUser | null>;
 }

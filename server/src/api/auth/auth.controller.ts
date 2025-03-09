@@ -1,8 +1,8 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { UserRole } from '../../data/models/User';
-import { IAuthService } from '../../core/auth/auth.service.interface';
-import { ICookieService } from '../../core/common/cookie/cookie.service.interface';
-import { IErrorHandlerService } from '../../core/common/error-handler/error-handler.interface';
+import { IAuthService } from '../../core/auth/AuthServiceInterfaces';
+import { ICookieService } from '../../core/common/cookie/CookieServiceInterfaces';
+import { IErrorHandlerService } from '../../core/common/error-handler/ErrorHandlerInterfaces';
 
 interface RegisterRequest {
   name: string;
@@ -60,9 +60,9 @@ export class AuthController {
   }
 }
 
-import authService from '../../core/auth/auth.service';
-import cookieService from '../../core/common/cookie/cookie.service';
-import errorHandlerService from '../../core/common/error-handler/error-handler.service';
+import authService from '../../core/auth/AuthService';
+import cookieService from '../../core/common/cookie/CookieService';
+import errorHandlerService from '../../core/common/error-handler/ErrorHandlerService';
 
 export const authController = new AuthController(authService, cookieService, errorHandlerService);
 export default authController;

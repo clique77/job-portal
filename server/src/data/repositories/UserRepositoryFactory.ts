@@ -1,7 +1,7 @@
-import { UserMongoDBRepository } from "./user.mongodb.repository";
-import { IUserRepository } from "./user.repository";
+import { UserMongoDBRepository } from "./user/UserMongoDbrepository";
+import { IUserRepository } from "./user/UserRepository";
 
-export * from './user.repository';
+export * from './user/UserRepository';
 
 let userRepositoryInstance: IUserRepository | null = null;
 

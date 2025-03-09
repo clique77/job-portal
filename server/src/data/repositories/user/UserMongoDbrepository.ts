@@ -1,5 +1,5 @@
-import User, { IUser } from '../models/User';
-import { IUserRepository, UserCreateData } from './user.repository';
+import User, { IUser } from '../../models/User';
+import { IUserRepository, UserCreateData } from './UserRepository';
 
 export class UserMongoDBRepository implements IUserRepository {
   async findById(id: string): Promise<IUser | null> {

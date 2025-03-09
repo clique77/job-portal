@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { IUserService } from '../../core/user/user.service.interface';
-import { IErrorHandlerService } from '../../core/common/error-handler/error-handler.interface';
-import { IPaginationService } from '../../core/common/pagination/pagination.service.interface';
+import { IUserService } from '../../core/user/UserServiceInterfaces';
+import { IErrorHandlerService } from '../../core/common/error-handler/ErrorHandlerInterfaces';
+import { IPaginationService } from '../../core/common/pagination/PaginationServiceInterfaces';
 
 export class UserController {
   private userService: IUserService;
@@ -49,9 +49,9 @@ export class UserController {
   }
 }
 
-import userService from '../../core/user/user.service';
-import errorHandlerService from '../../core/common/error-handler/error-handler.service';
-import paginationService from '../../core/common/pagination/pagination.service';
+import userService from '../../core/user/UserService';
+import errorHandlerService from '../../core/common/error-handler/ErrorHandlerService';
+import paginationService from '../../core/common/pagination/PaginationService';
 
 export const userController = new UserController(userService, errorHandlerService, paginationService);
 export default userController;
