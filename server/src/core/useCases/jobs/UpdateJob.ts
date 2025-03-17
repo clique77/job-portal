@@ -22,12 +22,25 @@ export class UpdateJobAction {
         throw new Error('Job not found');
       }
 
-      const isOwner = existingJob.employer.toString() === userId;
+      let jobEmployerId: string;
+
+      if (typeof existingJob.employer === 'object' && existingJob.employer !== null) {
+        if (existingJob.employer._id) {
+          jobEmployerId = existingJob.employer._id.toString();
+        } else {
+          jobEmployerId = (existingJob.employer as any).toString();
+        }
+      } else {
+        jobEmployerId = String(existingJob.employer);
+      }
+
+      const isOwner = jobEmployerId === userId;
+
       const user = await this.userService.getUserById(userId);
       const isAdmin = user?.role === 'admin';
 
       if (!isOwner && !isAdmin) {
-        throw new Error('Only employer or admin can update jobs');
+        throw new Error('Only the job creator or admin can update jobs');
       }
 
       this.validator.validateJobUpdateData(jobData);
@@ -35,8 +48,8 @@ export class UpdateJobAction {
       const updatedJob = await this.jobRepository.update(jobId, jobData);
       return updatedJob;
     } catch (error) {
-      console.error(`Error updating job ${jobId}: `, error);
-      throw new Error('Failed to update job');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to update job: ${errorMessage}`);
     }
   }
 }

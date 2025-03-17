@@ -1,9 +1,9 @@
 import { IUser } from "../../../data/models/User";
-import { getUserRepository } from "../../../data/repositories/user/UserRepositoryFactory";
-import { GetAllUsersAction } from "../../actions/user/GetAllUsersAction";
-import { GetUserByIdAction } from "../../actions/user/GetUserByIdAction";
-import { FormatUserAction } from "../../actions/user/utils/FormatUserAction";
-import { ValidateCredentialsAction } from "../../actions/user/utils/ValidateCredentialsActions";
+import { userRepository } from "../../../data/repositories/user/UserRepository";
+import { GetAllUsersAction } from "../../useCases/user/GetAllUsers";
+import { GetUserByIdAction } from "../../useCases/user/GetUserById";
+import { FormatUserAction } from "../../useCases/user/utils/FormatUser";
+import { ValidateCredentialsAction } from "../../useCases/user/utils/ValidateCredentials";
 import { IUserService } from "./interfaces/UserServiceInterfaces";
 
 export class UserService implements IUserService {
@@ -13,9 +13,9 @@ export class UserService implements IUserService {
   private formatUserAction: FormatUserAction;
 
   constructor() {
-    this.getUserByIdAction = new GetUserByIdAction(getUserRepository());
-    this.getAllUsersAction = new GetAllUsersAction(getUserRepository());
-    this.validateCredentialsAction = new ValidateCredentialsAction(getUserRepository());
+    this.getUserByIdAction = new GetUserByIdAction(userRepository);
+    this.getAllUsersAction = new GetAllUsersAction(userRepository);
+    this.validateCredentialsAction = new ValidateCredentialsAction(userRepository);
     this.formatUserAction = new FormatUserAction();
   }
 

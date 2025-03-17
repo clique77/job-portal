@@ -1,8 +1,8 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { UserRole } from '../../data/models/User';
-import { IAuthService } from '../../core/services/auth/interfaces/AuthServiceInterfaces';
-import { ICookieService } from '../../core/services/common/cookie/interfaces/CookieServiceInterfaces';
-import { IErrorHandlerService } from '../../core/services/common/error-handler/interfaces/ErrorHandlerInterfaces';
+import { UserRole } from '../../../data/models/User';
+import { IAuthService } from '../../../core/services/auth/interfaces/AuthServiceInterfaces';
+import { ICookieService } from '../../../core/services/common/cookie/interfaces/CookieServiceInterfaces';
+import { IErrorHandlerService } from '../../../core/services/common/error-handler/interfaces/ErrorHandlerInterfaces';
 
 interface RegisterRequest {
   name: string;
@@ -60,9 +60,9 @@ export class AuthController {
   }
 }
 
-import authService from '../../core/services/auth/AuthService';
-import cookieService from '../../core/services/common/cookie/CookieService';
-import errorHandlerService from '../../core/services/common/error-handler/ErrorHandlerService';
+import authService from '../../../core/services/auth/AuthService';
+import cookieService from '../../../core/services/common/cookie/CookieService';
+import errorHandlerService from '../../../core/services/common/error-handler/ErrorHandlerService';
 
 export const authController = new AuthController(authService, cookieService, errorHandlerService);
 export default authController;

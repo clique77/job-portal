@@ -1,0 +1,34 @@
+import { FastifyInstance } from "fastify";
+import jobController from "../../api/controllers/jobs/JobController";
+import { authenticate, checkRole } from "../../api/middleware/AuthMiddleware";
+import { UserRole } from "../../data/models/User";
+import { JobCreateData, JobUpdateData } from "../../data/repositories/jobs/JobRepository"; // Import these types
+
+export default function(fastify: FastifyInstance, _options: any, done: () => void) {
+  fastify.get('/api/jobs', jobController.getAllJobs);
+
+  fastify.get<{
+    Params: { id: string }
+  }>('/api/getJob/:id', jobController.getJobById);
+
+  fastify.post<{
+    Body: JobCreateData
+  }>('/api/createJob', {
+    preHandler: [authenticate, checkRole([UserRole.EMPLOYER])]
+  }, jobController.createJob);
+
+  fastify.put<{
+    Params: { id: string },
+    Body: JobUpdateData
+  }>('/api/updateJob/:id', {
+    preHandler: [authenticate, checkRole([UserRole.EMPLOYER])]
+  }, jobController.updateJob);
+
+  fastify.delete<{
+    Params: { id: string }
+  }>('/api/deleteJob/:id', {
+    preHandler: [authenticate, checkRole([UserRole.EMPLOYER])]
+  }, jobController.deleteJob);
+
+  done();
+}

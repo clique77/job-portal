@@ -1,6 +1,6 @@
 import jwt, { Secret, SignOptions } from 'jsonwebtoken';
-import { IUser } from '../../data/models/User';
-import config from '../../config';
+import { IUser } from '../../../../data/models/User';
+import config from '../../../../config';
 
 export class TokenService {
   private readonly jwtSecret: string;

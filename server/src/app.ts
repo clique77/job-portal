@@ -4,7 +4,24 @@ import cookie from '@fastify/cookie';
 import config from './config';
 import routes from './routes';
 import cors from '@fastify/cors';
+import database from './data/MongodbConnection';
 
+export const build = async () => {
+  app.addContentTypeParser('application/json', { parseAs: 'string' }, (req, body, done) => {
+    try {
+      const json = JSON.parse(body as string);
+      done(null, json);
+    } catch (err) {
+      done(err as Error, undefined);
+    }
+  });
+
+  if (process.env.NODE_ENV !== 'test' || !process.env.IN_MEMORY_DB) {
+    await database.connect();
+  }
+
+  return app;
+}
 const app = fastify({
   logger: true,
 });

@@ -1,6 +1,6 @@
 import { IJobRepository } from '../../../data/repositories/jobs/JobRepository';
 import { UserService } from '../../services/users/UserService';
-import { IDeleteJobAction } from './interfaces/IJobActions';
+import { IDeleteJobAction } from './interfaces/IJobUseCase';
 
 export class DeleteJobAction implements IDeleteJobAction {
   private jobRepository: IJobRepository;
@@ -19,19 +19,32 @@ export class DeleteJobAction implements IDeleteJobAction {
         throw new Error('Job not found');
       }
 
-      const isOwner = existingJob.employer.toString() === userId;
+      let jobEmployerId: string;
+
+      if (typeof existingJob.employer === 'object' && existingJob.employer !== null) {
+        if (existingJob.employer._id) {
+          jobEmployerId = existingJob.employer._id.toString();
+        } else {
+          jobEmployerId = (existingJob.employer as any).toString();
+        }
+      } else {
+        jobEmployerId = String(existingJob.employer);
+      }
+
+      const isOwner = jobEmployerId === userId;
+
       const user = await this.userService.getUserById(userId);
       const isAdmin = user?.role === 'admin';
 
       if (!isOwner && !isAdmin) {
-        throw new Error('Only employer or admin can delete jobs');
+        throw new Error('Only the job creator or admin can delete jobs');
       }
 
       await this.jobRepository.delete(jobId);
       return true;
     } catch (error) {
-      console.error(`Error deleting job ${jobId}: `, error);
-      throw new Error('Failed to delete job');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to delete job: ${errorMessage}`);
     }
   }
 }

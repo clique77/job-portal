@@ -1,14 +1,27 @@
 import { IJob } from "../../../data/models/Jobs";
 import { getJobRepository, JobCreateData, JobFilter, JobUpdateDTO } from "../../../data/repositories/jobs/JobRepository";
 import UserService from "../users/UserService";
-import { CreateJobAction } from "../../actions/jobs/CreateJobAction";
-import { DeleteJobAction } from "../../actions/jobs/DeleteJobAction";
-import { GetJobByIdAction } from "../../actions/jobs/GetJobByIdAction";
-import { ListJobsAction } from "../../actions/jobs/ListJobAction";
-import { UpdateJobAction } from "../../actions/jobs/UpdateJobAction";
-import { JobFilterBuilder } from "../../actions/jobs/utils/JobFilterBuilder";
-import { JobValidator } from "../../actions/jobs/utils/JobValidator";
+import { CreateJobAction } from "../../useCases/jobs/CreateJob";
+import { DeleteJobAction } from "../../useCases/jobs/DeleteJob";
+import { GetJobByIdAction } from "../../useCases/jobs/GetJobById";
+import { ListJobsAction } from "../../useCases/jobs/ListJob";
+import { UpdateJobAction } from "../../useCases/jobs/UpdateJob";
+import { JobFilterBuilder } from "../../useCases/jobs/utils/JobFilterBuilder";
+import { JobValidator } from "../../useCases/jobs/utils/JobValidator";
 import { IJobService } from "./interfaces/JobServiceInterfaces";
+
+type getAllJobsOptions ={
+  page?: number;
+  limit?: number;
+  filter?: JobFilter;
+  sort?: { [key: string]: 1 | -1 };
+}
+
+type getAllJobsParams = {
+  jobs: IJob[];
+  total: number;
+  pages: number;
+}
 
 export class JobService implements IJobService {
   private createJobAction: CreateJobAction;
@@ -42,7 +55,7 @@ export class JobService implements IJobService {
     return this.getJobByIdAction.execute(jobId);
   }
 
-  async getAllJobs(options: { page?: number, limit?: number, filter?: JobFilter, sort?: { [key: string]: 1 | -1 }}): Promise<{ jobs: IJob[], total: number, pages: number }> {
+  async getAllJobs(options: getAllJobsOptions): Promise<getAllJobsParams> {
     return this.listJobAction.execute(options);
   }
 
@@ -51,3 +64,5 @@ export class JobService implements IJobService {
   }
 }
 
+const jobService = new JobService();
+export default jobService;

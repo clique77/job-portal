@@ -1,6 +1,6 @@
 import { IUser } from '../../../data/models/User';
 import { IUserRepository } from '../../../data/repositories/user/UserRepository';
-import { IGetUserByIdAction } from './interfaces/IUserActions';
+import { IGetUserByIdAction } from './interfaces/IUserUseCase';
 
 export class GetUserByIdAction implements IGetUserByIdAction {
   private userRepository: IUserRepository;

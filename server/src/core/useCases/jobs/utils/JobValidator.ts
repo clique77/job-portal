@@ -10,10 +10,6 @@ export class JobValidator{
       throw new Error('Description is required');
     }
 
-    if (!jobData.employer) {
-      throw new Error('Employer is required');
-    }
-
     this.validateSalary(jobData);
   }
 

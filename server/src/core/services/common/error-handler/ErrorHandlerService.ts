@@ -5,12 +5,22 @@ export class ErrorHandlerService implements IErrorHandlerService {
   handleError(
     request: FastifyRequest,
     reply: FastifyReply,
-    error: unknown,
+    error: Error,
     statusCode: number = 500
   ): FastifyReply {
-    request.log.error(error);
+    console.error(`[ERROR] ${request.method} ${request.url}:`, error);
+
+    // More specific error message based on the error type
+    const errorMessage = error.message;
+    const detailedMessage = process.env.NODE_ENV !== 'production'
+      ? `Details: ${errorMessage}`
+      : 'Check server logs for details.';
+
     return reply.status(statusCode).send({
-      message: (error as Error).message || 'Internal Server Error'
+      message: errorMessage,
+      path: request.url,
+      method: request.method,
+      details: detailedMessage
     });
   }
 }

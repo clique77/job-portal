@@ -1,6 +1,6 @@
 import { IJobRepository } from '../../../data/repositories/jobs/JobRepository';
 import { IJob } from '../../../data/models/Jobs';
-import { IGetJobByIdAction } from './interfaces/IJobActions';
+import { IGetJobByIdAction } from './interfaces/IJobUseCase';
 
 export class GetJobByIdAction implements IGetJobByIdAction {
   private jobRepository: IJobRepository;

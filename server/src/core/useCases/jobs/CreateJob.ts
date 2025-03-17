@@ -1,7 +1,7 @@
 import { IJob } from "../../../data/models/Jobs";
-import { getJobRepository, IJobRepository, JobCreateData } from "../../../data/repositories/jobs/JobRepository";
+import { IJobRepository, JobCreateData } from "../../../data/repositories/jobs/JobRepository";
 import { UserService } from "../../services/users/UserService";
-import { ICreateJobAction } from "./interfaces/IJobActions";
+import { ICreateJobAction } from "./interfaces/IJobUseCase";
 import { JobValidator } from "./utils/JobValidator";
 
 export class CreateJobAction implements ICreateJobAction {
@@ -36,13 +36,12 @@ export class CreateJobAction implements ICreateJobAction {
         createdAt: new Date(),
         applicants: [],
       }
-
       const createdJob = await this.jobRepository.create(jobToCreate);
 
       return createdJob;
     } catch (error) {
-      console.error('Error creating job: ', error as Error);
-      throw new Error('Falied to create a job');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`Failed to create a job: ${errorMessage}`);
     }
   }
 }

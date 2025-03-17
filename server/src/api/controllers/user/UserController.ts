@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { IUserService } from '../../core/services/users/interfaces/UserServiceInterfaces';
-import { IErrorHandlerService } from '../../core/services/common/error-handler/interfaces/ErrorHandlerInterfaces';
-import { IPaginationService } from '../../core/services/common/pagination/interfaces/PaginationServiceInterfaces';
+import { IUserService } from '../../../core/services/users/interfaces/UserServiceInterfaces';
+import { IErrorHandlerService } from '../../../core/services/common/error-handler/interfaces/ErrorHandlerInterfaces';
+import { IPaginationService } from '../../../core/services/common/pagination/interfaces/PaginationServiceInterfaces';
 
 export class UserController {
   private userService: IUserService;
@@ -49,9 +49,9 @@ export class UserController {
   }
 }
 
-import userService from '../../core/services/users/UserService';
-import errorHandlerService from '../../core/services/common/error-handler/ErrorHandlerService';
-import paginationService from '../../core/services/common/pagination/PaginationService';
+import userService from '../../../core/services/users/UserService';
+import errorHandlerService from '../../../core/services/common/error-handler/ErrorHandlerService';
+import paginationService from '../../../core/services/common/pagination/PaginationService';
 
 export const userController = new UserController(userService, errorHandlerService, paginationService);
 export default userController;

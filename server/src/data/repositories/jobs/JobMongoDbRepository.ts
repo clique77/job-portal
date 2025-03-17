@@ -3,7 +3,7 @@ import { IJobRepository, JobCreateData, JobUpdateData, JobFilter } from "./JobRe
 import { IJob } from "../../models/Jobs";
 import mongoose from "mongoose";
 
-class JobMongoDBRepository implements IJobRepository {
+export class JobMongoDBRepository implements IJobRepository {
   async create(jobData: JobCreateData): Promise<IJob> {
     const job = new Jobs(jobData);
     return job.save();

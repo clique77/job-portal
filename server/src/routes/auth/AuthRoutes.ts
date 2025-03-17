@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import authController from '../../api/auth/AuthController';
+import authController from '../../api/controllers/auth/AuthController';
 
 export default function(fastify: FastifyInstance, _opts: any, done: () => void) {
   fastify.post('/api/auth/register', authController.register);

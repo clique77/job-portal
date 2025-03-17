@@ -63,7 +63,7 @@ export interface IJobRepository {
 }
 
 export const getJobRepository = (): IJobRepository => {
-  const { JobMongoDBRepository } = require('./job.mongodb.repository');
+  const { JobMongoDBRepository } = require('./JobMongoDbRepository');
   return new JobMongoDBRepository();
 }
 

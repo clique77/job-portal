@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import userController from '../../api/user/UserController';
+import userController from '../../api/controllers/user/UserController';
 import { authenticate } from '../../api/middleware/AuthMiddleware';
 
 export default function(fastify: FastifyInstance, _opts: any, done: () => void) {
