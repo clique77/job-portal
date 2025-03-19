@@ -4,7 +4,7 @@ import { GetAllUsersUseCase } from "../../useCases/user/GetAllUsers";
 import { GetUserByIdUseCase } from "../../useCases/user/GetUserById";
 import { FormatUser } from "../../useCases/user/utils/FormatUser";
 import { ValidateCredentials } from "../../useCases/user/utils/ValidateCredentials";
-import { IUserService } from "./interfaces/UserServiceInterfaces";
+import { IUserService } from "./interfaces/IUserService";
 
 export class UserService implements IUserService {
   private getUserByIdUseCase: GetUserByIdUseCase;

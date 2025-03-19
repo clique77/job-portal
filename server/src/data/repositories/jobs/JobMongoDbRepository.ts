@@ -72,23 +72,90 @@ export class JobMongoDBRepository implements IJobRepository {
   }
 
   async removeApplicant(jobId: string, applicantId: string): Promise<boolean> {
-    const result = await Jobs.findByIdAndUpdate(
-      jobId,
-      { $pull: { applicants: applicantId } },
-      { new: true }
-    );
-    return result !== null;
+    try {
+      const job = await Jobs.findById(jobId);
+
+      if (!job || !job.applicants || job.applicants.length === 0) {
+        return false;
+      }
+
+      const firstApplicant = job.applicants[0];
+      const isSimpleIds = typeof firstApplicant === 'string' ||
+                          (firstApplicant && typeof firstApplicant !== 'object');
+
+      let result;
+
+      if (isSimpleIds) {
+        result = await Jobs.findByIdAndUpdate(
+          jobId,
+          { $pull: { applicants: applicantId } },
+          { new: true }
+        );
+      } else {
+        result = await Jobs.findByIdAndUpdate(
+          jobId,
+          { $pull: { applicants: { applicant: applicantId } } },
+          { new: true }
+        );
+
+        if (!result || result.applicants.some(app =>
+            typeof app === 'object' && app.applicant &&
+            app.applicant._id.toString() === applicantId)) {
+          result = await Jobs.findByIdAndUpdate(
+            jobId,
+            { $pull: { applicants: { 'applicant._id': applicantId } } },
+            { new: true }
+          );
+        }
+      }
+
+      console.log(`Removed applicant ${applicantId} from job ${jobId}. Success: ${result !== null}`);
+      return result !== null;
+    } catch (error) {
+      console.error(`Error removing applicant ${applicantId} from job ${jobId}:`, error);
+      return false;
+    }
   }
 
   async getApplicants(jobId: string): Promise<IApplication[]> {
-    const job = await Jobs.findById(jobId).populate('applicants', '_id');
+    try {
+      const job = await Jobs.findById(jobId)
+        .populate({
+          path: 'applicants.applicant',
+          select: 'name email'
+        });
 
-    if (!job) return [];
+      if (!job) return [];
 
-    return job.applicants.map(applicant =>
-      //@ts-ignore
-      applicant instanceof mongoose.Types.ObjectId ? applicant.toString() : applicant._id.toString()
-    );
+      if (!job.applicants || job.applicants.length === 0) {
+        return [];
+      }
+
+      const firstApplicant = job.applicants[0];
+
+      if (typeof firstApplicant === 'string' ||
+          (firstApplicant && typeof firstApplicant !== 'object')) {
+        const formattedApplicants: IApplication[] = await Promise.all(
+          job.applicants.map(async (applicantId: any) => {
+            const user = await mongoose.model('User').findById(applicantId);
+            const now = new Date();
+            return {
+              applicant: user || { _id: applicantId },
+              status: 'PENDING',
+              notes: '',
+              appliedAt: now,
+              updatedAt: now,
+            } as IApplication;
+          })
+        );
+
+        return formattedApplicants;
+      }
+      return job.applicants;
+    } catch (error) {
+      console.error('Error getting applicants:', error);
+      return [];
+    }
   }
 
   async getApplication(jobId: string, applicantId: string): Promise<IApplication | null> {

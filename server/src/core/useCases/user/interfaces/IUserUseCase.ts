@@ -1,5 +1,5 @@
 import { IUser } from "../../../../data/models/User";
-import { UserResponse } from '../../../services/users/interfaces/UserServiceInterfaces';
+import { UserResponse } from '../../../services/users/interfaces/IUserService';
 
 export interface IGetUserByIdUseCase {
   execute(userId: string): Promise<Omit<IUser, 'password'> | null>;

@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { IUserService } from '../../../core/services/users/interfaces/UserServiceInterfaces';
+import { IUserService } from '../../../core/services/users/interfaces/IUserService';
 import { IErrorHandlerService } from '../../../core/services/common/error-handler/interfaces/ErrorHandlerInterfaces';
 import { IPaginationService } from '../../../core/services/common/pagination/interfaces/PaginationServiceInterfaces';
 

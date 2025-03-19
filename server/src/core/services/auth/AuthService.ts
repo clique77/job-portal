@@ -1,7 +1,7 @@
 import { IUserRepository } from '../../../data/repositories/user/UserRepository';
 import { IAuthService, RegisterData, LoginData, AuthResponse } from '../../services/auth/interfaces/AuthServiceInterfaces';
 import { ITokenService } from '../../services/common/token/interfaces/TokenServiceInterfaces';
-import { IUserService } from '../users/interfaces/UserServiceInterfaces';
+import { IUserService } from '../users/interfaces/IUserService';
 
 export class AuthService implements IAuthService {
   private userRepository: IUserRepository;

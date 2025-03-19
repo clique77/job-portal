@@ -26,7 +26,8 @@ export class GetJobApplicants {
         throw new Error('User not found');
       }
 
-      const jobEmployerId = job.employer.toString();
+      //@ts-ignore
+      const jobEmployerId = job.employer._id.toString();
       const isOwner = jobEmployerId === userId;
       const isAdmin = user.role === UserRole.ADMIN;
 
