@@ -1,7 +1,7 @@
 import { IUser } from "../../../../data/models/User";
 import mongoose from 'mongoose';
 
-export class FormatUserAction {
+export class FormatUser {
   execute(user: IUser) {
     return {
       id: user._id instanceof mongoose.Types.ObjectId

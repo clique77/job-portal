@@ -1,4 +1,6 @@
 import { IJob, JobType } from '../../models/Jobs';
+import { ApplicationStatus } from '../../models/ApplicationStatus';
+import { IApplication } from '../../models/Jobs';
 
 export interface JobCreateData {
   title: string;
@@ -37,6 +39,7 @@ export interface JobFilter {
   employer?: string;
   status?: string;
   tags?: string[];
+  applicantId?: string;
 }
 
 export interface JobUpdateDTO extends Omit<JobFilter, 'employer'> {
@@ -57,9 +60,21 @@ export interface IJobRepository {
   findByEmployer(employerId: string, skip: number, limit: number): Promise<IJob[]>;
   count(filter?: JobFilter): Promise<number>;
   search(query: string, skip: number, limit: number): Promise<IJob[]>;
-  addApplicant(jobId: string, applicantId: string): Promise<boolean>;
+  addApplicant(jobId: string, applicationData: {
+    applicant: string,
+    status?: ApplicationStatus,
+    notes?: string
+  }): Promise<boolean>;
   removeApplicant(jobId: string, applicantId: string): Promise<boolean>;
-  getApplicants(jobId: string): Promise<string[]>;
+  getApplicants(jobId: string): Promise<IApplication[]>;
+  updateApplicationStatus(
+    jobId: string,
+    applicantId: string,
+    status: ApplicationStatus,
+    notes?: string
+  ): Promise<boolean>;
+  getApplication(jobId: string, applicantId: string): Promise<IApplication | null>;
+  findJobsByApplicant(applicantId: string, skip: number, limit: number): Promise<IJob[]>;
 }
 
 export const getJobRepository = (): IJobRepository => {

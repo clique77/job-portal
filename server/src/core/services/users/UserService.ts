@@ -1,38 +1,38 @@
 import { IUser } from "../../../data/models/User";
 import { userRepository } from "../../../data/repositories/user/UserRepository";
-import { GetAllUsersAction } from "../../useCases/user/GetAllUsers";
-import { GetUserByIdAction } from "../../useCases/user/GetUserById";
-import { FormatUserAction } from "../../useCases/user/utils/FormatUser";
-import { ValidateCredentialsAction } from "../../useCases/user/utils/ValidateCredentials";
+import { GetAllUsersUseCase } from "../../useCases/user/GetAllUsers";
+import { GetUserByIdUseCase } from "../../useCases/user/GetUserById";
+import { FormatUser } from "../../useCases/user/utils/FormatUser";
+import { ValidateCredentials } from "../../useCases/user/utils/ValidateCredentials";
 import { IUserService } from "./interfaces/UserServiceInterfaces";
 
 export class UserService implements IUserService {
-  private getUserByIdAction: GetUserByIdAction;
-  private getAllUsersAction: GetAllUsersAction;
-  private validateCredentialsAction: ValidateCredentialsAction;
-  private formatUserAction: FormatUserAction;
+  private getUserByIdUseCase: GetUserByIdUseCase;
+  private getAllUsersUseCase: GetAllUsersUseCase;
+  private validateCredentialsUseCase: ValidateCredentials;
+  private formatUserUseCase: FormatUser;
 
   constructor() {
-    this.getUserByIdAction = new GetUserByIdAction(userRepository);
-    this.getAllUsersAction = new GetAllUsersAction(userRepository);
-    this.validateCredentialsAction = new ValidateCredentialsAction(userRepository);
-    this.formatUserAction = new FormatUserAction();
+    this.getUserByIdUseCase = new GetUserByIdUseCase(userRepository);
+    this.getAllUsersUseCase = new GetAllUsersUseCase(userRepository);
+    this.validateCredentialsUseCase = new ValidateCredentials(userRepository);
+    this.formatUserUseCase = new FormatUser();
   }
 
   async getUserById(userId: string): Promise<Omit<IUser, 'password'> | null> {
-    return this.getUserByIdAction.execute(userId);
+    return this.getUserByIdUseCase.execute(userId);
   }
 
   async getAllUsers(page: number = 1, limit: number = 10): Promise<{ users: Omit<IUser, 'password'>[], total: number }> {
-    return this.getAllUsersAction.execute(page, limit);
+    return this.getAllUsersUseCase.execute(page, limit);
   }
 
   async validateCredentials(email: string, password: string): Promise<IUser | null> {
-    return this.validateCredentialsAction.execute(email, password);
+    return this.validateCredentialsUseCase.execute(email, password);
   }
 
   formatUser(user: IUser) {
-    return this.formatUserAction.execute(user);
+    return this.formatUserUseCase.execute(user);
   }
 }
 

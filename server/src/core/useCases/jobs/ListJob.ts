@@ -2,7 +2,7 @@ import { IJobRepository, JobFilter } from '../../../data/repositories/jobs/JobRe
 import { IJob } from '../../../data/models/Jobs';
 import { JobFilterBuilder } from './utils/JobFilterBuilder';
 
-export class ListJobsAction {
+export class ListJobsUseCase {
   private jobRepository: IJobRepository;
   private filterBuilder: JobFilterBuilder;
 

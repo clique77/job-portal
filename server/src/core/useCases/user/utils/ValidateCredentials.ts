@@ -1,7 +1,7 @@
 import { IUser } from "../../../../data/models/User";
 import { IUserRepository } from "../../../../data/repositories/user/UserRepository";
 
-export class ValidateCredentialsAction {
+export class ValidateCredentials {
   private userRepository: IUserRepository;
   constructor(userRepository: IUserRepository) {
     this.userRepository = userRepository;

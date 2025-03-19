@@ -3,7 +3,7 @@ import { IJob } from '../../../data/models/Jobs';
 import { UserService } from '../../services/users/UserService';
 import { JobValidator } from './utils/JobValidator';
 
-export class UpdateJobAction {
+export class UpdateJobUseCase {
   private jobRepository: IJobRepository;
   private userService: UserService;
   private validator: JobValidator;

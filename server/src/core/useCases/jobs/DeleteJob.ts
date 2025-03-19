@@ -1,8 +1,8 @@
 import { IJobRepository } from '../../../data/repositories/jobs/JobRepository';
 import { UserService } from '../../services/users/UserService';
-import { IDeleteJobAction } from './interfaces/IJobUseCase';
+import { IDeleteJobUseCase } from './interfaces/IJobUseCase';
 
-export class DeleteJobAction implements IDeleteJobAction {
+export class DeleteJobUseCase implements IDeleteJobUseCase {
   private jobRepository: IJobRepository;
   private userService: UserService;
 

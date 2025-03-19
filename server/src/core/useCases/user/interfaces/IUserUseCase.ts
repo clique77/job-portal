@@ -1,27 +1,27 @@
 import { IUser } from "../../../../data/models/User";
 import { UserResponse } from '../../../services/users/interfaces/UserServiceInterfaces';
 
-export interface IGetUserByIdAction {
+export interface IGetUserByIdUseCase {
   execute(userId: string): Promise<Omit<IUser, 'password'> | null>;
 }
 
-export interface IGetAllUsersAction {
+export interface IGetAllUsersUseCase {
   execute(page?: number, limit?: number): Promise<{
     users: Omit<IUser, 'password'>[],
     total: number
   }>;
 }
 
-export interface IValidateCredentialsAction {
+export interface IValidateCredentialsUseCase {
   execute(email: string, password: string): Promise<IUser | null>;
 }
 
-export interface IFormatUserAction {
+export interface IFormatUserUseCase {
   execute(user: IUser): UserResponse;
 }
 
 // Для майбутніх дій
-export interface ICreateUserAction {
+export interface ICreateUserUseCase {
   execute(userData: {
     name: string;
     email: string;
@@ -30,10 +30,10 @@ export interface ICreateUserAction {
   }): Promise<IUser>;
 }
 
-export interface IUpdateUserAction {
+export interface IUpdateUserUseCase {
   execute(userId: string, userData: Partial<IUser>): Promise<IUser | null>;
 }
 
-export interface IDeleteUserAction {
+export interface IDeleteUserUseCase {
   execute(userId: string): Promise<boolean>;
 }

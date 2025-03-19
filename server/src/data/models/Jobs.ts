@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { IUser } from './User';
+import { ApplicationStatus } from './ApplicationStatus';
 
 export enum JobType {
   FULL_TIME = 'FULL_TIME',
@@ -8,6 +9,14 @@ export enum JobType {
   FREELANCE = 'FREELANCE',
   REMOTE = 'REMOTE',
   INTERNSHIP = 'INTERNSHIP'
+}
+
+export interface IApplication {
+  applicant: mongoose.Types.ObjectId;
+  status: ApplicationStatus;
+  appliedAt: Date;
+  updatedAt: Date;
+  notes?: string;
 }
 
 export interface IJob extends Document {
@@ -26,7 +35,7 @@ export interface IJob extends Document {
   tags: string[];
   employer: mongoose.Types.ObjectId | IUser;
   status: 'ACTIVE' | 'CLOSED' | 'DRAFT';
-  applicants: mongoose.Types.ObjectId[];
+  applicants: IApplication[];
   createdAt: Date;
   updatedAt: Date;
   expiresAt?: Date;
@@ -95,8 +104,29 @@ const JobSchema = new Schema<IJob>(
       default: 'ACTIVE'
     },
     applicants: [{
-      type: Schema.Types.ObjectId,
-      ref: 'User'
+      applicant: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+      },
+      status: {
+        type: String,
+        enum: Object.values(ApplicationStatus),
+        default: ApplicationStatus.PENDING,
+        required: true
+      },
+      appliedAt: {
+        type: Date,
+        default: Date.now,
+        required: true
+      },
+      updatedAt: {
+        type: Date,
+        default: Date.now
+      },
+      notes: {
+        type: String
+      }
     }],
     expiresAt: {
       type: Date

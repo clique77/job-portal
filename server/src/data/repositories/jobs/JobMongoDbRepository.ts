@@ -1,7 +1,8 @@
-import Jobs from "../../models/Jobs";
+import Jobs, { IApplication } from "../../models/Jobs";
 import { IJobRepository, JobCreateData, JobUpdateData, JobFilter } from "./JobRepository";
 import { IJob } from "../../models/Jobs";
 import mongoose from "mongoose";
+import { ApplicationStatus } from "../../models/ApplicationStatus";
 
 export class JobMongoDBRepository implements IJobRepository {
   async create(jobData: JobCreateData): Promise<IJob> {
@@ -48,12 +49,25 @@ export class JobMongoDBRepository implements IJobRepository {
     return jobs;
   }
 
-  async addApplicant(jobId: string, applicantId: string): Promise<boolean> {
+  async addApplicant(jobId: string, applicationData: {
+    applicant: string;
+    status?: ApplicationStatus;
+    notes?: string;
+  }): Promise<boolean> {
+    const applicationObject = {
+      applicant: applicationData.applicant,
+      status: applicationData.status || ApplicationStatus.PENDING,
+      notes: applicationData.notes || '',
+      appliedAt: new Date(),
+      updatedAt: new Date()
+    };
+
     const result = await Jobs.findByIdAndUpdate(
       jobId,
-      { $addToSet: { applicants: applicantId } },
+      { $push: { applicants: applicationObject } },
       { new: true }
     );
+
     return result !== null;
   }
 
@@ -66,7 +80,7 @@ export class JobMongoDBRepository implements IJobRepository {
     return result !== null;
   }
 
-  async getApplicants(jobId: string): Promise<string[]> {
+  async getApplicants(jobId: string): Promise<IApplication[]> {
     const job = await Jobs.findById(jobId).populate('applicants', '_id');
 
     if (!job) return [];
@@ -75,6 +89,64 @@ export class JobMongoDBRepository implements IJobRepository {
       //@ts-ignore
       applicant instanceof mongoose.Types.ObjectId ? applicant.toString() : applicant._id.toString()
     );
+  }
+
+  async getApplication(jobId: string, applicantId: string): Promise<IApplication | null> {
+    const job = await Jobs.findById(jobId);
+
+    if (!job) {
+      return null;
+    }
+
+    const application = job.applicants.find(
+      app => app.applicant.toString() === applicantId
+    );
+
+    return application || null;
+  }
+
+  async updateApplicationStatus(
+    jobId: string,
+    applicantId: string,
+    newStatus: ApplicationStatus,
+    notes?: string
+  ): Promise<boolean> {
+    const updateData: any = {
+      'applicants.$.status': newStatus,
+      'applicants.$.updatedAt': new Date()
+    };
+
+    if (notes) {
+      updateData['applicants.$.notes'] = notes;
+    }
+
+    const result = await Jobs.findOneAndUpdate(
+      {
+        _id: jobId,
+        'applicants.applicant': applicantId
+      },
+      {
+        $set: updateData
+      },
+      { new: true }
+    );
+
+    return result !== null;
+  }
+
+  async findJobsByApplicant(
+    applicantId: string,
+    skip: number = 0,
+    limit: number = 10
+  ): Promise<IJob[]> {
+    const jobs = await Jobs.find(
+      { 'applicants.applicant': applicantId }
+    )
+    .sort({ updatedAt: -1 })
+    .skip(skip)
+    .limit(limit);
+
+    return jobs;
   }
 
   private buildQuery(filter?: JobFilter): any {

@@ -1,10 +1,10 @@
 import { IJob } from "../../../data/models/Jobs";
 import { IJobRepository, JobCreateData } from "../../../data/repositories/jobs/JobRepository";
 import { UserService } from "../../services/users/UserService";
-import { ICreateJobAction } from "./interfaces/IJobUseCase";
+import { ICreateJobUseCase } from "./interfaces/IJobUseCase";
 import { JobValidator } from "./utils/JobValidator";
 
-export class CreateJobAction implements ICreateJobAction {
+export class CreateJobUseCase implements ICreateJobUseCase {
   private jobRepository: IJobRepository;
   private userService: UserService;
   private validator: JobValidator;

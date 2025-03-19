@@ -1,8 +1,8 @@
 import { IUser } from "../../../data/models/User";
 import { IUserRepository } from "../../../data/repositories/user/UserRepository";
-import { IGetAllUsersAction } from "./interfaces/IUserUseCase";
+import { IGetAllUsersUseCase } from "./interfaces/IUserUseCase";
 
-export class GetAllUsersAction implements IGetAllUsersAction {
+export class GetAllUsersUseCase implements IGetAllUsersUseCase {
   private userRepository: IUserRepository;
 
   constructor(userRepository: IUserRepository) {
