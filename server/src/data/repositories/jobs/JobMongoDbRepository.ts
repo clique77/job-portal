@@ -80,8 +80,7 @@ export class JobMongoDBRepository implements IJobRepository {
       }
 
       const firstApplicant = job.applicants[0];
-      const isSimpleIds = typeof firstApplicant === 'string' ||
-                          (firstApplicant && typeof firstApplicant !== 'object');
+      const isSimpleIds = typeof firstApplicant === 'string' || (firstApplicant && typeof firstApplicant !== 'object');
 
       let result;
 

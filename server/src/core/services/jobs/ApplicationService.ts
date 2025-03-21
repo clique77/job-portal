@@ -41,7 +41,7 @@ class ApplicationServiceImpl implements IApplicationService {
     this.withdrawApplicationUseCase = new WithdrawApplication(jobRepository);
     this.getUserApplicationsUseCase = new GetUserApplications(jobRepository);
     this.getJobApplicantsUseCase = new GetJobApplicants(jobRepository, userService);
-    this.updateApplicationStatusUseCase = new UpdateApplicationStatus(jobRepository, userService);
+    this.updateApplicationStatusUseCase = new UpdateApplicationStatus(jobRepository);
   }
 
   async applyToJob(jobId: string, userId: string, notes?: string): Promise<boolean> {

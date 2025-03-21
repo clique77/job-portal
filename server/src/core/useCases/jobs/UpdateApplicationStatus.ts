@@ -1,15 +1,13 @@
-import { ApplicationStatus, validStatusTransitions } from "../../../data/models/ApplicationStatus";
-import { UserRole } from "../../../data/models/User";
+import { ApplicationStatus } from "../../../data/models/ApplicationStatus";
 import { IJobRepository } from "../../../data/repositories/jobs/JobRepository";
-import { UserService } from "../../services/users/UserService";
 import { IUpdateApplicationStatusUseCase } from "./interfaces/IApplicationUseCase";
-import { IUserService } from "../../services/users/interfaces/IUserService";
 
 export class UpdateApplicationStatus implements IUpdateApplicationStatusUseCase {
-  constructor(
-    private jobRepository: IJobRepository,
-    private userService: IUserService
-  ) {}
+  private jobRepository: IJobRepository;
+
+  constructor(jobRepository: IJobRepository) {
+    this.jobRepository = jobRepository;
+  }
 
   async execute(jobId: string, applicantId: string, status: ApplicationStatus, userId: string, notes?: string): Promise<boolean> {
     try {
@@ -19,15 +17,9 @@ export class UpdateApplicationStatus implements IUpdateApplicationStatusUseCase 
         throw new Error("Job not found");
       }
 
-      console.log("Job employer:", job.employer);
-      console.log("User ID:", userId);
-
       const employerId = typeof job.employer === 'object' && job.employer._id ?
         job.employer._id.toString() :
         job.employer.toString();
-
-      console.log("Extracted employer ID:", employerId);
-      console.log("Do they match?", employerId === userId);
 
       if (employerId !== userId) {
         throw new Error("You are not authorized to update this application");
