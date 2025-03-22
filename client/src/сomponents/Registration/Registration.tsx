@@ -1,5 +1,6 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
 import './Registration.scss';
+import { useNavigate } from 'react-router-dom'
 
 enum UserRole {
   JOB_SEEKER = 'job_seeker',
@@ -41,7 +42,7 @@ const Registration = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
-  const [userData, setUserData] = useState<RegisterResponse | null>(null);
+  const navigate = useNavigate();
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = event.target;
@@ -74,7 +75,6 @@ const Registration = () => {
       }
 
       setSuccess('Registration successfull');
-      setUserData(data as RegisterResponse);
 
       setFormData({
         name: '',
@@ -82,6 +82,8 @@ const Registration = () => {
         password: '',
         role: UserRole.JOB_SEEKER
       })
+
+      navigate('/');
     } catch (error) {
       setError((error instanceof Error) ? error.message : 'An unexpected error');
       console.error('Registration error: ', error);
@@ -156,7 +158,7 @@ const Registration = () => {
             </div>
 
             <button type="submit" disabled={loading}>
-              {loading ? 'Registration...' : 'Registered!'}
+              {loading ? 'Registration...' : 'Successfully registered!'}
             </button>
           </form>
         </section>
