@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Job, JobsApi, JOB_LOCATIONS, JOB_TYPE_LABELS } from "../../../api/JobsApi";
+import JobDetails from '../JobDetail/JobDetail';
 import './JobList.scss';
 
-interface JobListProps {
-  onSelectJob?: (job: Job) => void;
-}
-
-const JobList: React.FC<JobListProps> = ({ onSelectJob }) => {
+const JobList: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
@@ -17,6 +15,8 @@ const JobList: React.FC<JobListProps> = ({ onSelectJob }) => {
     type: '',
     query: ''
   });
+  const navigate = useNavigate();
+  const [selectedJob, setSelectedJob] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -58,105 +58,111 @@ const JobList: React.FC<JobListProps> = ({ onSelectJob }) => {
     return JOB_TYPE_LABELS[type as keyof typeof JOB_TYPE_LABELS] || type;
   };
 
-  const handleJobClick = (job: Job) => {
-    if (onSelectJob) {
-      onSelectJob(job);
-    }
+  const handleJobClick = (jobId: string) => {
+    setSelectedJob(jobId);
+    navigate(`/jobs/${jobId}`);
   };
 
+
   return (
-    <div className="job-list-container">
-      <h2>Available Jobs</h2>
+    <div className={`job-list-container ${selectedJob ? 'with-details' : ''}`}>
+      <div className="jobs-section">
+        <h2>Available Jobs</h2>
 
-      <div className="job-filters">
-        <div className="search-box">
-          <input
-            type="text"
-            name="query"
-            value={filters.query}
-            onChange={handleFilterChange}
-            placeholder="Search by keywords..."
-          />
-        </div>
-
-        <div className="filter-group">
-          <select
-            name="location"
-            value={filters.location}
-            onChange={handleFilterChange}
-          >
-            <option value="">Any Location</option>
-            {JOB_LOCATIONS.map(location => (
-              <option key={location} value={location}>{location}</option>
-            ))}
-          </select>
-
-          <select
-            name="type"
-            value={filters.type}
-            onChange={handleFilterChange}
-          >
-            <option value="">Any Type</option>
-            {Object.entries(JOB_TYPE_LABELS).map(([type, label]) => (
-              <option key={type} value={type}>{label}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="loading">Loading jobs...</div>
-      ) : error ? (
-        <div className="error-message">{error}</div>
-      ) : jobs.length === 0 ? (
-        <div className="job-cards">
-          <div className="no-jobs">No jobs found</div>
-        </div>
-      ) : (
-        <>
-          <div className="job-cards">
-            {jobs.map((job) => (
-              <div
-                key={job._id}
-                className="job-card"
-                onClick={() => handleJobClick(job)}
-              >
-                <h3 className="job-title">{job.title}</h3>
-                <p className="job-company">{job.company}</p>
-                <p className="job-location">{job.location}</p>
-                <p className="job-type">{formatJobType(job.type)}</p>
-                {job.salary && (
-                  <p className="job-salary">
-                    {formatSalary(job.salary.min, job.salary.max, job.salary.currency)}
-                  </p>
-                )}
-                <div className="job-tags">
-                  {job.tags.map((tag, index) => (
-                    <span key={index} className="job-tag">{tag}</span>
-                  ))}
-                </div>
-              </div>
-            ))}
+        <div className="job-filters">
+          <div className="search-box">
+            <input
+              type="text"
+              name="query"
+              value={filters.query}
+              onChange={handleFilterChange}
+              placeholder="Search by keywords..."
+            />
           </div>
 
-          {totalPages > 1 && (
-            <div className="pagination">
-              <button
-                disabled={page === 1}
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-              >
-                Previous
-              </button>
-              <span className="page-info">Page {page} of {totalPages}</span>
-              <button
-                disabled={page === totalPages}
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              >
-                Next
-              </button>
+          <div className="filter-group">
+            <select
+              name="location"
+              value={filters.location}
+              onChange={handleFilterChange}
+            >
+              <option value="">Any Location</option>
+              {JOB_LOCATIONS.map(location => (
+                <option key={location} value={location}>{location}</option>
+              ))}
+            </select>
+
+            <select
+              name="type"
+              value={filters.type}
+              onChange={handleFilterChange}
+            >
+              <option value="">Any Type</option>
+              {Object.entries(JOB_TYPE_LABELS).map(([type, label]) => (
+                <option key={type} value={type}>{label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="loading">Loading jobs...</div>
+        ) : error ? (
+          <div className="error-message">{error}</div>
+        ) : jobs.length === 0 ? (
+          <div className="no-jobs">No jobs found</div>
+        ) : (
+          <>
+            <div className="job-cards">
+              {jobs.map((job) => (
+                <div
+                  key={job._id}
+                  className={`job-card ${selectedJob === job._id ? 'selected' : ''}`}
+                  onClick={() => handleJobClick(job._id)}
+                >
+                  <h3 className="job-title">{job.title}</h3>
+                  <p className="job-company">{job.company}</p>
+                  <p className="job-location">{job.location}</p>
+                  <p className="job-type">{formatJobType(job.type)}</p>
+                  {job.salary && (
+                    <p className="job-salary">
+                      {formatSalary(job.salary.min, job.salary.max, job.salary.currency)}
+                    </p>
+                  )}
+                  <div className="job-tags">
+                    {job.tags.map((tag, index) => (
+                      <span key={index} className="job-tag">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
-        </>
+
+            {totalPages > 1 && (
+              <div className="pagination">
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                >
+                  Previous
+                </button>
+                <span className="page-info">Page {page} of {totalPages}</span>
+                <button
+                  disabled={page === totalPages}
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {selectedJob && (
+        <div className="job-details-section">
+          <JobDetails jobId={selectedJob} />
+        </div>
       )}
     </div>
   );

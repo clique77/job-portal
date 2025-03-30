@@ -1,11 +1,11 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 export enum JobType {
-  FULL_TIME = 'FULL_TIME',
-  PART_TIME = 'PART_TIME',
-  CONTRACT = 'CONTRACT',
-  INTERNSHIP = 'INTERNSHIP',
-  TEMPORARY = 'TEMPORARY',
+  FULL_TIME = 'Full Time',
+  PART_TIME = 'Part Time',
+  CONTRACT = 'Contract',
+  INTERNSHIP = 'Internship',
+  TEMPORARY = 'Temporary',
 }
 
 export interface Job {
