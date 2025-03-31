@@ -5,6 +5,13 @@
   width: 100%;
   background-color: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  .navbar-wrapper {
+    max-width: none;
+    margin: 0;
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 
 .navbar-wrapper {
@@ -49,13 +56,6 @@
       transition: 0.2s;
     }
   }
-}
-
-header, nav, .navbar, .container {
-  max-width: none !important;
-  margin: 0 !important;
-  width: 100% !important;
-  justify-content: space-between !important;
 }
 
 @media (max-width: 768px) {

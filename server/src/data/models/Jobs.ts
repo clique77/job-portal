@@ -137,7 +137,12 @@ const JobSchema = new Schema<IJob>(
   }
 );
 
-JobSchema.index({ title: 'text', description: 'text', company: 'text', location: 'text' });
+JobSchema.index({
+  title: 'text',
+  description: 'text',
+  company: 'text',
+  tags: 'text'
+});
 JobSchema.index({ category: 1 });
 JobSchema.index({ type: 1 });
 JobSchema.index({ status: 1 });

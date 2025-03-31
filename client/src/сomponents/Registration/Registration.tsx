@@ -1,38 +1,11 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
 import './Registration.scss';
 import { useNavigate } from 'react-router-dom'
+import { UserApi, UserRole, RegisterData } from '../../api/UserApi';
 
-enum UserRole {
-  JOB_SEEKER = 'job_seeker',
-  EMPLOYER = 'employer',
-  ADMIN = 'admin',
-}
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-}
-
-interface RegisterFormData {
-  name: string;
-  email: string;
-  password: string;
-  role: UserRole;
-}
-
-interface RegisterResponse {
-  user: User;
-  token: string;
-}
-
-interface ApiError {
-  message: string;
-}
 
 const Registration = () => {
-  const [formData, setFormData] = useState<RegisterFormData>({
+  const [formData, setFormData] = useState<RegisterData>({
     name: '',
     email: '',
     password: '',
@@ -59,22 +32,8 @@ const Registration = () => {
     setSuccess('');
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-        credentials: 'include'
-      })
-
-      const data: RegisterResponse | ApiError = await response.json();
-
-      if (!response.ok) {
-        throw new Error((data as ApiError).message || 'Registration failed');
-      }
-
-      setSuccess('Registration successfull');
+      await UserApi.register(formData);
+      setSuccess('Registration successful');
 
       setFormData({
         name: '',
@@ -83,7 +42,7 @@ const Registration = () => {
         role: UserRole.JOB_SEEKER
       })
 
-      navigate('/');
+      navigate('/login');
     } catch (error) {
       setError((error instanceof Error) ? error.message : 'An unexpected error');
       console.error('Registration error: ', error);
@@ -94,10 +53,6 @@ const Registration = () => {
 
   return (
     <div className="container">
-      <header>
-        <h1>Job Portal</h1>
-      </header>
-
       <main>
         <section className="register-section">
           <h2>User Registration</h2>
@@ -156,9 +111,8 @@ const Registration = () => {
                 <option value={UserRole.EMPLOYER}>Employer</option>
               </select>
             </div>
-
             <button type="submit" disabled={loading}>
-              {loading ? 'Registration...' : 'Successfully registered!'}
+              Register
             </button>
           </form>
         </section>

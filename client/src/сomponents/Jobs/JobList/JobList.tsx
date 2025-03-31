@@ -5,7 +5,8 @@ import JobDetails from '../JobDetail/JobDetail';
 import './JobList.scss';
 
 const JobList: React.FC = () => {
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [allJobs, setAllJobs] = useState<Job[]>([]);
+  const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [page, setPage] = useState<number>(1);
@@ -13,7 +14,7 @@ const JobList: React.FC = () => {
   const [filters, setFilters] = useState({
     location: '',
     type: '',
-    query: ''
+    search: ''
   });
   const navigate = useNavigate();
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
@@ -22,17 +23,10 @@ const JobList: React.FC = () => {
     const fetchJobs = async () => {
       setLoading(true);
       try {
-        const activeFilters = Object.fromEntries(
-          Object.entries(filters).filter(([__, value]) => value !== '')
-        );
-
-        console.log('Sending filters to API:', activeFilters);
-        const response = await JobsApi.getJobs(page, 10, activeFilters);
-        console.log('API response:', response);
-
-        setJobs(response.data || []);
-        const total = response.meta?.total || 0;
-        setTotalPages(Math.ceil(total / 10));
+        const response = await JobsApi.getJobs(1, 100, {});
+        const jobs = response.data || [];
+        setAllJobs(jobs);
+        setFilteredJobs(jobs);
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to fetch jobs');
         console.error('Error fetching jobs:', error);
@@ -42,12 +36,30 @@ const JobList: React.FC = () => {
     };
 
     fetchJobs();
-  }, [page, filters]);
+  }, []);
+
+  useEffect(() => {
+    const filtered = allJobs.filter(job => {
+      const searchMatch = !filters.search || 
+        job.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+        job.company.toLowerCase().includes(filters.search.toLowerCase()) ||
+        job.description.toLowerCase().includes(filters.search.toLowerCase()) ||
+        job.tags.some(tag => tag.toLowerCase().includes(filters.search.toLowerCase()));
+
+      const locationMatch = !filters.location || job.location === filters.location;
+      const typeMatch = !filters.type || job.type === filters.type;
+
+      return searchMatch && locationMatch && typeMatch;
+    });
+
+    setFilteredJobs(filtered);
+    setTotalPages(Math.ceil(filtered.length / 10));
+    setPage(1);
+  }, [filters, allJobs]);
 
   const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
-    setFilters((prev) => ({ ...prev, [name]: value }));
-    setPage(1);
+    setFilters(prev => ({ ...prev, [name]: value }));
   };
 
   const formatSalary = (min: number, max: number, currency: string) => {
@@ -63,6 +75,11 @@ const JobList: React.FC = () => {
     navigate(`/jobs/${jobId}`);
   };
 
+  const getCurrentPageJobs = () => {
+    const startIndex = (page - 1) * 10;
+    const endIndex = startIndex + 10;
+    return filteredJobs.slice(startIndex, endIndex);
+  };
 
   return (
     <div className={`job-list-container ${selectedJob ? 'with-details' : ''}`}>
@@ -73,8 +90,8 @@ const JobList: React.FC = () => {
           <div className="search-box">
             <input
               type="text"
-              name="query"
-              value={filters.query}
+              name="search"
+              value={filters.search}
               onChange={handleFilterChange}
               placeholder="Search by keywords..."
             />
@@ -109,12 +126,12 @@ const JobList: React.FC = () => {
           <div className="loading">Loading jobs...</div>
         ) : error ? (
           <div className="error-message">{error}</div>
-        ) : jobs.length === 0 ? (
+        ) : getCurrentPageJobs().length === 0 ? (
           <div className="no-jobs">No jobs found</div>
         ) : (
           <>
             <div className="job-cards">
-              {jobs.map((job) => (
+              {getCurrentPageJobs().map((job) => (
                 <div
                   key={job._id}
                   className={`job-card ${selectedJob === job._id ? 'selected' : ''}`}

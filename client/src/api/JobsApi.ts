@@ -57,36 +57,24 @@ export const JOB_TYPE_LABELS = {
 };
 
 export const JobsApi = {
-  getJobs: async (page = 1, limit = 10, filters = {}) => {
-    const queryParams = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-      ...filters,
-    });
+  getJobs: async (page: number, limit: number, filters: any) => {
+    try {
+      const queryParams = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...(filters.search && { search: filters.search }),
+        ...(filters.location && { location: filters.location }),
+        ...(filters.type && { type: filters.type })
+      });
 
-    console.log('Request URL:', `${API_BASE_URL}/api/jobs?${queryParams.toString()}`);
-
-    const response = await fetch(`${API_BASE_URL}/api/jobs?${queryParams.toString()}`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to fetch jobs');
-    }
-
-    const responseData = await response.json();
-
-    return {
-      data: responseData.jobs.jobs,
-      meta: {
-        total: responseData.jobs.total,
-        pages: responseData.jobs.pages
+      const response = await fetch(`${API_BASE_URL}/api/jobs?${queryParams}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch jobs');
       }
-    };
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
   },
 
   getJobById: async (jobId: string) => {

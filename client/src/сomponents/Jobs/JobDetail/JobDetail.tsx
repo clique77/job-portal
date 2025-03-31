@@ -1,5 +1,4 @@
-import { useParams } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+  import { useState, useEffect } from 'react';
 import { JOB_TYPE_LABELS, JobsApi } from '../../../api/JobsApi';
 
 import './JobDetails.scss';
@@ -45,7 +44,7 @@ const JobDetails: React.FC<JobDetailsProps> = ({ jobId }) => {
       } finally {
         setIsLoading(false);
       }
-    };
+    };  
 
     if (jobId) {
       fetchJobDetails();
@@ -131,7 +130,7 @@ const JobDetails: React.FC<JobDetailsProps> = ({ jobId }) => {
             onClick={() => {/* TODO: Add apply handler*/}}
           >
             Apply Now
-          </button>
+          </button>   
         </div>
       )}
     </div>

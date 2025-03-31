@@ -36,6 +36,7 @@ export interface JobFilter {
     min?: number;
     max?: number;
   };
+  search?: string;
   employer?: string;
   status?: string;
   tags?: string[];

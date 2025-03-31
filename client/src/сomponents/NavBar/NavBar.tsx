@@ -9,6 +9,7 @@ const NavBar = () => {
           <Link to="/">Job Portal</Link>
         </div>
         <div className="navbar-menu">
+          <Link to="/login">Login</Link>
           <Link to="/registration">Register</Link>
         </div>
       </div>
