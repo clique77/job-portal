@@ -59,6 +59,7 @@ export const JOB_TYPE_LABELS = {
 export const JobsApi = {
   getJobs: async (page: number, limit: number, filters: any) => {
     try {
+      console.log('1. Starting API request with:', { page, limit, filters });
       const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
@@ -67,12 +68,19 @@ export const JobsApi = {
         ...(filters.type && { type: filters.type })
       });
 
+      console.log('2. Making request to:', `${API_BASE_URL}/api/jobs?${queryParams}`);
       const response = await fetch(`${API_BASE_URL}/api/jobs?${queryParams}`);
+      
+      console.log('3. Response status:', response.status);
       if (!response.ok) {
         throw new Error('Failed to fetch jobs');
       }
-      return await response.json();
+      
+      const data = await response.json();
+      console.log('4. API Response data:', data);
+      return data;
     } catch (error) {
+      console.error('5. Error in getJobs:', error);
       throw error;
     }
   },

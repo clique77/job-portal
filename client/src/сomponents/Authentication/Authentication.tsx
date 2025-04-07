@@ -1,9 +1,13 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserApi, LoginData } from '../../api/UserApi';
+import { UserApi, LoginData, User } from '../../api/UserApi';
 import './Authentication.scss';
 
-const Authentication = () => {
+export interface AuthenticationProps {
+  onLoginSuccess: (user: User) => void;
+}
+
+const Authentication = ({ onLoginSuccess }: AuthenticationProps) => {
   const [formData, setFormData] = useState<LoginData>({
     email: '',
     password: '',
@@ -27,7 +31,8 @@ const Authentication = () => {
     setError('');
 
     try {
-      await UserApi.login(formData);
+      const response = await UserApi.login(formData);
+      onLoginSuccess(response.user);
       navigate('/');
     } catch (error) {
       setError((error instanceof Error) ? error.message : 'An unexpected error occurred');

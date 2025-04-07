@@ -81,8 +81,16 @@ class JobController {
         status,
       }
 
-      const jobs = await this.jobService.getAllJobs({ page, limit, filter });
-      return reply.status(200).send({ message: "Jobs fetched successfully", jobs });
+      const result = await this.jobService.getAllJobs({ page, limit, filter });
+      
+      return reply.status(200).send({
+        data: result.jobs,
+        meta: {
+          total: result.total,
+          pages: result.pages,
+          page: page
+        }
+      });
     } catch (error) {
       return this.errorHandlerService.handleError(request, reply, (error as Error), 500);
     }
