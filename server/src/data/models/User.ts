@@ -14,6 +14,7 @@ export interface IUser extends mongoose.Document {
   role: UserRole;
   createdAt: Date;
   updatedAt: Date;
+  profilePicture?: string;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -34,13 +35,17 @@ const userSchema = new mongoose.Schema<IUser>({
     type: String,
     required: true
   },
+  profilePicture: {
+    type: String,
+    default: null,
+  },
   role: {
     type: String,
     enum: Object.values(UserRole),
     default: UserRole.JOB_SEEKER
   }
 }, {
-  timestamps: true
+  timestamps: true,
 });
 
 userSchema.pre('save', async function(next) {

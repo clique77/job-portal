@@ -1,5 +1,6 @@
 import { IJob } from "../../../data/models/Jobs";
 import { getJobRepository, JobCreateData, JobFilter, JobUpdateDTO } from "../../../data/repositories/jobs/JobRepository";
+import { getSavedJobRepository, ISavedJobRepository } from "../../../data/repositories/savedJobs/SavedJobRepository";
 import UserService from "../users/UserService";
 import { CreateJobUseCase } from "../../useCases/jobs/CreateJob";
 import { DeleteJobUseCase } from "../../useCases/jobs/DeleteJob";
@@ -9,6 +10,7 @@ import { UpdateJobUseCase } from "../../useCases/jobs/UpdateJob";
 import { JobFilterBuilder } from "../../useCases/jobs/utils/JobFilterBuilder";
 import { JobValidator } from "../../useCases/jobs/utils/JobValidator";
 import { IJobService } from "./interfaces/JobServiceInterfaces";
+import { MongoError } from 'mongodb';
 
 type getAllJobsOptions ={
   page?: number;
@@ -29,6 +31,7 @@ export class JobService implements IJobService {
   private getJobByIdUseCase: GetJobByIdUseCase;
   private listJobUseCase: ListJobsUseCase;
   private deleteJobUseCase: DeleteJobUseCase;
+  private savedJobRepository: ISavedJobRepository;
 
   constructor() {
     const jobRepository = getJobRepository();
@@ -36,6 +39,7 @@ export class JobService implements IJobService {
     const validator = new JobValidator();
     const filterBuilder = new JobFilterBuilder();
 
+    this.savedJobRepository = getSavedJobRepository();
     this.createJobUseCase = new CreateJobUseCase(jobRepository, userService, validator);
     this.updateJobUseCase = new UpdateJobUseCase(jobRepository, userService, validator);
     this.getJobByIdUseCase = new GetJobByIdUseCase(jobRepository);
@@ -61,6 +65,31 @@ export class JobService implements IJobService {
 
   async deleteJob(jobId: string, userId: string): Promise<boolean> {
     return this.deleteJobUseCase.execute(jobId, userId);
+  }
+
+  async saveJob(userId: string, jobId: string): Promise<boolean> {
+    try {
+      await this.savedJobRepository.save(userId, jobId);
+      return true;
+    } catch (error) {
+      if (error instanceof MongoError && error.code === 11000) {
+        return false;
+      }
+      throw error;
+    }
+  }
+
+  async unsaveJob(userId: string, jobId: string): Promise<boolean> {
+    return this.savedJobRepository.unsave(userId, jobId);
+  }
+
+  async getSavedJobs(userId: string): Promise<IJob[]> {
+    const savedJobs = await this.savedJobRepository.getSavedJobs(userId);
+    return savedJobs.map(saved => saved.job as IJob);
+  }
+
+  async isJobSaved(userId: string, jobId: string): Promise<boolean> {
+    return this.savedJobRepository.isSaved(userId, jobId);
   }
 }
 

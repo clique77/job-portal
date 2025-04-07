@@ -32,9 +32,12 @@ const NavBar = ({ user, isLoading, onLogout }: NavBarProps) => {
             <span className="loading-text">Loading...</span>
           ) : user ? (
             <>
-            <Link to='/profile' className="user-name">
-              <span className="user-name">Welcome, {user.name}</span>
-            </Link>
+              <Link to="/saved-jobs" className="saved-jobs-link">
+                Saved Jobs
+              </Link>
+              <Link to='/profile' className="user-name">
+                <span>Welcome, {user.name}</span>
+              </Link>
               <button onClick={handleLogout} className="logout-btn">
                 Logout
               </button>

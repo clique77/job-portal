@@ -9,6 +9,10 @@ interface GetJobParams {
   id: string;
 }
 
+interface JobIdParams {
+  jobId: string;
+}
+
 interface JobFilterQuery {
   title?: string;
   location?: string;
@@ -36,6 +40,10 @@ class JobController {
     this.getJobById = this.getJobById.bind(this);
     this.updateJob = this.updateJob.bind(this);
     this.deleteJob = this.deleteJob.bind(this);
+    this.saveJob = this.saveJob.bind(this);
+    this.unsaveJob = this.unsaveJob.bind(this);
+    this.isJobSaved = this.isJobSaved.bind(this);
+    this.getSavedJobs = this.getSavedJobs.bind(this);
   }
 
   async createJob(request: FastifyRequest<{ Body: JobCreateData }>, reply: FastifyReply) {
@@ -132,9 +140,73 @@ class JobController {
       return this.errorHandlerService.handleError(request, reply, (error as Error), 500);
     }
   }
+
+  async saveJob(request: FastifyRequest<{ Params: JobIdParams }>, reply: FastifyReply) {
+    try {
+      const { jobId } = request.params;
+      //@ts-ignore
+      const userId = request.user.id;
+
+      const result = await this.jobService.saveJob(userId, jobId);
+
+      return reply.status(200).send({
+        success: true,
+        message: result ? "Job saved successfully" : "Job was already saved"
+      });
+    } catch (error) {
+      return this.errorHandlerService.handleError(request, reply, (error as Error), 400);
+    }
+  }
+
+  async unsaveJob(request: FastifyRequest<{ Params: JobIdParams }>, reply: FastifyReply) {
+    try {
+      const { jobId } = request.params;
+      //@ts-ignore
+      const userId = request.user.id;
+
+      const result = await this.jobService.unsaveJob(userId, jobId);
+
+      return reply.status(200).send({
+        success: true,
+        message: result ? "Job unsaved successfully" : "Job was not saved"
+      });
+    } catch (error) {
+      return this.errorHandlerService.handleError(request, reply, (error as Error), 400);
+    }
+  }
+
+  async isJobSaved(request: FastifyRequest<{ Params: JobIdParams }>, reply: FastifyReply) {
+    try {
+      const { jobId } = request.params;
+      //@ts-ignore
+      const userId = request.user.id;
+
+      const isSaved = await this.jobService.isJobSaved(userId, jobId);
+
+      return reply.status(200).send(isSaved);
+    } catch (error) {
+      return this.errorHandlerService.handleError(request, reply, (error as Error), 400);
+    }
+  }
+
+  async getSavedJobs(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      //@ts-ignore
+      const userId = request.user.id;
+
+      const savedJobs = await this.jobService.getSavedJobs(userId);
+
+      return reply.status(200).send({
+        success: true,
+        data: savedJobs
+      });
+    } catch (error) {
+      return this.errorHandlerService.handleError(request, reply, (error as Error), 400);
+    }
+  }
 }
 
-import jobService  from '../../../core/services/jobs/JobService';
+import jobService from '../../../core/services/jobs/JobService';
 import errorHandlerService from '../../../core/services/common/error-handler/ErrorHandlerService';
 import paginationService from '../../../core/services/common/pagination/PaginationService';
 

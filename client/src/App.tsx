@@ -6,6 +6,7 @@ import Authentication from './сomponents/Authentication/Authentication';
 import { useState, useEffect, JSX } from 'react';
 import { User, UserApi } from './api/UserApi';
 import Profile from './сomponents/Profile/Profile';
+import SavedJobs from './сomponents/Jobs/SavedJobs/SavedJobs';
 
 const ProtectedRoute = ({ user, children }: { user: User | null, children: JSX.Element}) => {
   if (!user) {
@@ -76,6 +77,17 @@ function AppContent() {
               <Profile user={user} />
             </ProtectedRoute>
           } />
+          <Route path='/saved-jobs' element={
+            <ProtectedRoute user={user}>
+              <SavedJobs />
+            </ProtectedRoute>
+          }>
+            <Route path='/saved-jobs/:jobId' element={
+              <ProtectedRoute user={user}>
+                <SavedJobs />
+              </ProtectedRoute>
+            } />
+          </Route>
         </Routes>
       </div>
     </>

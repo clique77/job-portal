@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Job, JobsApi, JOB_LOCATIONS, JOB_TYPE_LABELS } from "../../../api/JobsApi";
 import JobDetails from '../JobDetail/JobDetail';
+import JobCard from '../JobCard/JobCard';
 import './JobList.scss';
 
 const JobList: React.FC = () => {
@@ -60,14 +61,6 @@ const JobList: React.FC = () => {
   const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
     setFilters(prev => ({ ...prev, [name]: value }));
-  };
-
-  const formatSalary = (min: number, max: number, currency: string) => {
-    return `${currency} ${min.toLocaleString()} - ${max.toLocaleString()}`
-  };
-
-  const formatJobType = (type: string) => {
-    return JOB_TYPE_LABELS[type as keyof typeof JOB_TYPE_LABELS] || type;
   };
 
   const handleJobClick = (jobId: string) => {
@@ -132,26 +125,11 @@ const JobList: React.FC = () => {
           <>
             <div className="job-cards">
               {getCurrentPageJobs().map((job) => (
-                <div
+                <JobCard
                   key={job._id}
-                  className={`job-card ${selectedJob === job._id ? 'selected' : ''}`}
-                  onClick={() => handleJobClick(job._id)}
-                >
-                  <h3 className="job-title">{job.title}</h3>
-                  <p className="job-company">{job.company}</p>
-                  <p className="job-location">{job.location}</p>
-                  <p className="job-type">{formatJobType(job.type)}</p>
-                  {job.salary && (
-                    <p className="job-salary">
-                      {formatSalary(job.salary.min, job.salary.max, job.salary.currency)}
-                    </p>
-                  )}
-                  <div className="job-tags">
-                    {job.tags.map((tag, index) => (
-                      <span key={index} className="job-tag">{tag}</span>
-                    ))}
-                  </div>
-                </div>
+                  job={job}
+                  onJobClick={handleJobClick}
+                />
               ))}
             </div>
 
