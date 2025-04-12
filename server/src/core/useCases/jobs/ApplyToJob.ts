@@ -13,7 +13,7 @@ export class ApplyToJob implements IApplyToJobUseCase {
     this.userService = userService;
   }
 
-  async execute(jobId: string, userId: string, notes?: string): Promise<boolean> {
+  async execute(jobId: string, userId: string, notes?: string, resumeId?: string): Promise<boolean> {
     try {
       const job = await this.jobRepository.findById(jobId);
 
@@ -44,6 +44,7 @@ export class ApplyToJob implements IApplyToJobUseCase {
         applicant: userId,
         status: ApplicationStatus.PENDING,
         notes: notes || '',
+        resumeId: resumeId || null,
       }
 
       const result = await this.jobRepository.addApplicant(jobId, applicationData);

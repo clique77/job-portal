@@ -3,7 +3,6 @@ import applicationController from "../../api/controllers/jobs/ApplicationControl
 import { authenticate, checkRole } from "../../api/middleware/AuthMiddleware";
 import { UserRole } from "../../data/models/User";
 import { ApplicationStatus } from "../../data/models/ApplicationStatus";
-import { getJobRepository } from "../../data/repositories/jobs/JobRepository";
 
 export default function(fastify: FastifyInstance, _options: any, done: () => void) {
   fastify.post<{

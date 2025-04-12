@@ -1,6 +1,7 @@
 import fastify from 'fastify';
 import jwt from '@fastify/jwt';
 import cookie from '@fastify/cookie';
+import multipart from '@fastify/multipart';
 import config from './config';
 import routes from './routes';
 import cors from '@fastify/cors';
@@ -35,6 +36,13 @@ app.register(cors, {
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+});
+
+app.register(multipart, {
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+    files: 1
+  }
 });
 
 app.register(jwt, {

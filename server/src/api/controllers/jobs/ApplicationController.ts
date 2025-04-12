@@ -1,12 +1,13 @@
 import { FastifyRequest, FastifyReply } from "fastify";
-import { ApplicationService, IApplicationService } from "../../../core/services/jobs/ApplicationService";
+import { ApplicationService } from "../../../core/services/jobs/ApplicationService";
 import { IErrorHandlerService } from "../../../core/services/common/error-handler/interfaces/ErrorHandlerInterfaces";
 import errorHandlerService from '../../../core/services/common/error-handler/ErrorHandlerService';
+import { IApplicationService } from "../../../core/services/jobs/interfaces/IApplicationService";
 import { ApplicationStatus } from "../../../data/models/ApplicationStatus";
 
 interface ApplyToJobRequest {
   Params: { jobId: string };
-  Body: { notes?: string };
+  Body: { notes?: string; resumeId?: string };
 }
 
 interface WithdrawApplicationRequest {
@@ -44,11 +45,11 @@ class ApplicationController {
   async applyToJob(request: FastifyRequest<ApplyToJobRequest>, reply: FastifyReply) {
     try {
       const { jobId } = request.params;
-      const { notes } = request.body;
+      const { notes, resumeId } = request.body;
       // @ts-ignore
       const userId = request.user.id;
 
-      const result = await this.applicationService.applyToJob(jobId, userId, notes);
+      const result = await this.applicationService.applyToJob(jobId, userId, notes, resumeId);
 
       return reply.status(201).send({
         success: true,

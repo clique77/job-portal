@@ -1,5 +1,7 @@
-  import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { JOB_TYPE_LABELS, JobsApi } from '../../../api/JobsApi';
+import ApplicationApi, { ApplicationStatus } from '../../../api/ApplicationApi';
+import JobApplication from '../JobApplication/JobApplication';
 
 import './JobDetails.scss';
 
@@ -30,6 +32,8 @@ interface JobDetails {
 const JobDetails: React.FC<JobDetailsProps> = ({ jobId }) => {
   const [job, setJob] = useState<JobDetails | null>(null);
   const [error, setError] = useState<string>('');
+  const [applicationStatus, setApplicationStatus] = useState<ApplicationStatus | null>(null);
+  const [showApplication, setShowApplication] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -37,19 +41,30 @@ const JobDetails: React.FC<JobDetailsProps> = ({ jobId }) => {
       try {
         setIsLoading(true);
         const data = await JobsApi.getJobById(jobId as string);
-        console.log('API Response:', data);
         setJob(data.job);
+        await checkApplicationStatus();
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to fetch job details...');
       } finally {
         setIsLoading(false);
       }
-    };  
+    };
 
     if (jobId) {
       fetchJobDetails();
     }
   }, [jobId]);
+
+  const checkApplicationStatus = async () => {
+    if (jobId) {
+      try {
+        const status = await ApplicationApi.checkApplication(jobId);
+        setApplicationStatus(status || { hasApplied: false, status: undefined });
+      } catch (error) {
+        console.error('Error checking application status:', error);
+      }
+    }
+  };
 
   const formatSalary = (salary: JobDetails['salary']) => {
     if (!salary) {
@@ -125,16 +140,38 @@ const JobDetails: React.FC<JobDetailsProps> = ({ jobId }) => {
 
       {job.status === 'ACTIVE' && (
         <div className="job-details__actions">
-          <button 
-            className="job-details__apply-btn"
-            onClick={() => {/* TODO: Add apply handler*/}}
-          >
-            Apply Now
-          </button>   
+          {!applicationStatus?.hasApplied ? (
+            showApplication ? (
+              <JobApplication
+                jobId={job._id}
+                jobTitle={job.title}
+                company={job.company}
+                onSuccess={() => {
+                  setShowApplication(false);
+                  checkApplicationStatus();
+                }}
+                onCancel={() => setShowApplication(false)}
+              />
+            ) : (
+              <button 
+                className="job-details__apply-btn"
+                onClick={() => setShowApplication(true)}
+              >
+                Quick Apply
+              </button>
+            )
+          ) : (
+            <div className="job-details__application-status">
+              <p>You have already applied for this job</p>
+              {applicationStatus.status && (
+                <p>Status: {applicationStatus.status}</p>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 };
 
-export default JobDetails;
+export default JobDetails; 

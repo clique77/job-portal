@@ -30,7 +30,6 @@ export default function(fastify: FastifyInstance, _options: any, done: () => voi
     preHandler: [authenticate, checkRole([UserRole.EMPLOYER])]
   }, jobController.deleteJob);
 
-  // Saved jobs routes
   fastify.post<{
     Params: { jobId: string }
   }>('/api/jobs/:jobId/save', {

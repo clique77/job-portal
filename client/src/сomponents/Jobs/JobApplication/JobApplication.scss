@@ -1,0 +1,145 @@
+.job-application {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  &__error {
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    background-color: #fee2e2;
+    border: 1px solid #ef4444;
+    border-radius: 4px;
+    color: #dc2626;
+    font-size: 0.875rem;
+  }
+
+  &__success {
+    padding: 1rem;
+    margin: 2rem 0;
+    background-color: #dcfce7;
+    border: 1px solid #22c55e;
+    border-radius: 4px;
+    color: #16a34a;
+    font-size: 1rem;
+    text-align: center;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  &__header {
+    text-align: center;
+    margin-bottom: 2rem;
+
+    h2 {
+      font-size: 1.8rem;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      font-size: 1.2rem;
+      color: #7f8c8d;
+    }
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  &__notes {
+    width: 100%;
+    min-height: 150px;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
+    font-size: 1rem;
+    line-height: 1.5;
+
+    &:focus {
+      outline: none;
+      border-color: #3498db;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+  }
+
+  &__submit,
+  &__cancel {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  &__submit {
+    background-color: #2ecc71;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background-color: #27ae60;
+    }
+  }
+
+  &__cancel {
+    background-color: #95a5a6;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background-color: #7f8c8d;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .job-application {
+    padding: 1rem;
+    margin: 0 1rem;
+
+    &__header {
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+    }
+
+    &__actions {
+      flex-direction: column;
+    }
+  }
+} 

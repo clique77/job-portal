@@ -17,6 +17,7 @@ export interface IApplication {
   appliedAt: Date;
   updatedAt: Date;
   notes?: string;
+  resumeId: mongoose.Types.ObjectId;
 }
 
 export interface IJob extends Document {
