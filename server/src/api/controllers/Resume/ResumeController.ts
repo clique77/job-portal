@@ -2,11 +2,11 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { IResumeService } from '../../../core/services/Resume/interfaces/IResumeService';
 import { IErrorHandlerService } from '../../../core/services/common/error-handler/interfaces/ErrorHandlerInterfaces';
 import { IPaginationService } from '../../../core/services/common/pagination/interfaces/PaginationServiceInterfaces';
-import { MultipartFile } from '@fastify/multipart';
 import { pipeline } from 'stream/promises';
 import { createWriteStream } from 'fs';
 import { mkdir } from 'fs/promises';
 import path from 'path';
+import config from '../../../config';
 
 interface CreateResumeBody {
   fileName: string;
@@ -47,14 +47,19 @@ class ResumeController {
         return reply.status(400).send({ message: 'Only PDF files are allowed' });
       }
 
+      if (data.file.bytesRead > config.uploads.maxSize) {
+        return reply.status(400).send({ 
+          message: `File size exceeds maximum limit of ${config.uploads.maxSize / 1024 / 1024}MB` 
+        });
+      }
+
       // @ts-ignore
       const userId = request.user.id;
       
-      const uploadsDir = path.join(process.cwd(), 'uploads');
-      await mkdir(uploadsDir, { recursive: true });
+      await mkdir(config.uploads.directory, { recursive: true });
 
       const fileName = `${Date.now()}-${data.filename}`;
-      const filePath = path.join(uploadsDir, fileName);
+      const filePath = path.join(config.uploads.directory, fileName);
 
       await pipeline(data.file, createWriteStream(filePath));
 

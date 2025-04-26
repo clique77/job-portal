@@ -10,7 +10,6 @@ export class ErrorHandlerService implements IErrorHandlerService {
   ): FastifyReply {
     console.error(`[ERROR] ${request.method} ${request.url}:`, error);
 
-    // More specific error message based on the error type
     const errorMessage = error.message;
     const detailedMessage = process.env.NODE_ENV !== 'production'
       ? `Details: ${errorMessage}`

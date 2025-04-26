@@ -30,10 +30,14 @@ export interface ICreateUserUseCase {
   }): Promise<IUser>;
 }
 
-export interface IUpdateUserUseCase {
-  execute(userId: string, userData: Partial<IUser>): Promise<IUser | null>;
+export interface IUpdateUserProfileUseCase {
+  execute(id: string, userData: Partial<IUser>): Promise<Omit<IUser, 'password'> | null>;
 }
 
-export interface IDeleteUserUseCase {
-  execute(userId: string): Promise<boolean>;
+export interface IUpdatePasswordUseCase {
+  execute(id: string, currentPassword: string, newPassword: string): Promise<Omit<IUser, 'password'> | null>;
+}
+
+export interface IUpdateProfilePictureUseCase {
+  execute(id: string, picturePath: string): Promise<Omit<IUser, 'password'> | null>;
 }

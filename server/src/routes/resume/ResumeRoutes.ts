@@ -3,13 +3,6 @@ import { resumeController } from "../../api/controllers/Resume/ResumeController"
 import { authenticate, checkRole } from "../../api/middleware/AuthMiddleware";
 import { UserRole } from "../../data/models/User";
 
-interface CreateResumeBody {
-  fileName: string;
-  filePath: string;
-  fileType: string;
-  fileSize: number;
-}
-
 export default function(fastify: FastifyInstance, _options: any, done: () => void) {
   // Get all resumes for the current user
   fastify.get('/api/resumes', {

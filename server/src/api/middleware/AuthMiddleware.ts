@@ -3,10 +3,8 @@ import { UserRole } from '../../data/models/User';
 
 export const authenticate = async (request: FastifyRequest, reply: FastifyReply) => {
   try {
-    // First try cookie-based authentication
     await request.jwtVerify();
   } catch (cookieError) {
-    // If cookie auth fails, try Bearer token
     const authHeader = request.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       try {

@@ -16,4 +16,3 @@ export default async function routes(fastify: FastifyInstance) {
     return { status: 'ok', message: 'Server is running' };
   })
 }
-``

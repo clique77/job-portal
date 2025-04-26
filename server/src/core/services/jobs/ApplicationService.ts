@@ -6,7 +6,7 @@ import { WithdrawApplication } from "../../useCases/jobs/WithdrawApplication";
 import { getJobRepository } from "../../../data/repositories/jobs/JobRepository";
 import UserService from "../users/UserService";
 import { ApplicationStatus } from "../../../data/models/ApplicationStatus";
-import { IApplication, IJob } from "../../../data/models/Jobs";
+import { IApplication } from "../../../data/models/Jobs";
 import { IApplicationService } from "./interfaces/IApplicationService";
 class ApplicationServiceImpl implements IApplicationService {
   private applyToJobUseCase: ApplyToJob;

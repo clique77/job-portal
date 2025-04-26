@@ -27,6 +27,13 @@ const app = fastify({
   logger: true,
 });
 
+app.register(multipart, {
+  limits: {
+    fileSize: config.uploads.maxSize,
+    files: 1
+  };
+})
+
 if (!config.jwtSecret) {
   throw new Error('JWT_SECRET is not defined');
 }

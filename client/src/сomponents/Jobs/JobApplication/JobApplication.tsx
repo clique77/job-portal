@@ -59,7 +59,6 @@ const JobApplication: React.FC<JobApplicationProps> = ({
 
       if (response) {
         setIsSuccess(true);
-        // Delay before closing to show success message
         setTimeout(() => {
           onSuccess?.();
         }, 2000);

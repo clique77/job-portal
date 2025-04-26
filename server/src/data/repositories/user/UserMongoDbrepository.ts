@@ -25,4 +25,28 @@ export class UserMongoDBRepository implements IUserRepository {
   async count(): Promise<number> {
     return User.countDocuments();
   }
+
+  async updateProfile(id: string, userData: Partial<IUser>): Promise<IUser | null> {
+    return User.findByIdAndUpdate(
+      id,
+      { $set: userData },
+      { new: true, select: '-password' }
+    );
+  }
+
+  async updatePassword(id: string, hashedPassword: string): Promise<IUser | null> {
+    return User.findByIdAndUpdate(
+      id,
+      { $set: { password: hashedPassword } },
+      { new: true, select: '-password' }
+    );
+  }
+
+  async updateProfilePicture(id: string, picturePath: string): Promise<IUser | null> {
+    return User.findByIdAndUpdate(
+      id,
+      { $set: { profilePicture: picturePath } },
+      { new: true, select: '-password' }
+    );
+  }
 }

@@ -98,7 +98,6 @@ describe('Job Endpoints', () => {
     const responseBody = JSON.parse(response.body);
     console.log("Jobs response structure:", Object.keys(responseBody));
 
-    // FIX: Just check if responseBody has expected structure without assuming specific types
     if (responseBody.jobs !== undefined) {
       expect(responseBody.jobs).toBeDefined();
     } else if (responseBody.data !== undefined) {
@@ -114,7 +113,6 @@ describe('Job Endpoints', () => {
       return;
     }
 
-    // FIXED: Updated URL to match actual route
     const response = await app.inject({
       method: 'GET',
       url: `/api/getJob/${jobId}`

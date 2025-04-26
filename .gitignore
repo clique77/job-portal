@@ -4,3 +4,8 @@ node_modules/
 
 /dist
 /build
+
+uploads/
+**/uploads/
+storage/
+**/storage/
