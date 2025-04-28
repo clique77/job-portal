@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import "./ProfilePictureUpload.scss";
 import { User, UserApi } from "../../../api/UserApi";
+import { formatImageUrl } from '../../../utils/imageUtils';
 import { toast } from "react-toastify";
 import defaultAvatar from '../../../assets/default-avatar.svg';
 
@@ -11,8 +12,17 @@ interface ProfilePictureUploadProps {
 
 const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({ currentPicture, onUpdate }) => {
   const [loading, setLoading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(currentPicture || null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (currentPicture) {
+      const formattedUrl = formatImageUrl(currentPicture);
+      setPreviewUrl(formattedUrl);
+    } else {
+      setPreviewUrl(null);
+    }
+  }, [currentPicture]);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -40,7 +50,7 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({ currentPict
       onUpdate(updatedUser);
       toast.success('Profile picture updated successfully');
     } catch (error) {
-      setPreviewUrl(currentPicture || null);
+      setPreviewUrl(currentPicture ? formatImageUrl(currentPicture) : null);
       
       if (error instanceof Error) {
         toast.error(error.message);
@@ -61,23 +71,23 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({ currentPict
 
   return (
     <div className="profile-picture-container">
-      <img
-        src={previewUrl || 
-          (currentPicture ? 
-            (currentPicture.startsWith('http') 
-              ? currentPicture 
-              : `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}${currentPicture}`
-            ) 
-            : defaultAvatar
-          )
-        }
-        alt="Profile"
-        className="profile-picture"
-        onError={(e) => {
-          console.error("Error loading image:", (e.target as HTMLImageElement).src);
-          (e.target as HTMLImageElement).src = defaultAvatar;
+      <div className="profile-title">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+          <circle cx="12" cy="13" r="4" />
+        </svg>
+        Profile Picture
+      </div>
+      
+      <div 
+        className="profile-picture-wrapper"
+        style={{
+          backgroundImage: `url(${previewUrl || formatImageUrl(currentPicture, defaultAvatar)})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
         }}
-      />
+      >
+      </div>
       <input
         ref={fileInputRef}
         type="file"
@@ -98,8 +108,8 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({ currentPict
           </>
         ) : (
           <>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
             Upload New Picture
           </>

@@ -144,12 +144,20 @@ export const UserApi = {
 
         if (response.ok) {
           const { user } = await response.json();
+          storage.saveUser(user);
           return user;
         }
 
-        storage.clearAuth();
-        return null;
-      } catch {
+        if (response.status === 401) {
+          console.error('Token is invalid or expired, clearing auth');
+          storage.clearAuth();
+          return null;
+        }
+        
+        console.warn('Error fetching current user, using cached data');
+        return storedUser;
+      } catch (error) {
+        console.warn('Network error when fetching user, using cached data', error);
         return storedUser;
       }
     }

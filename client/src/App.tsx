@@ -65,6 +65,10 @@ function AppContent() {
     setUser(userData);
   };
 
+  const handleUserUpdate = (updatedUser: User) => {
+    setUser(updatedUser);
+  };
+
   const handleLogout = async () => {
     setIsLoading(true);
     try {
@@ -91,7 +95,7 @@ function AppContent() {
           <Route path='/login' element={<Authentication onLoginSuccess={handleLoginSuccess} />} />
           <Route path='/profile' element={
             <ProtectedRoute user={user}>
-              <Profile user={user} />
+              <Profile user={user} onUserUpdate={handleUserUpdate} />
             </ProtectedRoute>
           } />
           <Route path='/saved-jobs' element={
