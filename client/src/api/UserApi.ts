@@ -11,6 +11,12 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  title: string;
+  bio: string;
+  location: string;
+  phoneNumber: string;
+  socialLinks: string[];
+  profilePicture: string;
 }
 
 export interface LoginData {
@@ -35,7 +41,10 @@ const STORAGE_KEY = {
   TOKEN: 'jobPortalToken'
 };
 
-const storage = {
+export const storage = {
+  saveUser: (user: User) => {
+    localStorage.setItem(STORAGE_KEY.USER, JSON.stringify(user));
+  },
   saveAuth: (authData: AuthResponse) => {
     localStorage.setItem(STORAGE_KEY.USER, JSON.stringify(authData.user));
     localStorage.setItem(STORAGE_KEY.TOKEN, authData.token);
@@ -146,5 +155,72 @@ export const UserApi = {
     }
 
     return null;
+  },
+
+  updateUserProfile: async (userData: Partial<User>): Promise<User> => {
+    const token = storage.getToken();
+    const response = await fetch(`${API_BASE_URL}/api/users/profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(userData),
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update profile');
+    }
+
+    const { user } = await response.json();
+    storage.saveUser(user);
+    return user;
+  },
+
+  updatePassword: async (currentPassword: string, newPassword: string): Promise<User> => {
+    const token = storage.getToken();
+    const response = await fetch(`${API_BASE_URL}/api/users/password`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ currentPassword, newPassword }),
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update password');
+    }
+
+    const { user } = await response.json();
+    return user;
+  },
+
+  updateProfilePicture: async (file: File): Promise<User> => {
+    const token = storage.getToken();
+    const formData = new FormData();
+    formData.append('profilePicture', file);
+
+    const response = await fetch(`${API_BASE_URL}/api/users/profile-picture`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      credentials: 'include',
+      body: formData
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to update profile picture');
+    }
+
+    const { user } = await response.json();
+    storage.saveUser(user);
+    return user;
   }
 };

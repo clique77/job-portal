@@ -1,0 +1,205 @@
+.profile-settings {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+
+  &__header {
+    margin-bottom: 2rem;
+    position: relative;
+    
+    h1 {
+      font-size: 1.875rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      color: #64748b;
+      font-size: 1rem;
+    }
+
+    .back-btn {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      color: #1e293b;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      &:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+      }
+
+      &:before {
+        content: "←";
+        font-size: 1rem;
+      }
+    }
+  }
+
+  &__container {
+    display: grid;
+    grid-template-columns: 250px 2fr 250px;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  &__section {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 1rem;
+
+      svg {
+        width: 1.25rem;
+        height: 1.25rem;
+        color: #3b82f6;
+      }
+    }
+
+    // Profile Picture Section
+    &:first-child {
+      .profile-picture-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+
+        .profile-picture {
+          width: 120px;
+          height: 120px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 2px solid #e5e7eb;
+        }
+
+        .upload-button {
+          width: 100%;
+          padding: 0.5rem;
+          background: #f8fafc;
+          border: 1px dashed #cbd5e1;
+          border-radius: 0.5rem;
+          color: #64748b;
+          font-size: 0.875rem;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          text-align: center;
+
+          &:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+            color: #475569;
+          }
+        }
+      }
+    }
+
+    // Profile Form Section
+    &:nth-child(2) {
+      height: 100%;
+    }
+
+    // Security Section
+    &:last-child {
+      .change-password-btn {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        color: #1e293b;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+
+        &:hover {
+          background: #f1f5f9;
+          border-color: #cbd5e1;
+        }
+
+        svg {
+          width: 1rem;
+          height: 1rem;
+          color: #64748b;
+        }
+      }
+    }
+  }
+}
+
+// Loading state
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  color: #64748b;
+
+  &-spinner {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 50%;
+    border-top-color: #3b82f6;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-settings {
+    margin: 1rem;
+    padding: 0 1rem;
+
+    &__header {
+      margin-bottom: 2rem;
+
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .back-btn {
+        position: static;
+        margin-top: 1rem;
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    &__container {
+      grid-template-columns: 1fr;
+    }
+  }
+}

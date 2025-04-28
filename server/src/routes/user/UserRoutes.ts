@@ -59,14 +59,6 @@ export default function(fastify: FastifyInstance, _opts: any, done: () => void) 
 
   fastify.put('/api/users/profile-picture', {
     preValidation: [authenticate],
-    schema: {
-      body: {
-        type: 'object',
-        properties: {
-          file: { type: 'object' }
-        }
-      }
-    }
   }, userController.updateProfilePicture);
 
   done();

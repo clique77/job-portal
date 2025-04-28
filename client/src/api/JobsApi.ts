@@ -1,7 +1,9 @@
+import { storage } from './UserApi';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 const getAuthHeaders = (includeContentType = true) => {
-  const token = localStorage.getItem('jobPortalToken');
+  const token = storage.getToken();
   return {
     ...(includeContentType ? { 'Content-Type': 'application/json' } : {}),
     ...(token ? { 'Authorization': `Bearer ${token}` } : {})

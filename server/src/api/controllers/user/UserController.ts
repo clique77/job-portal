@@ -122,14 +122,12 @@ export class UserController {
         });
       }
   
-      // Ensure upload directory exists
       const uploadDir = path.join(config.uploads.directory, 'profile-pictures');
       await mkdir(uploadDir, { recursive: true });
   
       const fileName = `${Date.now()}-${data.filename}`;
       const filePath = path.join(uploadDir, fileName);
   
-      // Use pipeline instead of saveTo
       await pipeline(data.file, createWriteStream(filePath));
   
       const updatedUser = await this.userService.updateProfilePicture(userId, fileName);

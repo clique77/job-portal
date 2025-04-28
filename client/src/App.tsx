@@ -19,8 +19,25 @@ function AppContent() {
   const [user, setUser] = useState<User | null>(() => {
     try {
       const storedUser = localStorage.getItem('jobPortalUser');
-      return storedUser ? JSON.parse(storedUser) : null;
-    } catch {
+      if (!storedUser) return null;
+      
+      const parsedUser = JSON.parse(storedUser);
+      
+      if (!parsedUser || 
+          !parsedUser.id || 
+          !parsedUser.email || 
+          !parsedUser.role) {
+        console.error('Invalid user data in localStorage, logging out');
+        localStorage.removeItem('jobPortalUser');
+        localStorage.removeItem('jobPortalToken');
+        return null;
+      }
+      
+      return parsedUser;
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+      localStorage.removeItem('jobPortalUser');
+      localStorage.removeItem('jobPortalToken');
       return null;
     }
   });
@@ -35,6 +52,8 @@ function AppContent() {
         const userData = await UserApi.getCurrentUser();
         if (!userData) {
           setUser(null);
+        } else {
+          setUser(userData);
         }
       } finally {
         setIsLoading(false);
