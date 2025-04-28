@@ -18,33 +18,28 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({ currentPict
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       toast.error('Please upload an image file (JPEG, PNG, etc.)');
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Image size should be less than 5MB');
       return;
     }
 
-    // Create preview immediately for better UX
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreviewUrl(reader.result as string);
     };
     reader.readAsDataURL(file);
 
-    // Upload file
     setLoading(true);
     try {
       const updatedUser = await UserApi.updateProfilePicture(file);
       onUpdate(updatedUser);
       toast.success('Profile picture updated successfully');
     } catch (error) {
-      console.error('Upload error:', error);
       setPreviewUrl(currentPicture || null);
       
       if (error instanceof Error) {
@@ -54,7 +49,6 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({ currentPict
       }
     } finally {
       setLoading(false);
-      // Reset the input so the same file can be selected again if needed
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -68,9 +62,21 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({ currentPict
   return (
     <div className="profile-picture-container">
       <img
-        src={previewUrl || defaultAvatar}
+        src={previewUrl || 
+          (currentPicture ? 
+            (currentPicture.startsWith('http') 
+              ? currentPicture 
+              : `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}${currentPicture}`
+            ) 
+            : defaultAvatar
+          )
+        }
         alt="Profile"
         className="profile-picture"
+        onError={(e) => {
+          console.error("Error loading image:", (e.target as HTMLImageElement).src);
+          (e.target as HTMLImageElement).src = defaultAvatar;
+        }}
       />
       <input
         ref={fileInputRef}

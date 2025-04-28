@@ -205,6 +205,11 @@ export const UserApi = {
     const formData = new FormData();
     formData.append('profilePicture', file);
 
+    console.log("API_BASE_URL:", API_BASE_URL);
+    console.log("Uploading to:", `${API_BASE_URL}/api/users/profile-picture`);
+    console.log("Token present:", !!token);
+    console.log("File being uploaded:", file.name, file.type, file.size);
+    
     const response = await fetch(`${API_BASE_URL}/api/users/profile-picture`, {
       method: 'PUT',
       headers: {
@@ -214,13 +219,25 @@ export const UserApi = {
       body: formData
     });
 
+    console.log("Response status:", response.status);
+    
     if (!response.ok) {
       const error = await response.json();
+      console.error("Upload error response:", error);
       throw new Error(error.message || 'Failed to update profile picture');
     }
 
-    const { user } = await response.json();
-    storage.saveUser(user);
-    return user;
+    const result = await response.json();
+    console.log("Upload success response:", result);
+    const { user: updatedUserData } = result;
+    
+    const existingUser = storage.getUser();
+    const mergedUser = existingUser ? { ...existingUser, ...updatedUserData } : updatedUserData;
+    
+    console.log("Saving merged user to storage:", mergedUser);
+    console.log("User profile picture URL:", mergedUser.profilePicture);
+    
+    storage.saveUser(mergedUser);
+    return mergedUser;
   }
 };

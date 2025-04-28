@@ -6,6 +6,8 @@ import config from './config';
 import routes from './routes';
 import cors from '@fastify/cors';
 import database from './data/MongodbConnection';
+import path from 'path';
+import fastifyStatic from '@fastify/static';
 
 export const build = async () => {
   app.addContentTypeParser('application/json', { parseAs: 'string' }, (req, body, done) => {
@@ -34,10 +36,16 @@ app.register(multipart, {
   }
 });
 
+app.register(fastifyStatic, {
+  root: path.join(__dirname, '../../uploads'),
+  prefix: '/uploads/',
+  decorateReply: false
+});
+
 if (!config.jwtSecret) {
   throw new Error('JWT_SECRET is not defined');
 }
-
+;
 app.register(cors, {
   origin: true,
   credentials: true,

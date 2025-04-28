@@ -115,7 +115,6 @@ export class UserController {
         return reply.status(400).send({ message: 'Invalid file type. Please upload an image file.' });
       }
   
-      // Add file size check like in ResumeController
       if (data.file.bytesRead > config.uploads.maxSize) {
         return reply.status(400).send({ 
           message: `File size exceeds maximum limit of ${config.uploads.maxSize / 1024 / 1024}MB` 
@@ -130,7 +129,8 @@ export class UserController {
   
       await pipeline(data.file, createWriteStream(filePath));
   
-      const updatedUser = await this.userService.updateProfilePicture(userId, fileName);
+      const profilePictureUrl = `/uploads/profile-pictures/${fileName}`;
+      const updatedUser = await this.userService.updateProfilePicture(userId, profilePictureUrl);
   
       if (!updatedUser) {
         return reply.status(404).send({ message: 'Failed to update profile picture' });

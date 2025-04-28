@@ -33,7 +33,17 @@ const Profile = ({ user }: ProfileProps) => {
 
         <div className="profile-picture">
           {user.profilePicture ? (
-            <img src={user.profilePicture} alt={user.name} />
+            <img 
+              src={user.profilePicture.startsWith('http') 
+                ? user.profilePicture 
+                : `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}${user.profilePicture}`
+              } 
+              alt={user.name} 
+              onError={(e) => {
+                console.error("Failed to load profile image:", user.profilePicture);
+                (e.target as HTMLImageElement).src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><text x="50%" y="50%" font-size="50" text-anchor="middle" dominant-baseline="middle" fill="%239ca3af">${user.name.charAt(0).toUpperCase()}</text></svg>`;
+              }}
+            />
           ) : (
             <div className="profile-picture-placeholder">
               {user.name.charAt(0).toUpperCase()}

@@ -108,7 +108,6 @@ export class JobMongoDBRepository implements IJobRepository {
         }
       }
 
-      console.log(`Removed applicant ${applicantId} from job ${jobId}. Success: ${result !== null}`);
       return result !== null;
     } catch (error) {
       console.error(`Error removing applicant ${applicantId} from job ${jobId}:`, error);

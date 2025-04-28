@@ -27,7 +27,6 @@ function AppContent() {
           !parsedUser.id || 
           !parsedUser.email || 
           !parsedUser.role) {
-        console.error('Invalid user data in localStorage, logging out');
         localStorage.removeItem('jobPortalUser');
         localStorage.removeItem('jobPortalToken');
         return null;
@@ -35,7 +34,6 @@ function AppContent() {
       
       return parsedUser;
     } catch (error) {
-      console.error('Error parsing user data:', error);
       localStorage.removeItem('jobPortalUser');
       localStorage.removeItem('jobPortalToken');
       return null;
