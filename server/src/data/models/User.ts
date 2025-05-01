@@ -20,6 +20,14 @@ export interface IUser extends mongoose.Document {
   bio: string;
   socialLinks: string[];
   profilePicture?: string;
+  workExperience: {
+    company: string;
+    position: string;
+    startDate: Date;
+    endDate?: Date;
+    current: boolean;
+    description: string;
+  }[];
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
@@ -72,7 +80,35 @@ const userSchema = new mongoose.Schema<IUser>({
   socialLinks: {
     type: [String],
     default: []
-  }
+  },
+  workExperience: [{
+    company: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    position: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    startDate: {
+      type: Date,
+      required: true
+    },
+    endDate: {
+      type: Date
+    },
+    current: {
+      type: Boolean,
+      default: false
+    },
+    description: {
+      type: String,
+      required: true,
+      trim: true
+    }
+  }],
 }, {
   timestamps: true,
 });

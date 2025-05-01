@@ -9,6 +9,14 @@ export interface UserData {
   title?: string;
   bio?: string;
   socialLinks?: string[];
+  workExperience?: {
+    company: string;
+    position: string;
+    startDate: Date;
+    endDate?: Date;
+    current: boolean;
+    description: string;
+  }[];
 }
 
 export class UpdateUserProfile implements IUpdateUserProfileUseCase {

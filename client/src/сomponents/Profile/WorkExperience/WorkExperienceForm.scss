@@ -1,0 +1,422 @@
+.work-experience-form {
+  $primary: #2563eb;
+  $danger: #dc2626;
+  $success: #059669;
+  $border-radius: 12px;
+  $transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  $shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+
+  width: 100%;
+  animation: fadeIn 0.4s ease-out;
+
+  .work-experience-list {
+    margin-bottom: 2rem;
+    display: grid;
+    gap: 1.25rem;
+    
+    .experience-item {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: $border-radius;
+      padding: 1.75rem;
+      transition: $transition;
+      box-shadow: $shadow;
+      position: relative;
+      overflow: hidden;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        border-color: rgba($primary, 0.5);
+      }
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(to bottom, $primary, lighten($primary, 20%));
+        border-radius: $border-radius 0 0 $border-radius;
+      }
+      
+      .experience-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+        
+        h3 {
+          margin: 0;
+          font-size: 1.25rem;
+          color: #1e293b;
+          font-weight: 600;
+        }
+        
+        .delete-btn {
+          padding: 0.5rem;
+          border-radius: 50%;
+          transition: $transition;
+          color: #94a3b8;
+          
+          svg {
+            width: 1.25rem;
+            height: 1.25rem;
+            transition: $transition;
+          }
+          
+          &:hover {
+            background-color: #fee2e2;
+            color: $danger;
+            
+            svg {
+              transform: scale(1.1);
+            }
+          }
+        }
+      }
+      
+      .company {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #475569;
+        font-weight: 500;
+        margin: 0.5rem 0;
+        
+        svg {
+          width: 1rem;
+          height: 1rem;
+          color: #64748b;
+        }
+      }
+      
+      .dates {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #64748b;
+        font-size: 0.9rem;
+        margin: 0.5rem 0;
+        
+        svg {
+          width: 1rem;
+          height: 1rem;
+        }
+      }
+      
+      .description {
+        margin: 1rem 0 0;
+        color: #334155;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        position: relative;
+        padding-left: 1.5rem;
+        
+        &::before {
+          content: '•';
+          position: absolute;
+          left: 0;
+          color: $primary;
+          font-weight: bold;
+        }
+      }
+    }
+  }
+  
+  .add-experience-btn {
+    width: 100%;
+    padding: 1rem;
+    background-color: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: $border-radius;
+    color: $primary;
+    font-weight: 600;
+    cursor: pointer;
+    transition: $transition;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    
+    svg {
+      width: 1.25rem;
+      height: 1.25rem;
+      transition: $transition;
+    }
+    
+    &:hover {
+      background-color: #f1f5f9;
+      border-color: $primary;
+      transform: translateY(-1px);
+      
+      svg {
+        transform: scale(1.1);
+      }
+    }
+  }
+  
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease;
+    
+    .modal {
+      background: #fff;
+      border-radius: $border-radius;
+      padding: 2rem;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      animation: slideUp 0.3s ease;
+      
+      .close-button {
+        position: absolute;
+        top: 1.25rem;
+        right: 1.25rem;
+        padding: 0.5rem;
+        border-radius: 50%;
+        transition: $transition;
+        color: #94a3b8;
+        
+        svg {
+          width: 1.5rem;
+          height: 1.5rem;
+        }
+        
+        &:hover {
+          background-color: #f1f5f9;
+          color: #475569;
+        }
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+      }
+      
+      form {
+        margin-top: 1rem;
+        
+        .form-group {
+          position: relative;
+          margin-bottom: 1.5rem;
+          
+          label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            color: #334155;
+            font-size: 0.9375rem;
+
+            svg {
+              width: 1.125rem;
+              height: 1.125rem;
+              color: $primary;
+            }
+          }
+          
+          input[type="text"],
+          input[type="date"],
+          textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            padding-left: 2.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: $transition;
+            background-color: #f8fafc;
+            
+            &:focus {
+              border-color: $primary;
+              background-color: white;
+              box-shadow: 0 0 0 3px rgba($primary, 0.1);
+            }
+          }
+
+          &::before {
+            content: '';
+            position: absolute;
+            left: 1rem;
+            top: 2.5rem;
+            width: 1rem;
+            height: 1rem;
+            background-size: contain;
+            opacity: 0.5;
+            transition: $transition;
+          }
+          
+          textarea {
+            min-height: 120px;
+            resize: vertical;
+            line-height: 1.5;
+            padding-left: 1rem;
+          }
+          
+          &.checkbox-container {
+            margin: 1rem 0;
+            padding: 0;
+            
+            .checkbox-group {
+              display: flex;
+              align-items: center;
+              padding: 0.875rem 1.25rem;
+              background: #f8fafc;
+              border: 1px solid #e2e8f0;
+              border-radius: 8px;
+              transition: $transition;
+              cursor: pointer;
+              margin: 0;
+              
+              &:hover {
+                background: #f1f5f9;
+                border-color: $primary;
+              }
+              
+              input[type="checkbox"] {
+                appearance: none;
+                -webkit-appearance: none;
+                width: 1.25rem;
+                height: 1.25rem;
+                border: 2px solid #cbd5e1;
+                border-radius: 4px;
+                margin-right: 0.75rem;
+                position: relative;
+                cursor: pointer;
+                transition: $transition;
+                
+                &:checked {
+                  background-color: $primary;
+                  border-color: $primary;
+                  
+                  &::after {
+                    content: '';
+                    position: absolute;
+                    left: 4px;
+                    top: 1px;
+                    width: 6px;
+                    height: 10px;
+                    border: solid white;
+                    border-width: 0 2px 2px 0;
+                    transform: rotate(45deg);
+                  }
+                }
+                
+                &:hover {
+                  border-color: $primary;
+                }
+              }
+              
+              label {
+                margin: 0;
+                color: #475569;
+                font-weight: 500;
+                cursor: pointer;
+                user-select: none;
+                font-size: 0.9375rem;
+                
+                &:hover {
+                  color: $primary;
+                }
+              }
+            }
+          }
+        }
+        
+        .form-actions {
+          display: flex;
+          gap: 1rem;
+          margin-top: 2rem;
+          
+          button {
+            flex: 1;
+            padding: 0.875rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            
+            &.save-btn {
+              background: linear-gradient(135deg, $success, #10b981);
+              color: white;
+              border: none;
+              box-shadow: 0 2px 4px rgba($success, 0.2);
+              
+              &:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 6px rgba($success, 0.3);
+                background: linear-gradient(135deg, darken($success, 5%), #0d9488);
+              }
+              
+              &:active {
+                transform: translateY(0);
+              }
+
+              svg {
+                width: 1.25rem;
+                height: 1.25rem;
+                transition: transform 0.2s ease;
+              }
+            }
+            
+            &.cancel-btn {
+              background-color: white;
+              border: 1px solid #e2e8f0;
+              color: #64748b;
+              
+              &:hover {
+                background-color: #f8fafc;
+                color: #475569;
+                border-color: #cbd5e1;
+              }
+
+              svg {
+                width: 1.25rem;
+                height: 1.25rem;
+                transition: transform 0.2s ease;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

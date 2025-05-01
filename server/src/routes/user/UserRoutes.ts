@@ -37,6 +37,21 @@ export default function(fastify: FastifyInstance, _opts: any, done: () => void) 
           socialLinks: { 
             type: 'array',
             items: { type: 'string' }
+          },
+          workExperience: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                company: { type: 'string' },
+                position: { type: 'string' },
+                startDate: { type: 'string', format: 'date-time' },
+                endDate: { type: 'string', format: 'date-time', nullable: true },
+                current: { type: 'boolean' },
+                description: { type: 'string' }
+              },
+              required: ['company', 'position', 'startDate', 'description']
+            }
           }
         }
       }

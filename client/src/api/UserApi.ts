@@ -17,6 +17,14 @@ export interface User {
   phoneNumber: string;
   socialLinks: string[];
   profilePicture: string;
+  workExperience: {
+    company: string;
+    position: string;
+    startDate: Date;
+    endDate?: Date;
+    current: boolean;
+    description: string;
+  }[];
 }
 
 export interface LoginData {
@@ -166,15 +174,14 @@ export const UserApi = {
   },
 
   updateUserProfile: async (userData: Partial<User>): Promise<User> => {
-    const token = storage.getToken();
     const response = await fetch(`${API_BASE_URL}/api/users/profile`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${storage.getToken()}`
       },
-      body: JSON.stringify(userData),
       credentials: 'include',
+      body: JSON.stringify(userData)
     });
 
     if (!response.ok) {
@@ -183,7 +190,6 @@ export const UserApi = {
     }
 
     const { user } = await response.json();
-    storage.saveUser(user);
     return user;
   },
 

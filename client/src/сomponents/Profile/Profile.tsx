@@ -114,6 +114,33 @@ const Profile = ({ user, onUserUpdate }: ProfileProps) => {
             </div>
           )}
 
+          {user.workExperience && user.workExperience.length > 0 && (
+            <div className="profile-section">
+              <h3 className="section-title">
+                Work Experience
+              </h3>
+              <div className="profile-info">
+                {user.workExperience.map((exp, index) => (
+                  <div key={index} className="info-group full-width experience-item">
+                    <h4 className="position">{exp.position}</h4>
+                    <p className="company">{exp.company}</p>
+                    <p className="dates">
+                      {new Date(exp.startDate).toLocaleDateString('en-US', { 
+                        month: 'long',
+                        year: 'numeric'
+                      })} - {' '}
+                      {exp.current ? 'Present' : exp.endDate ? new Date(exp.endDate).toLocaleDateString('en-US', {
+                        month: 'long',
+                        year: 'numeric'
+                      }) : ''}
+                    </p>
+                    <p className="description">{exp.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {user.socialLinks && user.socialLinks.length > 0 && (
             <div className="profile-section">
               <h3 className="section-title">Social Profiles</h3>

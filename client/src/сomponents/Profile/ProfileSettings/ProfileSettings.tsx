@@ -3,10 +3,12 @@ import { User, UserApi } from "../../../api/UserApi";
 import ProfilePictureUpload from "../ProfilePictureUpload/ProfilePictureUpload";
 import ProfileForm from "../ProfileForm/ProfileForm";
 import PasswordForm from "../PasswordForm/PasswordForm";
+import WorkExperienceForm from "../WorkExperience/WorkExperienceForm";
 import { toast } from "react-toastify";
 import UserIcon from "../Icons/UserIcon";
 import CameraIcon from "../Icons/CameraIcon";
 import KeyIcon from "../Icons/KeyIcon";
+import BriefcaseIcon from "../Icons/BriefcaseIcon";
 import "./ProfileSettings.scss";
 import LoadingSpinner from "../Icons/LoadingSpinner";
 
@@ -49,8 +51,6 @@ const ProfileSettings = ({ initialUser, onUserUpdate, onBack }: ProfileSettingsP
   return (
     <div className="profile-settings">
       <div className="profile-settings__header">
-        <h1>Profile Settings</h1>
-        <p>Manage your account settings and preferences</p>
         {onBack && (
           <button 
             className="back-button"
@@ -62,43 +62,62 @@ const ProfileSettings = ({ initialUser, onUserUpdate, onBack }: ProfileSettingsP
             Back to Profile
           </button>
         )}
+        <h1>Profile Settings</h1>
+        <p>Manage your account settings and preferences</p>
       </div>
 
       <div className="profile-settings__container">
-        <section className="profile-settings__section">
-          <h2>
-            <CameraIcon />
-            Profile Picture
-          </h2>
-          <ProfilePictureUpload 
-            currentPicture={user?.profilePicture}
-            onUpdate={handleUserUpdate}
-          />
-        </section>
+        <div className="profile-settings__sidebar">
+          <div className="profile-picture-section">
+            <h2>
+              <CameraIcon />
+              Profile Picture
+            </h2>
+            <ProfilePictureUpload 
+              currentPicture={user?.profilePicture}
+              onUpdate={handleUserUpdate}
+            />
+          </div>
+        </div>
 
-        <section className="profile-settings__section">
-          <h2>
-            <UserIcon />
-            Profile Information
-          </h2>
-          <ProfileForm 
-            initialData={user}
-            onUpdate={handleUserUpdate}
-          />
-        </section>
+        <div className="profile-settings__main">
+          <div className="settings-section">
+            <h2>
+              <UserIcon />
+              Profile Information
+            </h2>
+            <ProfileForm 
+              initialData={user}
+              onUpdate={handleUserUpdate}
+            />
+          </div>
 
-        <section className="profile-settings__section">
-          <h2>
-            <KeyIcon />
-            Security
-          </h2>
-          <button 
-            className="change-password-btn"
-            onClick={() => setIsPasswordModalOpen(true)}
-          >
-            Change Password
-          </button>
-        </section>
+          <div className="settings-section">
+            <h2>
+              <BriefcaseIcon />
+              Work Experience
+            </h2>
+            {user && (
+              <WorkExperienceForm 
+                user={user}
+                onUpdate={handleUserUpdate}
+              />
+            )}
+          </div>
+
+          <div className="settings-section">
+            <h2>
+              <KeyIcon />
+              Security
+            </h2>
+            <button 
+              className="change-password-btn"
+              onClick={() => setIsPasswordModalOpen(true)}
+            >
+              Change Password
+            </button>
+          </div>
+        </div>
       </div>
 
       {isPasswordModalOpen && (
