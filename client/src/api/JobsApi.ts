@@ -230,5 +230,24 @@ export const JobsApi = {
       console.error('Error checking if job is saved:', error);
       return false;
     }
+  },
+
+  getLocations: async (): Promise<string[]> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/jobs/locations`);
+      
+      if (!response.ok) {
+        console.error('Failed to fetch locations:', response.status);
+        return JOB_LOCATIONS;
+      }
+      
+      const result = await response.json();
+      return result.data && result.data.length > 0 
+        ? result.data 
+        : JOB_LOCATIONS;
+    } catch (error) {
+      console.error('Error fetching job locations:', error);
+      return JOB_LOCATIONS;
+    }
   }
 }

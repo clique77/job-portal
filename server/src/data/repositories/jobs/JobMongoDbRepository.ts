@@ -37,6 +37,19 @@ export class JobMongoDBRepository implements IJobRepository {
     return Jobs.countDocuments(query);
   }
 
+  async getUniqueLocations(): Promise<string[]> {
+    try {
+      const locations = await Jobs.distinct('location');
+      
+      return locations
+        .filter(location => location && location.trim() !== '')
+        .sort((a, b) => a.localeCompare(b));
+    } catch (error) {
+      console.error('Error getting unique locations:', error);
+      return [];
+    }
+  }
+
   async search(query: string, skip: number, limit: number): Promise<IJob[]> {
     const jobs = await Jobs.find(
       { $text: { $search: query } },

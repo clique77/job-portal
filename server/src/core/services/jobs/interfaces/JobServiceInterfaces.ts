@@ -25,4 +25,5 @@ export interface IJobService {
   unsaveJob(userId: string, jobId: string): Promise<boolean>;
   getSavedJobs(userId: string): Promise<IJob[]>;
   isJobSaved(userId: string, jobId: string): Promise<boolean>;
+  getUniqueLocations(): Promise<string[]>;
 }

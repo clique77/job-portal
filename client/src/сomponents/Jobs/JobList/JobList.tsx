@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Job, JobsApi, JOB_LOCATIONS, JOB_TYPE_LABELS } from "../../../api/JobsApi";
+import { Job, JobsApi, JOB_TYPE_LABELS } from "../../../api/JobsApi";
 import JobDetails from '../JobDetail/JobDetail';
 import JobCard from '../JobCard/JobCard';
 import './JobList.scss';
@@ -17,8 +17,22 @@ const JobList: React.FC = () => {
     type: '',
     search: ''
   });
+  const [locations, setLocations] = useState<string[]>([]);
   const navigate = useNavigate();
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const locationData = await JobsApi.getLocations();
+        setLocations(locationData);
+      } catch (error) {
+        console.error('Error fetching locations:', error);
+      }
+    };
+
+    fetchLocations();
+  }, []);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -97,7 +111,7 @@ const JobList: React.FC = () => {
               onChange={handleFilterChange}
             >
               <option value="">Any Location</option>
-              {JOB_LOCATIONS.map(location => (
+              {locations.map(location => (
                 <option key={location} value={location}>{location}</option>
               ))}
             </select>

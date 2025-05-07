@@ -52,5 +52,7 @@ export default function(fastify: FastifyInstance, _options: any, done: () => voi
     preHandler: [authenticate]
   }, jobController.getSavedJobs);
 
+  fastify.get('/api/jobs/locations', jobController.getUniqueLocations);
+
   done();
 }

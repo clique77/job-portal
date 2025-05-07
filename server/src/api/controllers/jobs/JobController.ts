@@ -44,6 +44,7 @@ class JobController {
     this.unsaveJob = this.unsaveJob.bind(this);
     this.isJobSaved = this.isJobSaved.bind(this);
     this.getSavedJobs = this.getSavedJobs.bind(this);
+    this.getUniqueLocations = this.getUniqueLocations.bind(this);
   }
 
   async createJob(request: FastifyRequest<{ Body: JobCreateData }>, reply: FastifyReply) {
@@ -202,6 +203,19 @@ class JobController {
       });
     } catch (error) {
       return this.errorHandlerService.handleError(request, reply, (error as Error), 400);
+    }
+  }
+
+  async getUniqueLocations(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const locations = await this.jobService.getUniqueLocations();
+      
+      return reply.status(200).send({
+        success: true,
+        data: locations
+      });
+    } catch (error) {
+      return this.errorHandlerService.handleError(request, reply, (error as Error), 500);
     }
   }
 }

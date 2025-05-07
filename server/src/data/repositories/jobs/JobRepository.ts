@@ -76,6 +76,7 @@ export interface IJobRepository {
   ): Promise<boolean>;
   getApplication(jobId: string, applicantId: string): Promise<IApplication | null>;
   findJobsByApplicant(applicantId: string, skip: number, limit: number): Promise<IJob[]>;
+  getUniqueLocations(): Promise<string[]>;
 }
 
 export const getJobRepository = (): IJobRepository => {

@@ -91,6 +91,11 @@ export class JobService implements IJobService {
   async isJobSaved(userId: string, jobId: string): Promise<boolean> {
     return this.savedJobRepository.isSaved(userId, jobId);
   }
+
+  async getUniqueLocations(): Promise<string[]> {
+    const jobRepository = getJobRepository();
+    return jobRepository.getUniqueLocations();
+  }
 }
 
 const jobService = new JobService();
