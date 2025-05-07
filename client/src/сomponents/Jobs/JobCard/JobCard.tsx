@@ -31,11 +31,8 @@ const JobCard: React.FC<JobCardProps> = ({
           setIsSaved(saved);
           setIsLoggedIn(true);
         } catch (error) {
-          if ((error as Error).message === 'You are not authorized to access this resource') {
-            setIsLoggedIn(false);
-          } else {
-            console.error('Error checking if job is saved:', error);
-          }
+          // This code won't be reached anymore since isJobSaved doesn't throw on auth errors
+          setIsLoggedIn(false);
         }
       };
       checkIfSaved();
@@ -52,7 +49,13 @@ const JobCard: React.FC<JobCardProps> = ({
 
   const handleSaveToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if ((isLoading || isUnsaving) || !isLoggedIn) return;
+    if ((isLoading || isUnsaving) || !isLoggedIn) {
+      // If user is not logged in, we can show a message or redirect to login
+      if (!isLoggedIn) {
+        alert('Please log in to save jobs');
+      }
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -66,8 +69,9 @@ const JobCard: React.FC<JobCardProps> = ({
       }
       setIsLoggedIn(true);
     } catch (error) {
-      if ((error as Error).message === 'You are not authorized to access this resource') {
+      if ((error as Error).message === 'Authentication required') {
         setIsLoggedIn(false);
+        alert('Please log in to save jobs');
       } else {
         console.error('Error toggling job save state:', error);
       }

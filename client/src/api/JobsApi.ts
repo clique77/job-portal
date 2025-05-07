@@ -126,60 +126,109 @@ export const JobsApi = {
   },
 
   saveJob: async (jobId: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/api/jobs/${jobId}/save`, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({}),
-      credentials: 'include',
-    });
+    try {
+      const token = storage.getToken();
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/jobs/${jobId}/save`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({}),
+        credentials: 'include',
+      });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to save job');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to save job');
+      }
+    } catch (error) {
+      console.error('Error saving job:', error);
+      throw error;
     }
   },
 
   unsaveJob: async (jobId: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/api/jobs/${jobId}/save`, {
-      method: 'DELETE',
-      headers: getAuthHeaders(false),
-      credentials: 'include',
-    });
+    try {
+      const token = storage.getToken();
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/jobs/${jobId}/save`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(false),
+        credentials: 'include',
+      });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to unsave job');
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to unsave job');
+      }
+    } catch (error) {
+      console.error('Error unsaving job:', error);
+      throw error;
     }
   },
 
   getSavedJobs: async (): Promise<Job[]> => {
-    const response = await fetch(`${API_BASE_URL}/api/jobs/saved`, {
-      method: 'GET',
-      headers: getAuthHeaders(),
-      credentials: 'include',
-    });
+    try {
+      const token = storage.getToken();
+      if (!token) {
+        return [];
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/jobs/saved`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to fetch saved jobs');
+      if (response.status === 401) {
+        return [];
+      }
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch saved jobs');
+      }
+
+      const result = await response.json();
+      return result.data;
+    } catch (error) {
+      console.error('Error fetching saved jobs:', error);
+      return [];
     }
-
-    const result = await response.json();
-    return result.data;
   },
 
   isJobSaved: async (jobId: string): Promise<boolean> => {
-    const response = await fetch(`${API_BASE_URL}/api/jobs/${jobId}/saved`, {
-      method: 'GET',
-      headers: getAuthHeaders(),
-      credentials: 'include',
-    });
+    try {
+      const token = storage.getToken();
+      
+      if (!token) {
+        return false;
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/jobs/${jobId}/saved`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to check if job is saved');
+      if (response.status === 401) {
+        return false;
+      }
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to check if job is saved');
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Error checking if job is saved:', error);
+      return false;
     }
-
-    return response.json();
   }
 }

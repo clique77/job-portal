@@ -42,11 +42,20 @@ interface Application {
 const ApplicationApi = {
   getUserApplications: async (): Promise<Application[] | undefined> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/me/applications`, {
+      const token = localStorage.getItem('jobPortalToken');
+      if (!token) {
+        return [];
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/me/applications`, {
         method: 'GET',
         headers: getAuthHeaders(),
         credentials: 'include',
       });
+
+      if (response.status === 401) {
+        return [];
+      }
 
       if (!response.ok) {
         throw new Error('Failed to fetch applications');
@@ -56,12 +65,17 @@ const ApplicationApi = {
       return data.data?.applications || [];
     } catch (error) {
       console.error('Error fetching applications: ', error);
-      throw error;
+      return [];
     }
   },
 
   checkApplication: async (jobId: string): Promise<ApplicationStatus | undefined> => {
     try {
+      const token = localStorage.getItem('jobPortalToken');
+      if (!token) {
+        return { hasApplied: false, status: undefined };
+      }
+      
       const applications = await ApplicationApi.getUserApplications();
       if (!applications || applications.length === 0) {
         return { hasApplied: false, status: undefined };
@@ -75,18 +89,27 @@ const ApplicationApi = {
       };
     } catch (error) {
       console.error('Error checking application: ', error);
-      throw error;
+      return { hasApplied: false, status: undefined };
     }
   },
 
   applyToJob: async (jobId: string, data: ApplicationData): Promise<Application | undefined> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/apply`, {
+      const token = localStorage.getItem('jobPortalToken');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/jobs/${jobId}/apply`, {
         method: 'POST',
         headers: getAuthHeaders(),
         credentials: 'include',
         body: JSON.stringify(data)
       });
+
+      if (response.status === 401) {
+        throw new Error('Authentication required');
+      }
 
       if (!response.ok) {
         const error = await response.json();
@@ -102,11 +125,20 @@ const ApplicationApi = {
 
   withdrawApplication: async (jobId: string): Promise<void> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/withdraw`, {
+      const token = localStorage.getItem('jobPortalToken');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/jobs/${jobId}/withdraw`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
         credentials: 'include',
       });
+
+      if (response.status === 401) {
+        throw new Error('Authentication required');
+      }
 
       if (!response.ok) {
         const error = await response.json();

@@ -191,8 +191,28 @@ const JobDetails: React.FC<JobDetailsProps> = ({ jobId }) => {
               {applicationStatus.status && (
                 <p>
                   Status: <span className={`status ${getStatusClassName(applicationStatus.status)}`}>
+                    {applicationStatus.status === 'PENDING' && '⏳ '}
+                    {applicationStatus.status === 'ACCEPTED' && '✅ '}
+                    {applicationStatus.status === 'REJECTED' && '❌ '}
+                    {applicationStatus.status === 'WITHDRAWN' && '↩️ '}
+                    {applicationStatus.status === 'REVIEWING' && '🔎 '}
                     {applicationStatus.status}
                   </span>
+                </p>
+              )}
+              {applicationStatus.status === 'PENDING' && (
+                <p className="status-message">
+                  Your application is being reviewed by the employer. You'll be notified when there's an update.
+                </p>
+              )}
+              {applicationStatus.status === 'ACCEPTED' && (
+                <p className="status-message">
+                  Congratulations! The employer has accepted your application.
+                </p>
+              )}
+              {applicationStatus.status === 'REJECTED' && (
+                <p className="status-message">
+                  Unfortunately, the employer has decided not to proceed with your application at this time.
                 </p>
               )}
             </div>
