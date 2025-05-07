@@ -1,6 +1,6 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserApi, LoginData, User } from '../../api/UserApi';
+import { UserApi, LoginData, User, storage } from '../../api/UserApi';
 import './Authentication.scss';
 
 export interface AuthenticationProps {
@@ -32,8 +32,20 @@ const Authentication = ({ onLoginSuccess }: AuthenticationProps) => {
 
     try {
       const response = await UserApi.login(formData);
-      onLoginSuccess(response.user);
-      navigate('/');
+      console.log('Login response received:', 
+        response ? `token: ${response.token ? '✓' : '✗'}, user: ${response.user ? '✓' : '✗'}` : 'null');
+      
+      if (response && response.user && response.token) {
+        // Manually ensure token is set correctly in case the API save didn't work
+        localStorage.setItem('jobPortalToken', response.token);
+        // Use the storage helper for consistency
+        storage.saveUser(response.user);
+        
+        onLoginSuccess(response.user);
+        navigate('/');
+      } else {
+        throw new Error('Login response missing user or token data');
+      }
     } catch (error) {
       setError((error instanceof Error) ? error.message : 'An unexpected error occurred');
       console.error('Login error:', error);

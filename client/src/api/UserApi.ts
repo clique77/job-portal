@@ -8,6 +8,7 @@ export enum UserRole {
 
 export interface User {
   id: string;
+  _id?: string; // MongoDB id field
   name: string;
   email: string;
   role: UserRole;
@@ -51,23 +52,74 @@ const STORAGE_KEY = {
 
 export const storage = {
   saveUser: (user: User) => {
-    localStorage.setItem(STORAGE_KEY.USER, JSON.stringify(user));
+    // Normalize MongoDB _id to id if needed
+    let normalizedUser = user;
+    if (user && user._id && !user.id) {
+      normalizedUser = {
+        ...user,
+        id: user._id
+      };
+    }
+    
+    if (!normalizedUser || !normalizedUser.id || !normalizedUser.email || !normalizedUser.role) {
+      console.error('Attempted to save invalid user data to storage');
+      return;
+    }
+    localStorage.setItem(STORAGE_KEY.USER, JSON.stringify(normalizedUser));
   },
   saveAuth: (authData: AuthResponse) => {
-    localStorage.setItem(STORAGE_KEY.USER, JSON.stringify(authData.user));
-    localStorage.setItem(STORAGE_KEY.TOKEN, authData.token);
+    // Normalize MongoDB _id to id if needed
+    let normalizedAuthData = {...authData};
+    if (authData.user && authData.user._id && !authData.user.id) {
+      normalizedAuthData.user = {
+        ...authData.user,
+        id: authData.user._id
+      };
+    }
+    
+    if (!normalizedAuthData || !normalizedAuthData.user || !normalizedAuthData.token || 
+        !normalizedAuthData.user.id || !normalizedAuthData.user.email || !normalizedAuthData.user.role) {
+      console.error('Attempted to save invalid auth data to storage');
+      return;
+    }
+    localStorage.setItem(STORAGE_KEY.USER, JSON.stringify(normalizedAuthData.user));
+    localStorage.setItem(STORAGE_KEY.TOKEN, normalizedAuthData.token);
   },
   getUser: (): User | null => {
     const data = localStorage.getItem(STORAGE_KEY.USER);
     if (!data) return null;
     try {
-      return JSON.parse(data);
-    } catch {
+      const parsed = JSON.parse(data);
+      
+      // Normalize MongoDB _id to id if needed
+      let normalizedUser = parsed;
+      if (parsed && parsed._id && !parsed.id) {
+        normalizedUser = {
+          ...parsed,
+          id: parsed._id
+        };
+      }
+      
+      if (!normalizedUser || !normalizedUser.id || !normalizedUser.email || !normalizedUser.role) {
+        console.warn('Invalid user data in storage, clearing');
+        localStorage.removeItem(STORAGE_KEY.USER);
+        return null;
+      }
+      return normalizedUser;
+    } catch (error) {
+      console.error('Error parsing user data from storage:', error);
+      localStorage.removeItem(STORAGE_KEY.USER);
       return null;
     }
   },
   getToken: (): string | null => {
-    return localStorage.getItem(STORAGE_KEY.TOKEN);
+    const token = localStorage.getItem(STORAGE_KEY.TOKEN);
+    if (!token || token.trim() === '') {
+      // Clear any stale user data if token is missing
+      localStorage.removeItem(STORAGE_KEY.USER);
+      return null;
+    }
+    return token;
   },
   clearAuth: () => {
     localStorage.removeItem(STORAGE_KEY.USER);
@@ -92,6 +144,15 @@ export const UserApi = {
     }
     
     const data = await response.json();
+    
+    // MongoDB returns _id instead of id, so we need to transform it
+    if (data.user && data.user._id && !data.user.id) {
+      data.user = {
+        ...data.user,
+        id: data.user._id
+      };
+    }
+    
     storage.saveAuth(data);
     return data;
   },
@@ -112,6 +173,15 @@ export const UserApi = {
     }
 
     const responseData = await response.json();
+    
+    // MongoDB returns _id instead of id, so we need to transform it
+    if (responseData.user && responseData.user._id && !responseData.user.id) {
+      responseData.user = {
+        ...responseData.user,
+        id: responseData.user._id
+      };
+    }
+    
     storage.saveAuth(responseData);
     return responseData;
   },
@@ -136,41 +206,74 @@ export const UserApi = {
   },
 
   getCurrentUser: async (): Promise<User | null> => {
-    const storedUser = storage.getUser();
     const token = storage.getToken();
+    if (!token) return null;
 
-    if (storedUser && token) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          credentials: 'include',
-        });
+    try {
+      console.log('Fetching current user with token:', token.substring(0, 10) + '...');
+      const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        credentials: 'include',
+      });
 
-        if (response.ok) {
-          const { user } = await response.json();
-          storage.saveUser(user);
-          return user;
+      console.log('API response status:', response.status);
+      
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log('API response data:', JSON.stringify(responseData).substring(0, 100) + '...');
+        
+        // Handle both formats: { user: User } or direct User object
+        let userData = responseData.user || responseData;
+        
+        // MongoDB returns _id instead of id, so we need to transform it
+        if (userData && userData._id && !userData.id) {
+          userData = {
+            ...userData,
+            id: userData._id
+          };
         }
-
-        if (response.status === 401) {
-          console.error('Token is invalid or expired, clearing auth');
+        
+        if (userData && userData.id && userData.email) {
+          console.log('Valid user data received, id:', userData.id, 'email:', userData.email);
+          storage.saveUser(userData);
+          return userData;
+        } else {
+          console.error('Invalid user data received from server:', JSON.stringify(responseData));
           storage.clearAuth();
           return null;
         }
-        
-        console.warn('Error fetching current user, using cached data');
-        return storedUser;
-      } catch (error) {
-        console.warn('Network error when fetching user, using cached data', error);
+      }
+
+      if (response.status === 401) {
+        // Token is invalid or expired
+        console.warn('Authentication token is invalid or expired');
+        storage.clearAuth();
+        return null;
+      }
+      
+      // For other server errors (500, etc.), we'll attempt to use cached data
+      const storedUser = storage.getUser();
+      if (storedUser && storedUser.id && storedUser.email) {
+        console.warn('Server error, using cached user data:', storedUser.email);
         return storedUser;
       }
+      
+      storage.clearAuth();
+      return null;
+    } catch (error) {
+      // Network errors - if we have a stored user, use it temporarily
+      console.warn('Network error when fetching user data:', error);
+      const storedUser = storage.getUser();
+      if (storedUser && storedUser.id && storedUser.email) {
+        console.log('Using cached user during network error:', storedUser.email);
+        return storedUser;
+      }
+      return null;
     }
-
-    return null;
   },
 
   updateUserProfile: async (userData: Partial<User>): Promise<User> => {
@@ -190,7 +293,17 @@ export const UserApi = {
     }
 
     const { user } = await response.json();
-    return user;
+    
+    // MongoDB returns _id instead of id, so we need to transform it
+    let transformedUser = user;
+    if (user && user._id && !user.id) {
+      transformedUser = {
+        ...user,
+        id: user._id
+      };
+    }
+    
+    return transformedUser;
   },
 
   updatePassword: async (currentPassword: string, newPassword: string): Promise<User> => {
@@ -211,7 +324,17 @@ export const UserApi = {
     }
 
     const { user } = await response.json();
-    return user;
+    
+    // MongoDB returns _id instead of id, so we need to transform it
+    let transformedUser = user;
+    if (user && user._id && !user.id) {
+      transformedUser = {
+        ...user,
+        id: user._id
+      };
+    }
+    
+    return transformedUser;
   },
 
   updateProfilePicture: async (file: File): Promise<User> => {
@@ -245,8 +368,17 @@ export const UserApi = {
     console.log("Upload success response:", result);
     const { user: updatedUserData } = result;
     
+    // MongoDB returns _id instead of id, so we need to transform it
+    let transformedUserData = updatedUserData;
+    if (updatedUserData && updatedUserData._id && !updatedUserData.id) {
+      transformedUserData = {
+        ...updatedUserData,
+        id: updatedUserData._id
+      };
+    }
+    
     const existingUser = storage.getUser();
-    const mergedUser = existingUser ? { ...existingUser, ...updatedUserData } : updatedUserData;
+    const mergedUser = existingUser ? { ...existingUser, ...transformedUserData } : transformedUserData;
     
     console.log("Saving merged user to storage:", mergedUser);
     console.log("User profile picture URL:", mergedUser.profilePicture);

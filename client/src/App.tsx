@@ -3,8 +3,8 @@ import JobList from './сomponents/Jobs/JobList/JobList';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import NavBar from './сomponents/NavBar/NavBar';
 import Authentication from './сomponents/Authentication/Authentication';
-import { useState, useEffect, JSX } from 'react';
-import { User, UserApi } from './api/UserApi';
+import { useState, useEffect, JSX, useCallback } from 'react';
+import { User, UserApi, storage } from './api/UserApi';
 import Profile from './сomponents/Profile/Profile';
 import SavedJobs from './сomponents/Jobs/SavedJobs/SavedJobs';
 
@@ -16,63 +16,58 @@ const ProtectedRoute = ({ user, children }: { user: User | null, children: JSX.E
 }
 
 function AppContent() {
-  const [user, setUser] = useState<User | null>(() => {
-    try {
-      const storedUser = localStorage.getItem('jobPortalUser');
-      if (!storedUser) return null;
-      
-      const parsedUser = JSON.parse(storedUser);
-      
-      if (!parsedUser || 
-          !parsedUser.id || 
-          !parsedUser.email || 
-          !parsedUser.role) {
-        localStorage.removeItem('jobPortalUser');
-        localStorage.removeItem('jobPortalToken');
-        return null;
-      }
-      
-      return parsedUser;
-    } catch (error) {
-      localStorage.removeItem('jobPortalUser');
-      localStorage.removeItem('jobPortalToken');
-      return null;
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const verifyAuth = useCallback(async () => {
+    const token = storage.getToken();
+    
+    if (!token) {
+      console.log('No token found, user is not authenticated');
+      setUser(null);
+      setIsLoading(false);
+      return;
     }
-  });
-  const [isLoading, setIsLoading] = useState(false);
+    
+    setIsLoading(true);
+    try {
+      console.log('Verifying authentication...');
+      const userData = await UserApi.getCurrentUser();
+      
+      if (userData && userData.id && userData.email) {
+        console.log('Authentication successful, user data loaded:', userData.email);
+        setUser(userData);
+      } else {
+        console.log('Authentication failed, no valid user data returned');
+        setUser(null);
+      }
+    } catch (error) {
+      console.error('Auth verification error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const verifyAuth = async () => {
-      if (!user) return;
-      
-      setIsLoading(true);
-      try {
-        const userData = await UserApi.getCurrentUser();
-        if (!userData) {
-          setUser(null);
-        } else {
-          setUser(userData);
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     verifyAuth();
-  }, [user?.id]);
+  }, [verifyAuth]);
 
   const handleLoginSuccess = (userData: User) => {
     setUser(userData);
   };
 
   const handleUserUpdate = (updatedUser: User) => {
-    setUser(updatedUser);
+    if (updatedUser) {
+      storage.saveUser(updatedUser);
+      setUser(updatedUser);
+    }
   };
 
   const handleLogout = async () => {
     setIsLoading(true);
     try {
       await UserApi.logout();
+      storage.clearAuth();
       setUser(null);
     } catch (error) {
       console.error('Logout failed:', error);
