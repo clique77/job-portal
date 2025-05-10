@@ -31,7 +31,6 @@ const JobCard: React.FC<JobCardProps> = ({
           setIsSaved(saved);
           setIsLoggedIn(true);
         } catch (error) {
-          // This code won't be reached anymore since isJobSaved doesn't throw on auth errors
           setIsLoggedIn(false);
         }
       };
@@ -50,7 +49,6 @@ const JobCard: React.FC<JobCardProps> = ({
   const handleSaveToggle = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if ((isLoading || isUnsaving) || !isLoggedIn) {
-      // If user is not logged in, we can show a message or redirect to login
       if (!isLoggedIn) {
         alert('Please log in to save jobs');
       }

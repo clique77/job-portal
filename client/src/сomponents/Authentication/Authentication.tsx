@@ -36,9 +36,7 @@ const Authentication = ({ onLoginSuccess }: AuthenticationProps) => {
         response ? `token: ${response.token ? '✓' : '✗'}, user: ${response.user ? '✓' : '✗'}` : 'null');
       
       if (response && response.user && response.token) {
-        // Manually ensure token is set correctly in case the API save didn't work
         localStorage.setItem('jobPortalToken', response.token);
-        // Use the storage helper for consistency
         storage.saveUser(response.user);
         
         onLoginSuccess(response.user);

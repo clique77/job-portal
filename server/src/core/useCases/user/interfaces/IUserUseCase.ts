@@ -20,7 +20,6 @@ export interface IFormatUserUseCase {
   execute(user: IUser): UserResponse;
 }
 
-// Для майбутніх дій
 export interface ICreateUserUseCase {
   execute(userData: {
     name: string;

@@ -52,7 +52,6 @@ const STORAGE_KEY = {
 
 export const storage = {
   saveUser: (user: User) => {
-    // Normalize MongoDB _id to id if needed
     let normalizedUser = user;
     if (user && user._id && !user.id) {
       normalizedUser = {
@@ -68,7 +67,6 @@ export const storage = {
     localStorage.setItem(STORAGE_KEY.USER, JSON.stringify(normalizedUser));
   },
   saveAuth: (authData: AuthResponse) => {
-    // Normalize MongoDB _id to id if needed
     let normalizedAuthData = {...authData};
     if (authData.user && authData.user._id && !authData.user.id) {
       normalizedAuthData.user = {
@@ -91,7 +89,6 @@ export const storage = {
     try {
       const parsed = JSON.parse(data);
       
-      // Normalize MongoDB _id to id if needed
       let normalizedUser = parsed;
       if (parsed && parsed._id && !parsed.id) {
         normalizedUser = {
@@ -115,7 +112,6 @@ export const storage = {
   getToken: (): string | null => {
     const token = localStorage.getItem(STORAGE_KEY.TOKEN);
     if (!token || token.trim() === '') {
-      // Clear any stale user data if token is missing
       localStorage.removeItem(STORAGE_KEY.USER);
       return null;
     }
@@ -145,7 +141,6 @@ export const UserApi = {
     
     const data = await response.json();
     
-    // MongoDB returns _id instead of id, so we need to transform it
     if (data.user && data.user._id && !data.user.id) {
       data.user = {
         ...data.user,
@@ -174,7 +169,6 @@ export const UserApi = {
 
     const responseData = await response.json();
     
-    // MongoDB returns _id instead of id, so we need to transform it
     if (responseData.user && responseData.user._id && !responseData.user.id) {
       responseData.user = {
         ...responseData.user,
@@ -226,10 +220,8 @@ export const UserApi = {
         const responseData = await response.json();
         console.log('API response data:', JSON.stringify(responseData).substring(0, 100) + '...');
         
-        // Handle both formats: { user: User } or direct User object
         let userData = responseData.user || responseData;
         
-        // MongoDB returns _id instead of id, so we need to transform it
         if (userData && userData._id && !userData.id) {
           userData = {
             ...userData,
@@ -249,13 +241,11 @@ export const UserApi = {
       }
 
       if (response.status === 401) {
-        // Token is invalid or expired
         console.warn('Authentication token is invalid or expired');
         storage.clearAuth();
         return null;
       }
       
-      // For other server errors (500, etc.), we'll attempt to use cached data
       const storedUser = storage.getUser();
       if (storedUser && storedUser.id && storedUser.email) {
         console.warn('Server error, using cached user data:', storedUser.email);
@@ -265,7 +255,6 @@ export const UserApi = {
       storage.clearAuth();
       return null;
     } catch (error) {
-      // Network errors - if we have a stored user, use it temporarily
       console.warn('Network error when fetching user data:', error);
       const storedUser = storage.getUser();
       if (storedUser && storedUser.id && storedUser.email) {
@@ -294,7 +283,6 @@ export const UserApi = {
 
     const { user } = await response.json();
     
-    // MongoDB returns _id instead of id, so we need to transform it
     let transformedUser = user;
     if (user && user._id && !user.id) {
       transformedUser = {
@@ -325,7 +313,6 @@ export const UserApi = {
 
     const { user } = await response.json();
     
-    // MongoDB returns _id instead of id, so we need to transform it
     let transformedUser = user;
     if (user && user._id && !user.id) {
       transformedUser = {
@@ -368,7 +355,6 @@ export const UserApi = {
     console.log("Upload success response:", result);
     const { user: updatedUserData } = result;
     
-    // MongoDB returns _id instead of id, so we need to transform it
     let transformedUserData = updatedUserData;
     if (updatedUserData && updatedUserData._id && !updatedUserData.id) {
       transformedUserData = {
