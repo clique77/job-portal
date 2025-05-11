@@ -81,26 +81,58 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ userCompany }) => {
     }
   };
   
+  // Log objects for debugging
+  useEffect(() => {
+    console.log('Full company object:', company);
+    console.log('Full userCompany object:', userCompany);
+  }, [company, userCompany]);
+  
   const formatDate = () => {
     try {
-      if (!company.createdAt) {
-        return "Recently created";
+      // Look for creation date in different possible locations
+      let creationDate = null;
+      
+      // First check if company object has createdAt
+      if (company && company.createdAt) {
+        creationDate = company.createdAt;
+      }
+      
+      // If not found, check if the company object has updatedAt as fallback
+      if (!creationDate && company && company.updatedAt) {
+        creationDate = company.updatedAt;
+      }
+      
+      // If still not found, check userCompany object
+      if (!creationDate && userCompany && userCompany.createdAt) {
+        creationDate = userCompany.createdAt;
+      }
+      
+      console.log('Found creation date:', creationDate);
+      
+      if (!creationDate) {
+        return "Creation time unavailable";
       }
 
-      const date = new Date(company.createdAt);
+      const date = new Date(creationDate);
+      console.log('Parsed date:', date);
       
       if (isNaN(date.getTime())) {
-        return "Recently created";
+        return "Creation time unavailable";
       }
       
-      return date.toLocaleDateString('en-US', { 
+      const formattedDate = date.toLocaleDateString('en-US', { 
         year: 'numeric', 
         month: 'short', 
-        day: 'numeric' 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
       });
+      
+      console.log('Formatted date:', formattedDate);
+      return formattedDate;
     } catch (error) {
       console.error('Error formatting date:', error);
-      return "Recently created";
+      return "Creation time unavailable";
     }
   };
 
@@ -184,7 +216,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({ userCompany }) => {
           <h3 className="company-name">{company.name}</h3>
           <span className={`company-role ${getRoleBadgeClass()}`}>{role}</span>
         </div>
-        <p className={`company-created ${company.createdAt && !isNaN(new Date(company.createdAt).getTime()) ? '' : 'recently-created'}`}>{formatDate()}</p>
+        <p className="company-created">{formatDate()}</p>
         <p className="company-description">{truncateDescription(company.description)}</p>
       </div>
       
