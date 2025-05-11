@@ -8,7 +8,7 @@ export enum UserRole {
 
 export interface User {
   id: string;
-  _id?: string; // MongoDB id field
+  _id?: string;
   name: string;
   email: string;
   role: UserRole;
@@ -212,6 +212,7 @@ export const UserApi = {
           'Authorization': `Bearer ${token}`
         },
         credentials: 'include',
+        cache: 'no-cache'
       });
 
       console.log('API response status:', response.status);

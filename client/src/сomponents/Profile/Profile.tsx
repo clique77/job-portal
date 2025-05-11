@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { User, UserRole } from '../../api/UserApi';
+import { useState, useEffect } from 'react';
+import { User, UserRole, UserApi } from '../../api/UserApi';
 import ProfileSettings from './ProfileSettings/ProfileSettings';
 import { formatImageUrl, createInitialPlaceholder } from '../../utils/imageUtils';
 import './Profile.scss';
@@ -11,12 +11,36 @@ interface ProfileProps {
 
 const Profile = ({ user, onUserUpdate }: ProfileProps) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(user);
 
-  if (!user) {
+  useEffect(() => {
+    const refreshUserData = async () => {
+      if (user && user.id) {
+        try {
+          const freshUserData = await UserApi.getCurrentUser();
+          if (freshUserData) {
+            setCurrentUser(freshUserData);
+            if (onUserUpdate) {
+              onUserUpdate(freshUserData);
+            }
+          }
+        } catch (error) {
+          console.error("Failed to refresh user data:", error);
+        }
+      } else {
+        setCurrentUser(user);
+      }
+    };
+    
+    refreshUserData();
+  }, [user, onUserUpdate]);
+
+  if (!currentUser) {
     return <div className='profile-error'>Please login to view your profile</div>;
   }
 
   const handleUserUpdate = (updatedUser: User) => {
+    setCurrentUser(updatedUser);
     if (onUserUpdate) {
       onUserUpdate(updatedUser);
     }
@@ -24,7 +48,7 @@ const Profile = ({ user, onUserUpdate }: ProfileProps) => {
 
   if (isEditing) {
     return <ProfileSettings 
-      initialUser={user} 
+      initialUser={currentUser} 
       onUserUpdate={handleUserUpdate} 
       onBack={() => setIsEditing(false)}
     />;
@@ -36,24 +60,24 @@ const Profile = ({ user, onUserUpdate }: ProfileProps) => {
         <div className="profile-cover"></div>
         
         <div className="profile-picture">
-          {user.profilePicture ? (
+          {currentUser.profilePicture ? (
             <img 
-              src={formatImageUrl(user.profilePicture)}
-              alt={user.name} 
+              src={formatImageUrl(currentUser.profilePicture)}
+              alt={currentUser.name} 
               onError={(e) => {
-                console.error("Failed to load profile image:", user.profilePicture);
-                (e.target as HTMLImageElement).src = createInitialPlaceholder(user.name.charAt(0));
+                console.error("Failed to load profile image:", currentUser.profilePicture);
+                (e.target as HTMLImageElement).src = createInitialPlaceholder(currentUser.name.charAt(0));
               }}
             />
           ) : (
             <div className="profile-picture-placeholder">
-              {user.name.charAt(0).toUpperCase()}
+              {currentUser.name.charAt(0).toUpperCase()}
             </div>
           )}
         </div>
         
         <div className="profile-header">
-          <h2>{user.name}</h2>
+          <h2>{currentUser.name}</h2>
           <button 
             className="edit-profile-btn"
             onClick={() => setIsEditing(true)}
@@ -64,19 +88,19 @@ const Profile = ({ user, onUserUpdate }: ProfileProps) => {
 
         <div className="profile-content">
           <div className="profile-meta">
-            {user.title && (
+            {currentUser.title && (
               <div className="meta-item">
-                {user.title}
+                {currentUser.title}
               </div>
             )}
-            {user.location && (
+            {currentUser.location && (
               <div className="meta-item">
-                {user.location}
+                {currentUser.location}
               </div>
             )}
             <div className="meta-item">
-              {user.role}
-              {user.role === UserRole.ADMIN && (
+              {currentUser.role}
+              {currentUser.role === UserRole.ADMIN && (
                 <span className="profile-badge">Administrator</span>
               )}
             </div>
@@ -88,39 +112,39 @@ const Profile = ({ user, onUserUpdate }: ProfileProps) => {
               <div className="info-group">
                 <label>Email</label>
                 <span className="link-item">
-                  {user.email}
+                  {currentUser.email}
                 </span>
               </div>
 
-              {user.phoneNumber && (
+              {currentUser.phoneNumber && (
                 <div className="info-group">
                   <label>Phone</label>
                   <span className="link-item">
-                    {user.phoneNumber}
+                    {currentUser.phoneNumber}
                   </span>
                 </div>
               )}
             </div>
           </div>
 
-          {user.bio && (
+          {currentUser.bio && (
             <div className="profile-section">
               <h3 className="section-title">About</h3>
               <div className="profile-info">
                 <div className="info-group full-width">
-                  <p className="bio">{user.bio}</p>
+                  <p className="bio">{currentUser.bio}</p>
                 </div>
               </div>
             </div>
           )}
 
-          {user.workExperience && user.workExperience.length > 0 && (
+          {currentUser.workExperience && currentUser.workExperience.length > 0 && (
             <div className="profile-section">
               <h3 className="section-title">
                 Work Experience
               </h3>
               <div className="profile-info">
-                {user.workExperience.map((exp, index) => (
+                {currentUser.workExperience.map((exp, index) => (
                   <div key={index} className="info-group full-width experience-item">
                     <h4 className="position">{exp.position}</h4>
                     <p className="company">{exp.company}</p>
@@ -141,13 +165,13 @@ const Profile = ({ user, onUserUpdate }: ProfileProps) => {
             </div>
           )}
 
-          {user.socialLinks && user.socialLinks.length > 0 && (
+          {currentUser.socialLinks && currentUser.socialLinks.length > 0 && (
             <div className="profile-section">
               <h3 className="section-title">Social Profiles</h3>
               <div className="profile-info">
                 <div className="info-group full-width">
                   <div className="social-links">
-                    {user.socialLinks.map((link, index) => {
+                    {currentUser.socialLinks.map((link, index) => {
                       let displayName;
                       try {
                         const hostname = new URL(link).hostname.toLowerCase();

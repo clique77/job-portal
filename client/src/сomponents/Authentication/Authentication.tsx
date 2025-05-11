@@ -32,14 +32,19 @@ const Authentication = ({ onLoginSuccess }: AuthenticationProps) => {
 
     try {
       const response = await UserApi.login(formData);
-      console.log('Login response received:', 
-        response ? `token: ${response.token ? '✓' : '✗'}, user: ${response.user ? '✓' : '✗'}` : 'null');
       
       if (response && response.user && response.token) {
         localStorage.setItem('jobPortalToken', response.token);
         storage.saveUser(response.user);
         
-        onLoginSuccess(response.user);
+        // Get fresh user data to ensure we have everything including profile picture
+        const freshUserData = await UserApi.getCurrentUser();
+        if (freshUserData) {
+          onLoginSuccess(freshUserData);
+        } else {
+          onLoginSuccess(response.user);
+        }
+        
         navigate('/');
       } else {
         throw new Error('Login response missing user or token data');
