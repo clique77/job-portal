@@ -1,0 +1,619 @@
+.company-details-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  
+  // Define animations for elements
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    }
+  }
+
+  .error-message {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    border-left: 4px solid #ef4444;
+    display: flex;
+    align-items: center;
+    animation: slideInRight 0.5s ease-out;
+    
+    &::before {
+      content: "⚠️";
+      margin-right: 0.75rem;
+      font-size: 1.25rem;
+      animation: scaleIn 0.5s 0.2s both;
+    }
+  }
+  
+  .loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 240px;
+    color: #3b82f6;
+    font-size: 1.1rem;
+    font-weight: 500;
+    animation: fadeIn 0.3s ease-out;
+    
+    &::before {
+      content: "";
+      width: 2rem;
+      height: 2rem;
+      border: 3px solid #dbeafe;
+      border-top-color: #3b82f6;
+      border-radius: 50%;
+      margin-right: 1rem;
+      animation: spin 1s linear infinite;
+    }
+  }
+  
+  .not-found {
+    text-align: center;
+    padding: 3rem;
+    background-color: #f0f9ff;
+    border-radius: 16px;
+    color: #1e40af;
+    font-size: 1.25rem;
+    font-weight: 600;
+    border: 2px dashed #bfdbfe;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.05);
+    margin: 2rem 0;
+    animation: scaleIn 0.5s ease-out;
+  }
+  
+  .company-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding: 2rem;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 5px 20px rgba(37, 99, 235, 0.08);
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #3b82f6, #2563eb, #1d4ed8);
+    }
+    
+    // Rainbow gradient animation for the top border
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f97316, #3b82f6);
+      background-size: 200% 100%;
+      animation: shimmer 6s infinite linear;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    
+    &:hover::after {
+      opacity: 1;
+    }
+    
+    @keyframes shimmer {
+      to {
+        background-position: 200% 0;
+      }
+    }
+    
+    .company-logo {
+      flex-shrink: 0;
+      margin-right: 2.5rem;
+      animation: fadeIn 0.8s ease-out;
+      
+      img {
+        width: 140px;
+        height: 140px;
+        object-fit: contain;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
+        background: white;
+        padding: 0.75rem;
+        border: 1px solid #dbeafe;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        
+        &:hover {
+          transform: translateY(-5px) scale(1.05);
+          box-shadow: 0 12px 25px rgba(37, 99, 235, 0.15);
+        }
+      }
+      
+      .company-initials {
+        width: 140px;
+        height: 140px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3.5rem;
+        font-weight: 700;
+        letter-spacing: -2px;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.15);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        overflow: hidden;
+        
+        &::before {
+          content: '';
+          position: absolute;
+          top: -50%;
+          left: -50%;
+          width: 200%;
+          height: 200%;
+          background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 60%);
+          opacity: 0;
+          transform: scale(0.5);
+          transition: opacity 0.4s ease, transform 0.6s ease;
+        }
+        
+        &:hover {
+          transform: translateY(-5px) scale(1.05);
+          box-shadow: 0 12px 25px rgba(37, 99, 235, 0.2);
+          
+          &::before {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+      }
+    }
+    
+    .company-title {
+      flex-grow: 1;
+      animation: fadeInUp 0.7s 0.1s both ease-out;
+      
+      h1 {
+        color: #1e40af;
+        font-size: 2.75rem;
+        font-weight: 800;
+        margin: 0 0 0.75rem;
+        line-height: 1.2;
+        letter-spacing: -0.5px;
+        position: relative;
+        display: block;
+        width: fit-content;
+        
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -6px;
+          left: 0;
+          width: 0;
+          height: 3px;
+          background: linear-gradient(90deg, #3b82f6, #2563eb);
+          transition: width 0.4s ease;
+          border-radius: 2px;
+        }
+        
+        &:hover::after {
+          width: 100%;
+        }
+      }
+      
+      .user-role {
+        color: #6b7280;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        display: block;
+        background-color: #f1f5f9;
+        padding: 0.4rem 1rem;
+        border-radius: 30px;
+        letter-spacing: 0.5px;
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+        margin-top: 0.5rem;
+        width: fit-content;
+        
+        &:hover {
+          background-color: #eff6ff;
+          border-color: #bfdbfe;
+          transform: translateX(5px);
+        }
+      }
+    }
+    
+    .company-actions {
+      display: flex;
+      gap: 1rem;
+      animation: fadeInUp 0.7s 0.2s both ease-out;
+      
+      button {
+        padding: 0.875rem 1.75rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        
+        &::before {
+          margin-right: 0.5rem;
+          font-size: 1.1rem;
+        }
+        
+        &::after {
+          content: "";
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 5px;
+          height: 5px;
+          background: rgba(255, 255, 255, 0.5);
+          opacity: 0;
+          border-radius: 100%;
+          transform: scale(1, 1) translate(-50%);
+          transform-origin: 50% 50%;
+        }
+        
+        &:focus:not(:active)::after {
+          animation: ripple 1s ease-out;
+        }
+      }
+      
+      @keyframes ripple {
+        0% {
+          transform: scale(0, 0);
+          opacity: 0.5;
+        }
+        20% {
+          transform: scale(25, 25);
+          opacity: 0.3;
+        }
+        100% {
+          opacity: 0;
+          transform: scale(40, 40);
+        }
+      }
+      
+      .edit-btn {
+        background-color: #eff6ff;
+        color: #2563eb;
+        border: 1px solid #bfdbfe;
+        
+        &:hover {
+          background-color: #dbeafe;
+          border-color: #93c5fd;
+          transform: translateY(-3px);
+          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        }
+        
+        &:active {
+          transform: translateY(1px);
+        }
+      }
+      
+      .delete-btn {
+        background-color: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+        padding: 0.875rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        aspect-ratio: 1/1;
+        width: 48px;
+        height: 48px;
+        
+        svg {
+          width: 20px;
+          height: 20px;
+          stroke: currentColor;
+          stroke-width: 2;
+          transition: all 0.2s ease;
+        }
+        
+        &:hover {
+          background-color: #fee2e2;
+          border-color: #fca5a5;
+          transform: translateY(-3px) rotate(5deg);
+          box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+          
+          svg {
+            stroke-width: 2.5;
+            transform: scale(1.1);
+          }
+        }
+        
+        &:active {
+          transform: translateY(1px) rotate(0deg);
+        }
+      }
+    }
+  }
+  
+  .company-section {
+    background-color: white;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 5px 20px rgba(37, 99, 235, 0.08);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s 0.3s forwards ease-out;
+    
+    &:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    
+    &:nth-child(4) {
+      animation-delay: 0.5s;
+    }
+    
+    h2 {
+      color: #1e40af;
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0 0 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #eff6ff;
+      display: flex;
+      align-items: center;
+      
+      &::before {
+        content: "";
+        display: inline-block;
+        width: 12px;
+        height: 24px;
+        background: linear-gradient(to bottom, #3b82f6, #2563eb);
+        border-radius: 4px;
+        margin-right: 0.75rem;
+        animation: pulse 2s infinite;
+      }
+    }
+    
+    .company-description {
+      color: #4b5563;
+      line-height: 1.8;
+      font-size: 1.05rem;
+      white-space: pre-line;
+      padding: 0.5rem;
+      animation: fadeIn 0.8s 0.6s both ease-out;
+    }
+    
+    .members-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+      
+      .member-item {
+        padding: 1.25rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        background-color: #f9fafb;
+        opacity: 0;
+        transform: translateY(10px);
+        animation: fadeInUp 0.5s forwards ease-out;
+        
+        @for $i from 1 through 20 {
+          &:nth-child(#{$i}) {
+            animation-delay: #{0.1 + ($i * 0.05)}s;
+          }
+        }
+        
+        &:hover {
+          background-color: #f1f5f9;
+          border-color: #bfdbfe;
+          transform: translateY(-3px) scale(1.02);
+          box-shadow: 0 6px 15px rgba(37, 99, 235, 0.1);
+          z-index: 1;
+        }
+        
+        .member-name {
+          font-weight: 600;
+          color: #1f2937;
+          flex-grow: 1;
+          font-size: 1.05rem;
+          transition: color 0.3s ease;
+        }
+        
+        &:hover .member-name {
+          color: #2563eb;
+        }
+        
+        .member-role {
+          background-color: #eff6ff;
+          color: #1e40af;
+          font-size: 0.75rem;
+          padding: 0.3rem 0.75rem;
+          border-radius: 30px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          border: 1px solid #bfdbfe;
+          transition: all 0.3s ease;
+          flex-shrink: 0;
+        }
+        
+        &:hover .member-role {
+          background-color: #dbeafe;
+          transform: scale(1.05);
+        }
+        
+        .member-actions {
+          display: flex;
+          gap: 0.5rem;
+          
+          button {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 0.35rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            transform: scale(0.9);
+            opacity: 0.7;
+            
+            &:hover {
+              background-color: #eff6ff;
+              color: #2563eb;
+              transform: scale(1.1);
+              opacity: 1;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .debug-section {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 2rem;
+    animation: fadeIn 0.5s 0.7s both ease-out;
+    
+    h3 {
+      font-size: 1rem;
+      color: #475569;
+      margin-top: 0;
+      margin-bottom: 0.75rem;
+    }
+    
+    pre {
+      background-color: #f1f5f9;
+      padding: 1.25rem;
+      border-radius: 8px;
+      overflow: auto;
+      max-height: 300px;
+      font-size: 0.875rem;
+      border: 1px solid #e2e8f0;
+      animation: fadeIn 0.5s 0.8s both ease-out;
+    }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .company-details-container {
+    padding: 1rem;
+    
+    .company-header {
+      flex-direction: column;
+      text-align: center;
+      padding: 2rem 1.5rem;
+      
+      .company-logo {
+        margin-right: 0;
+        margin-bottom: 1.5rem;
+      }
+      
+      .company-title {
+        margin-bottom: 1.5rem;
+        
+        h1 {
+          font-size: 2rem;
+          
+          &::after {
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+          }
+        }
+        
+        .user-role {
+          margin: 0.75rem auto 0;
+        }
+      }
+      
+      .company-actions {
+        width: 100%;
+        flex-direction: column;
+        gap: 0.75rem;
+        
+        button {
+          width: 100%;
+        }
+      }
+    }
+    
+    .company-section {
+      padding: 1.5rem;
+    }
+  }
+} 

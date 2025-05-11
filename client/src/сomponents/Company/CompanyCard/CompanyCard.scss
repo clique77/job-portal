@@ -1,0 +1,448 @@
+// Modern, distinctive CompanyCard design
+.company-card {
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(37, 99, 235, 0.08);
+  position: relative;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: row;
+  height: 300px; // Taller height
+  width: 100%;
+  max-width: 800px;
+  min-width: 460px;
+  opacity: 0;
+  transform: translateY(10px);
+  margin-bottom: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  
+  // Define animations
+  @keyframes shimmer {
+    to {
+      background-position: 200% 0;
+    }
+  }
+  
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    }
+  }
+  
+  @keyframes buttonGlow {
+    0% {
+      box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(37, 99, 235, 0.7);
+    }
+    100% {
+      box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
+    }
+  }
+  
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+  
+  &.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #2563eb, #1d4ed8);
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f97316, #3b82f6);
+    background-size: 200% 100%;
+    animation: shimmer 6s infinite linear;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px rgba(37, 99, 235, 0.12);
+    
+    &::after {
+      opacity: 1;
+    }
+  }
+  
+  &.broken-data {
+    opacity: 0.7;
+    
+    &::before {
+      background: #94a3b8;
+    }
+  }
+
+  // Left side - Logo area
+  .company-card-logo {
+    width: 140px;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(239, 246, 255, 0.8);
+    
+    .logo-container {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 3px 10px rgba(37, 99, 235, 0.1);
+      position: relative;
+      z-index: 2;
+      border: 3px solid white;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      
+      &:hover {
+        transform: scale(1.08);
+        box-shadow: 0 5px 15px rgba(37, 99, 235, 0.15);
+      }
+      
+      img {
+        width: 70%;
+        height: 70%;
+        object-fit: contain;
+        opacity: 0;
+        transition: opacity 0.3s ease, transform 0.4s ease;
+      }
+      
+      img.loaded {
+        opacity: 1;
+      }
+      
+      .company-initials {
+        font-size: 32px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        transition: transform 0.3s ease;
+        
+        &:hover {
+          transform: scale(1.1);
+        }
+      }
+    }
+  }
+  
+  // Right side - Content area
+  .company-card-content {
+    flex: 1;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    min-width: 0; // For text truncation
+    
+    // Top section with name and badge
+    .company-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px; // More space below header
+      
+      .company-name {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1e3a8a;
+        margin: 0;
+        padding-right: 15px;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 80%;
+        transition: color 0.2s ease;
+        
+        &:hover {
+          color: #2563eb;
+        }
+      }
+      
+      .company-role {
+        font-size: 13px;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 24px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+      }
+      
+      .owner-badge {
+        background: rgba(219, 234, 254, 0.5);
+        color: #1e40af;
+        border: 1px solid rgba(191, 219, 254, 0.4);
+        
+        &:hover {
+          background: rgba(219, 234, 254, 0.8);
+          transform: translateX(3px);
+        }
+      }
+      
+      .admin-badge {
+        background: rgba(224, 242, 254, 0.5);
+        color: #0369a1;
+        border: 1px solid rgba(186, 230, 253, 0.4);
+        
+        &:hover {
+          background: rgba(224, 242, 254, 0.8);
+          transform: translateX(3px);
+        }
+      }
+      
+      .member-badge {
+        background: rgba(239, 246, 255, 0.5);
+        color: #1e40af;
+        border: 1px solid rgba(219, 234, 254, 0.4);
+        
+        &:hover {
+          background: rgba(239, 246, 255, 0.8);
+          transform: translateX(3px);
+        }
+      }
+    }
+    
+    // Date display
+    .company-created {
+      font-size: 14px;
+      color: #64748b;
+      margin: 0 0 18px;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      
+      &::before {
+        margin-right: 5px;
+        font-size: 12px;
+        opacity: 0.8;
+      }
+    }
+    
+    // Description text - MUCH more visible
+    .company-description {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #334155;
+      margin: 0 0 40px;
+      overflow: hidden;
+      display: -webkit-box;
+      line-clamp: 8;
+      -webkit-line-clamp: 8; // More lines visible
+      -webkit-box-orient: vertical;
+      max-width: 95%;
+      position: relative;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 50px;
+        height: 20px;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+      }
+    }
+  }
+  
+  // Action button
+  .company-card-actions {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    
+    .view-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 24px;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(37, 99, 235, 0.15);
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      
+      &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg, 
+          rgba(255, 255, 255, 0) 0%, 
+          rgba(255, 255, 255, 0.3) 50%, 
+          rgba(255, 255, 255, 0) 100%
+        );
+        transition: all 0.6s;
+        z-index: -1;
+      }
+      
+      &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: -2;
+      }
+      
+      &:hover {
+        color: white;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+        animation: buttonGlow 2s infinite;
+        letter-spacing: 0.5px;
+        
+        &::before {
+          left: 100%;
+          transition: all 0.8s;
+        }
+        
+        &::after {
+          opacity: 1;
+        }
+      }
+      
+      &:active {
+        box-shadow: 0 2px 3px rgba(37, 99, 235, 0.2);
+        animation: none;
+      }
+    }
+    
+    .delete-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background-color: #fff;
+      border: 1px solid #e2e8f0;
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      
+      svg {
+        stroke: currentColor;
+        stroke-width: 2;
+        transition: all 0.2s ease;
+      }
+      
+      &:hover {
+        background-color: #fee2e2;
+        color: #ef4444;
+        border-color: #fca5a5;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(239, 68, 68, 0.15);
+        
+        svg {
+          stroke-width: 2.5;
+          transform: rotate(5deg);
+        }
+      }
+      
+      &:active {
+        transform: translateY(1px);
+        box-shadow: 0 1px 2px rgba(239, 68, 68, 0.1);
+      }
+    }
+  }
+  
+  // Responsive styles
+  @media (max-width: 640px) {
+    & {
+      flex-direction: column;
+      height: auto;
+      min-height: 400px;
+      min-width: 300px;
+      
+      .company-card-logo {
+        width: 100%;
+        height: 120px;
+      }
+      
+      .company-card-content {
+        padding: 24px;
+        padding-bottom: 80px; // More space for button
+        
+        .company-header {
+          .company-name {
+            max-width: 75%;
+          }
+        }
+        
+        .company-description {
+          max-width: 100%;
+          line-clamp: 8;
+          -webkit-line-clamp: 8;
+          margin-bottom: 30px;
+        }
+      }
+      
+      .company-card-actions {
+        bottom: 24px;
+        right: 24px;
+        left: auto;
+      }
+    }
+  }
+}
+
+// Make the cards appear with a staggered animation
+@for $i from 1 through 10 {
+  .company-card:nth-child(#{$i}) {
+    transition-delay: #{$i * 0.05}s;
+  }
+} 

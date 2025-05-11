@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import './NavBar.scss';
-import { UserApi, User } from "../../api/UserApi";
+import { UserApi, User, UserRole } from "../../api/UserApi";
 
 export interface NavBarProps {
   user: User | null;
@@ -21,6 +21,44 @@ const NavBar = ({ user, isLoading, onLogout }: NavBarProps) => {
     }
   };
 
+  const renderUserLinks = () => {
+    if (!user) return null;
+
+    if (user.role === UserRole.EMPLOYER) {
+      return (
+        <>
+          <Link to="/companies" className="nav-link">
+            My Companies
+          </Link>
+        </>
+      );
+    } else if (user.role === UserRole.JOB_SEEKER) {
+      return (
+        <>
+          <Link to="/saved-jobs" className="nav-link">
+            Saved Jobs
+          </Link>
+        </>
+      );
+    } else if (user.role === UserRole.ADMIN) {
+      return (
+        <>
+          <Link to="/jobs" className="nav-link">
+            Browse Jobs
+          </Link>
+          <Link to="/companies" className="nav-link">
+            Companies
+          </Link>
+          <Link to="/saved-jobs" className="nav-link">
+            Saved Jobs
+          </Link>
+        </>
+      );
+    }
+    
+    return null;
+  };
+
   return (
     <header className="main-header">
       <div className="navbar-wrapper">
@@ -32,9 +70,7 @@ const NavBar = ({ user, isLoading, onLogout }: NavBarProps) => {
             <span className="loading-text">Loading...</span>
           ) : user ? (
             <>
-              <Link to="/saved-jobs" className="saved-jobs-link">
-                Saved Jobs
-              </Link>
+              {renderUserLinks()}
               <Link to='/profile' className="user-name">
                 <span>Welcome, {user.name}</span>
               </Link>

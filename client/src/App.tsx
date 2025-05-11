@@ -4,9 +4,12 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import NavBar from './сomponents/NavBar/NavBar';
 import Authentication from './сomponents/Authentication/Authentication';
 import { useState, useEffect, JSX, useCallback } from 'react';
-import { User, UserApi, storage } from './api/UserApi';
+import { User, UserApi, UserRole, storage } from './api/UserApi';
 import Profile from './сomponents/Profile/Profile';
 import SavedJobs from './сomponents/Jobs/SavedJobs/SavedJobs';
+import RoleBasedRoute from './сomponents/Authentication/RoleBasedRoute';
+import Companies from './сomponents/Company/Companies/Companies';
+import CompanyDetails from './сomponents/Company/CompanyDetails/CompanyDetails';
 
 const ProtectedRoute = ({ user, children }: { user: User | null, children: JSX.Element}) => {
   if (!user) {
@@ -83,27 +86,64 @@ function AppContent() {
       </div>
       <div className='App'>
         <Routes>
-          <Route path='/' element={<JobList/>} >
-            <Route path='/jobs/:jobId' element={<JobList/>} />
-          </Route>
+          {/* Home page - Role-based redirect */}
+          <Route path='/' element={
+            user?.role === UserRole.EMPLOYER ? 
+              <Navigate to='/companies' replace /> : 
+              <RoleBasedRoute user={user} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
+                <JobList />
+              </RoleBasedRoute>
+          } />
+          
+          {/* Job seeker routes */}
+          <Route path='/jobs' element={
+            <RoleBasedRoute user={user} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
+              <JobList />
+            </RoleBasedRoute>
+          } />
+          <Route path='/jobs/:jobId' element={
+            <RoleBasedRoute user={user} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
+              <JobList />
+            </RoleBasedRoute>
+          } />
+          
+          {/* Employer routes */}
+          <Route path='/companies' element={
+            <RoleBasedRoute user={user} allowedRoles={[UserRole.EMPLOYER, UserRole.ADMIN]}>
+              <Companies user={user} />
+            </RoleBasedRoute>
+          } />
+          <Route path='/companies/:companyId' element={
+            <RoleBasedRoute user={user} allowedRoles={[UserRole.EMPLOYER, UserRole.ADMIN]}>
+              <CompanyDetails user={user} />
+            </RoleBasedRoute>
+          } />
+          <Route path='/companies/:companyId/edit' element={
+            <RoleBasedRoute user={user} allowedRoles={[UserRole.EMPLOYER, UserRole.ADMIN]}>
+              <CompanyDetails user={user} />
+            </RoleBasedRoute>
+          } />
+          
+          {/* Public routes */}
           <Route path='/registration' element={<Registration/>} />
           <Route path='/login' element={<Authentication onLoginSuccess={handleLoginSuccess} />} />
+          
+          {/* Protected routes for all logged-in users */}
           <Route path='/profile' element={
             <ProtectedRoute user={user}>
               <Profile user={user} onUserUpdate={handleUserUpdate} />
             </ProtectedRoute>
           } />
           <Route path='/saved-jobs' element={
-            <ProtectedRoute user={user}>
+            <RoleBasedRoute user={user} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
               <SavedJobs />
-            </ProtectedRoute>
-          }>
-            <Route path='/saved-jobs/:jobId' element={
-              <ProtectedRoute user={user}>
-                <SavedJobs />
-              </ProtectedRoute>
-            } />
-          </Route>
+            </RoleBasedRoute>
+          } />
+          <Route path='/saved-jobs/:jobId' element={
+            <RoleBasedRoute user={user} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
+              <SavedJobs />
+            </RoleBasedRoute>
+          } />
         </Routes>
       </div>
     </>
