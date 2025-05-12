@@ -13,10 +13,17 @@ import CompanyDetails from './сomponents/Company/CompanyDetails/CompanyDetails'
 import JobDetail from './сomponents/Jobs/JobDetail/JobDetail';
 import EmployerJobDetail from './сomponents/Jobs/EmployerJobDetail/EmployerJobDetail';
 
-const ProtectedRoute = ({ user, children }: { user: User | null, children: JSX.Element}) => {
+const ProtectedRoute = ({ user, isLoading, children }: { user: User | null, isLoading: boolean, children: JSX.Element}) => {
+  // First, check if authentication is still being verified
+  if (isLoading) {
+    return <div className="loading-auth">Verifying authentication...</div>;
+  }
+  
+  // Only redirect if definitely not authenticated (after loading completes)
   if (!user) {
     return <Navigate to='/login' replace />;
   }
+  
   return children;
 }
 
@@ -54,14 +61,142 @@ function AppContent() {
       }
     } catch (error) {
       console.error('Auth verification error:', error);
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    verifyAuth();
-  }, [verifyAuth]);
+    // Set a flag to handle component unmounting and signal auth checking
+    let isMounted = true;
+    let retryCount = 0;
+    const maxRetries = 3;
+    
+    // Signal that auth check is starting
+    localStorage.setItem('authCheckInProgress', 'true');
+    localStorage.setItem('lastAuthCheckStart', Date.now().toString());
+    
+    const performAuthCheck = async () => {
+      const token = storage.getToken();
+      
+      if (!token) {
+        console.log('No token found, user is not authenticated');
+        if (isMounted) {
+          setUser(null);
+          setIsLoading(false);
+          localStorage.setItem('authCheckInProgress', 'false');
+        }
+        return;
+      }
+      
+      if (isMounted) setIsLoading(true);
+      
+      try {
+        console.log('Verifying authentication...');
+        const userData = await UserApi.getCurrentUser();
+        
+        if (!isMounted) return; // Exit if component unmounted
+        
+        if (userData && userData.id && userData.email) {
+          console.log('Authentication successful, user data loaded:', userData.email);
+          setUser(userData);
+          // Reset retry count on success
+          retryCount = 0;
+          
+          // Store last successful auth time
+          localStorage.setItem('lastAuthCheck', Date.now().toString());
+          localStorage.setItem('authCheckInProgress', 'false');
+        } else {
+          console.log('Authentication failed, no valid user data returned');
+          
+          // Try to recover user from storage as fallback
+          const storedUser = storage.getUser();
+          if (storedUser && storedUser.id && storedUser.email) {
+            console.log('Using stored user data as fallback');
+            setUser(storedUser);
+          } else {
+            setUser(null);
+          }
+          
+          // Only retry a few times to avoid infinite loops
+          if (retryCount < maxRetries) {
+            retryCount++;
+            console.log(`Retrying authentication (${retryCount}/${maxRetries})...`);
+            setTimeout(performAuthCheck, 2000); // Retry after delay
+          } else {
+            localStorage.setItem('authCheckInProgress', 'false');
+          }
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error('Auth verification error:', error);
+          
+          // Try to recover user from storage as fallback
+          const storedUser = storage.getUser();
+          if (storedUser && storedUser.id && storedUser.email) {
+            console.log('Using stored user data as fallback after error');
+            setUser(storedUser);
+          } else {
+            setUser(null);
+          }
+          
+          // Only retry a few times to avoid infinite loops
+          if (retryCount < maxRetries) {
+            retryCount++;
+            console.log(`Retrying authentication after error (${retryCount}/${maxRetries})...`);
+            setTimeout(performAuthCheck, 3000); // Longer delay for errors
+          } else {
+            localStorage.setItem('authCheckInProgress', 'false');
+          }
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+          if (retryCount >= maxRetries) {
+            localStorage.setItem('authCheckInProgress', 'false');
+          }
+        }
+      }
+    };
+    
+    performAuthCheck();
+    
+    // Watch for auth clear requests from other components
+    const checkAuthClearRequests = setInterval(() => {
+      if (isMounted) {
+        const authClearRequested = localStorage.getItem('authClearRequested');
+        if (authClearRequested === 'true') {
+          console.log('Auth clear requested from another component');
+          localStorage.removeItem('authClearRequested');
+          setUser(null);
+        }
+      }
+    }, 1000);
+    
+    // Setup periodic auth refresh to ensure token validity
+    const authRefreshInterval = setInterval(() => {
+      if (isMounted) {
+        const lastCheck = localStorage.getItem('lastAuthCheck');
+        const now = Date.now();
+        // Only refresh if last check was more than 15 minutes ago
+        if (!lastCheck || now - parseInt(lastCheck) > 15 * 60 * 1000) {
+          console.log('Performing periodic auth refresh...');
+          localStorage.setItem('authCheckInProgress', 'true');
+          localStorage.setItem('lastAuthCheckStart', Date.now().toString());
+          performAuthCheck();
+        }
+      }
+    }, 10 * 60 * 1000); // Check every 10 minutes
+    
+    // Cleanup function to prevent state updates after unmount
+    return () => {
+      isMounted = false;
+      localStorage.setItem('authCheckInProgress', 'false');
+      clearInterval(authRefreshInterval);
+      clearInterval(checkAuthClearRequests);
+    };
+  }, []);
 
   const handleLoginSuccess = (userData: User) => {
     setUser(userData);
@@ -98,42 +233,42 @@ function AppContent() {
           <Route path='/' element={
             user?.role === UserRole.EMPLOYER ? 
               <Navigate to='/companies' replace /> : 
-              <RoleBasedRoute user={user} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
+              <RoleBasedRoute user={user} isLoading={isLoading} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
                 <JobList />
               </RoleBasedRoute>
           } />
           
           {/* Job seeker routes */}
           <Route path='/jobs' element={
-            <RoleBasedRoute user={user} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
+            <RoleBasedRoute user={user} isLoading={isLoading} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
               <JobList />
             </RoleBasedRoute>
           } />
           <Route path='/jobs/:jobId' element={
-            <RoleBasedRoute user={user} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
+            <RoleBasedRoute user={user} isLoading={isLoading} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
               <JobList />
             </RoleBasedRoute>
           } />
           
           {/* Employer routes */}
           <Route path='/companies' element={
-            <RoleBasedRoute user={user} allowedRoles={[UserRole.EMPLOYER, UserRole.ADMIN]}>
+            <RoleBasedRoute user={user} isLoading={isLoading} allowedRoles={[UserRole.EMPLOYER, UserRole.ADMIN]}>
               <Companies />
             </RoleBasedRoute>
           } />
           <Route path='/companies/:companyId' element={
-            <RoleBasedRoute user={user} allowedRoles={[UserRole.EMPLOYER, UserRole.ADMIN]}>
+            <RoleBasedRoute user={user} isLoading={isLoading} allowedRoles={[UserRole.EMPLOYER, UserRole.ADMIN]}>
               <CompanyDetails user={user} />
             </RoleBasedRoute>
           } />
           <Route path='/companies/:companyId/edit' element={
-            <RoleBasedRoute user={user} allowedRoles={[UserRole.EMPLOYER, UserRole.ADMIN]}>
+            <RoleBasedRoute user={user} isLoading={isLoading} allowedRoles={[UserRole.EMPLOYER, UserRole.ADMIN]}>
               <CompanyDetails user={user} />
             </RoleBasedRoute>
           } />
           {/* Special route for employers to view job applicants */}
           <Route path='/employer/jobs/:jobId' element={
-            <RoleBasedRoute user={user} allowedRoles={[UserRole.EMPLOYER, UserRole.ADMIN]}>
+            <RoleBasedRoute user={user} isLoading={isLoading} allowedRoles={[UserRole.EMPLOYER, UserRole.ADMIN]}>
               <EmployerJobDetail />
             </RoleBasedRoute>
           } />
@@ -144,17 +279,17 @@ function AppContent() {
           
           {/* Protected routes for all logged-in users */}
           <Route path='/profile' element={
-            <ProtectedRoute user={user}>
+            <ProtectedRoute user={user} isLoading={isLoading}>
               <Profile user={user} onUserUpdate={handleUserUpdate} />
             </ProtectedRoute>
           } />
           <Route path='/saved-jobs' element={
-            <RoleBasedRoute user={user} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
+            <RoleBasedRoute user={user} isLoading={isLoading} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
               <SavedJobs />
             </RoleBasedRoute>
           } />
           <Route path='/saved-jobs/:jobId' element={
-            <RoleBasedRoute user={user} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
+            <RoleBasedRoute user={user} isLoading={isLoading} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
               <SavedJobs />
             </RoleBasedRoute>
           } />

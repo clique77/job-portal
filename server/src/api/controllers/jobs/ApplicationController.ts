@@ -58,7 +58,7 @@ class ApplicationController {
       const { notes, resumeId } = request.body;
       // @ts-ignore
       const userId = request.user.id;
-      
+
       console.log(`Application request for job ${jobId} from user ${userId}:`, {
         jobId,
         userId,

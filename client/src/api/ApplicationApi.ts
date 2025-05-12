@@ -113,7 +113,7 @@ const ApplicationApi = {
       if (!token) {
         throw new Error('Authentication required');
       }
-
+      
       console.log('Applying to job with data:', {
         jobId,
         notes: data.notes || 'No notes',

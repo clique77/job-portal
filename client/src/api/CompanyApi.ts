@@ -1,5 +1,7 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
+import { getAuthHeaders, handleApiResponse, safeJsonParse } from '../utils/auth';
+
 export interface Company {
   _id: string;
   id?: string;
@@ -40,24 +42,6 @@ export interface UserCompany {
   createdAt: string;
   invitedBy?: string;
 }
-
-const getAuthHeaders = (includeContentType = true): HeadersInit => {
-  const token = localStorage.getItem('jobPortalToken');
-  const headers: HeadersInit = {};
-  
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  
-  if (includeContentType) {
-    headers['Content-Type'] = 'application/json';
-    console.log('Added Content-Type header');
-  } else {
-    console.log('Content-Type header not included');
-  }
-  
-  return headers;
-};
 
 const CompanyApi = {
   getAllCompanies: async (page = 1, limit = 10): Promise<{ companies: Company[]; total: number }> => {
@@ -282,16 +266,22 @@ const CompanyApi = {
 
   getUserCompanies: async (): Promise<UserCompany[]> => {
     try {
+      // Make sure we have the most up-to-date auth token
+      const token = localStorage.getItem('jobPortalToken');
+      if (!token) {
+        console.warn('No auth token available for getUserCompanies');
+        return [];
+      }
+      
       const response = await fetch(`${API_BASE_URL}/api/me/companies`, {
         method: 'GET',
         headers: getAuthHeaders(),
         credentials: 'include',
+        cache: 'no-store' // Prevent caching to always get fresh data
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch user companies');
-      }
-
+      await handleApiResponse(response);
+      
       const data = await response.json();
       console.log('Raw getUserCompanies response:', data);
       
@@ -313,6 +303,9 @@ const CompanyApi = {
         return [];
       }
       
+      // Store success timestamp for caching purposes
+      localStorage.setItem('lastCompanyFetchTime', Date.now().toString());
+      
       // Normalize _id to id if needed
       const normalizedUserCompanies = userCompaniesArray.map((userCompany: UserCompany) => {
         const normalized = { ...userCompany };
@@ -326,9 +319,29 @@ const CompanyApi = {
       }) || [];
       
       console.log('Normalized userCompanies:', normalizedUserCompanies);
+      
+      // Cache the companies in localStorage for offline/error fallback
+      try {
+        localStorage.setItem('cachedUserCompanies', JSON.stringify(normalizedUserCompanies));
+      } catch (cacheError) {
+        console.warn('Failed to cache user companies:', cacheError);
+      }
+      
       return normalizedUserCompanies;
     } catch (error) {
       console.error('Error fetching user companies:', error);
+      
+      // Try to use cached data if available
+      try {
+        const cachedData = safeJsonParse(localStorage.getItem('cachedUserCompanies'), []);
+        if (cachedData && Array.isArray(cachedData) && cachedData.length > 0) {
+          console.log('Using cached user companies data');
+          return cachedData;
+        }
+      } catch (cacheError) {
+        console.error('Error reading cached companies:', cacheError);
+      }
+      
       return [];
     }
   },

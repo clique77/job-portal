@@ -11,6 +11,10 @@ const SavedJobs: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
   const [isUnsaving, setIsUnsaving] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalJobs, setTotalJobs] = useState(0);
+  const limit = 8; // Number of jobs per page
   const navigate = useNavigate();
   const { jobId } = useParams();
 
@@ -20,12 +24,24 @@ const SavedJobs: React.FC = () => {
     }
   }, [jobId]);
 
-  const fetchSavedJobs = async () => {
+  const fetchSavedJobs = async (currentPage = page) => {
     try {
       setIsLoading(true);
       setError(null);
-      const jobs = await JobsApi.getSavedJobs();
-      setSavedJobs(jobs);
+      const result = await JobsApi.getSavedJobs(currentPage, limit);
+      
+      // Filter out any null jobs or jobs with missing required fields
+      const validJobs = result.jobs.filter(job => 
+        job && job._id && job.title && job.company
+      );
+      
+      if (validJobs.length !== result.jobs.length) {
+        console.warn(`Filtered out ${result.jobs.length - validJobs.length} invalid job entries`);
+      }
+      
+      setSavedJobs(validJobs);
+      setTotalPages(result.pages);
+      setTotalJobs(result.total);
     } catch (err) {
       if ((err as Error).message === 'You are not authorized to access this resource') {
         setError('Please log in to view your saved jobs');
@@ -40,13 +56,22 @@ const SavedJobs: React.FC = () => {
 
   useEffect(() => {
     fetchSavedJobs();
-  }, []);
+  }, [page]);
 
   const handleUnsaveJob = async (jobId: string) => {
     try {
       setIsUnsaving(jobId);
       await JobsApi.unsaveJob(jobId);
       setSavedJobs(prevJobs => prevJobs.filter(job => job._id !== jobId));
+      setTotalJobs(prev => prev - 1);
+      
+      // If we've removed the last job on a page, go back one page (unless we're on page 1)
+      if (savedJobs.length === 1 && page > 1) {
+        setPage(prevPage => prevPage - 1);
+      } else {
+        // Otherwise just refresh current page
+        fetchSavedJobs();
+      }
       
       if (selectedJob === jobId) {
         setSelectedJob(null);
@@ -68,6 +93,13 @@ const SavedJobs: React.FC = () => {
     navigate(`/saved-jobs/${jobId}`, { replace: true });
   };
 
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    // Reset selected job when changing pages
+    setSelectedJob(null);
+    navigate('/saved-jobs', { replace: true });
+  };
+
   if (isLoading) {
     return (
       <div className="saved-jobs-loading">
@@ -86,7 +118,7 @@ const SavedJobs: React.FC = () => {
             Log In
           </button>
         ) : (
-          <button onClick={fetchSavedJobs} className="retry-button">
+          <button onClick={() => fetchSavedJobs(1)} className="retry-button">
             Try Again
           </button>
         )}
@@ -98,25 +130,49 @@ const SavedJobs: React.FC = () => {
     <div className={`saved-jobs-container ${selectedJob ? 'with-details' : ''}`}>
       <div className="jobs-section">
         <h1>Saved Jobs</h1>
-        {savedJobs.length === 0 ? (
+        {totalJobs === 0 ? (
           <div className="no-saved-jobs">
             <p>You haven't saved any jobs yet.</p>
             <Link to="/" className="browse-jobs-link">Browse Jobs</Link>
           </div>
         ) : (
-          <div className="saved-jobs-grid">
-            {savedJobs.map(job => (
-              <JobCard
-                key={job._id}
-                job={job}
-                onJobClick={handleJobClick}
-                onUnsave={() => handleUnsaveJob(job._id)}
-                isSaved={true}
-                isUnsaving={isUnsaving === job._id}
-                isSelected={selectedJob === job._id}
-              />
-            ))}
-          </div>
+          <>
+            <div className="saved-jobs-grid">
+              {savedJobs.map(job => (
+                <JobCard
+                  key={job._id}
+                  job={job}
+                  onJobClick={handleJobClick}
+                  onUnsave={() => handleUnsaveJob(job._id)}
+                  isSaved={true}
+                  isUnsaving={isUnsaving === job._id}
+                  isSelected={selectedJob === job._id}
+                />
+              ))}
+            </div>
+            
+            {totalPages > 1 && (
+              <div className="pagination">
+                <button
+                  disabled={page === 1}
+                  onClick={() => handlePageChange(page - 1)}
+                  className="pagination-button"
+                >
+                  Previous
+                </button>
+                <span className="page-info">
+                  Page {page} of {totalPages}
+                </span>
+                <button
+                  disabled={page === totalPages}
+                  onClick={() => handlePageChange(page + 1)}
+                  className="pagination-button"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 

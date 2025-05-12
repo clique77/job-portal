@@ -1,0 +1,29 @@
+/* Check if App.css exists and add the loading-auth class styling */
+.loading-auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  font-size: 1.2rem;
+  color: #4b5563;
+  padding: 2rem;
+  position: relative;
+}
+
+.loading-auth::after {
+  content: "";
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 3px solid #e0e7ff;
+  border-top-color: #4f46e5;
+  animation: spin 1s linear infinite;
+  margin-left: 15px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+} 

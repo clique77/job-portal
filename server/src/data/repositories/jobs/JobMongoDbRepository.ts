@@ -60,7 +60,7 @@ export class JobMongoDBRepository implements IJobRepository {
 
   async findByEmployer(employerId: string, skip: number, limit: number): Promise<IJob[]> {
     try {
-      console.log(`Finding jobs for employer ID: ${employerId}`);
+    console.log(`Finding jobs for employer ID: ${employerId}`);
       
       // Debug: Find a sample job to check structure
       const sampleJob = await Jobs.findOne();
@@ -90,7 +90,7 @@ export class JobMongoDBRepository implements IJobRepository {
         .limit(limit)
         .sort({ createdAt: -1 });
       
-      console.log(`Found ${jobs.length} jobs for employer ${employerId}`);
+    console.log(`Found ${jobs.length} jobs for employer ${employerId}`);
       
       if (jobs.length === 0) {
         // If no jobs found, check if any jobs exist at all
@@ -110,7 +110,7 @@ export class JobMongoDBRepository implements IJobRepository {
         });
       }
       
-      return jobs;
+    return jobs;
     } catch (error) {
       console.error(`Error finding jobs for employer ${employerId}:`, error);
       return [];
@@ -390,7 +390,7 @@ export class JobMongoDBRepository implements IJobRepository {
         query.$or.push({ employer: filter.employer });
         query.$or.push({ employer: new mongoose.Types.ObjectId(filter.employer) });
       } else {
-        query.employer = filter.employer;
+      query.employer = filter.employer;
       }
     }
 

@@ -342,21 +342,21 @@ export const JobsApi = {
     }
   },
 
-  getSavedJobs: async (): Promise<Job[]> => {
+  getSavedJobs: async (page: number = 1, limit: number = 10): Promise<{jobs: Job[], total: number, pages: number}> => {
     try {
       const token = storage.getToken();
       if (!token) {
-        return [];
+        return {jobs: [], total: 0, pages: 0};
       }
       
-      const response = await fetch(`${API_BASE_URL}/api/jobs/saved`, {
+      const response = await fetch(`${API_BASE_URL}/api/jobs/saved?page=${page}&limit=${limit}`, {
         method: 'GET',
         headers: getAuthHeaders(),
         credentials: 'include',
       });
 
       if (response.status === 401) {
-        return [];
+        return {jobs: [], total: 0, pages: 0};
       }
 
       if (!response.ok) {
@@ -365,10 +365,25 @@ export const JobsApi = {
       }
 
       const result = await response.json();
-      return result.data;
+      
+      if (result.data && Array.isArray(result.data)) {
+        return {
+          jobs: result.data,
+          total: result.pagination?.total || result.data.length,
+          pages: result.pagination?.totalPages || 1
+        };
+      } else if (Array.isArray(result.data)) {
+        return {
+          jobs: result.data, 
+          total: result.data.length,
+          pages: 1
+        };
+      }
+      
+      return {jobs: [], total: 0, pages: 0};
     } catch (error) {
       console.error('Error fetching saved jobs:', error);
-      return [];
+      return {jobs: [], total: 0, pages: 0};
     }
   },
 

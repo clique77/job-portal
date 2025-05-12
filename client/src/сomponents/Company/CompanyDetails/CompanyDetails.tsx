@@ -102,7 +102,7 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = () => {
       
       if (Array.isArray(companyJobs)) {
         console.log(`Successfully loaded ${companyJobs.length} jobs for company`);
-        setJobs(companyJobs);
+      setJobs(companyJobs);
       } else {
         console.error('Unexpected response format:', companyJobs);
         setJobs([]);

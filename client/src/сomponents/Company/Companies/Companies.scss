@@ -34,6 +34,25 @@
     }
   }
   
+  // Add shimmer animation for the loading card effect
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+  
+  // Add text loading animation
+  @keyframes loadingDots {
+    0% { content: "."; }
+    25% { content: ".."; }
+    50% { content: "..."; }
+    75% { content: ".."; }
+    100% { content: "."; }
+  }
+  
   .companies-page-header {
     background: #ffffff;
     padding: 2.5rem 0;
@@ -172,6 +191,66 @@
           color: #1e40af;
           margin-bottom: 1rem;
         }
+      }
+    }
+
+    .loading-companies {
+      background-color: #ffffff;
+      border-radius: 1rem;
+      padding: 3.5rem;
+      text-align: center;
+      border: 1px solid #e2e8f0;
+      animation: fadeIn 0.6s 0.2s both ease-out;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      min-height: 400px;
+      
+      p {
+        color: #3b82f6;
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 0;
+        letter-spacing: 0;
+        animation: fadeIn 0.6s 0.4s both ease-out;
+        position: relative;
+        
+        &::after {
+          content: "";
+          display: inline-block;
+          animation: loadingDots 2s infinite;
+          padding-left: 2px;
+          font-weight: bold;
+        }
+      }
+      
+      .loading-shimmer {
+        width: 100%;
+        max-width: 450px;
+        height: 72px;
+        margin-top: 1rem;
+        background: linear-gradient(
+          90deg,
+          #f1f5f9 0%,
+          #e2e8f0 20%,
+          #f1f5f9 40%,
+          #e2e8f0 60%,
+          #f1f5f9 80%
+        );
+        background-size: 1000px 100%;
+        border-radius: 0.5rem;
+        animation: shimmer 2s infinite linear;
+      }
+      
+      /* Styled differently to look distinct */
+      .loading-shimmer:nth-child(4) {
+        width: 70%;
+        height: 48px;
+        opacity: 0.7;
+        animation-delay: 0.3s;
       }
     }
 

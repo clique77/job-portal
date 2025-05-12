@@ -247,6 +247,7 @@ export const UserApi = {
         return null;
       }
       
+      // For non-401 errors, try to use cached user data if available
       const storedUser = storage.getUser();
       if (storedUser && storedUser.id && storedUser.email) {
         console.warn('Server error, using cached user data:', storedUser.email);
@@ -257,11 +258,14 @@ export const UserApi = {
       return null;
     } catch (error) {
       console.warn('Network error when fetching user data:', error);
+      
+      // For network errors, also try to use cached user data
       const storedUser = storage.getUser();
       if (storedUser && storedUser.id && storedUser.email) {
         console.log('Using cached user during network error:', storedUser.email);
         return storedUser;
       }
+      
       return null;
     }
   },

@@ -20,10 +20,19 @@ const JobCard: React.FC<JobCardProps> = ({
   isUnsaving = false,
   isSelected = false
 }) => {
+  if (!job || !job._id || !job.title) {
+    console.error('Invalid job object received by JobCard:', job);
+    return (
+      <div className="job-card error">
+        <p>Invalid job data</p>
+      </div>
+    );
+  }
+
   const [isSaved, setIsSaved] = useState(initialIsSaved);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [companyName, setCompanyName] = useState<string>(job.company);
+  const [companyName, setCompanyName] = useState<string>(job.company || 'Unknown Company');
 
   useEffect(() => {
     if (initialIsSaved === undefined) {
@@ -61,6 +70,7 @@ const JobCard: React.FC<JobCardProps> = ({
   };
 
   const formatJobType = (type: string) => {
+    if (!type) return 'Not specified';
     return JOB_TYPE_LABELS[type as keyof typeof JOB_TYPE_LABELS] || type;
   };
 
@@ -119,15 +129,15 @@ const JobCard: React.FC<JobCardProps> = ({
         </button>
       </div>
       <p className="job-company">{companyName}</p>
-      <p className="job-location">{job.location}</p>
+      <p className="job-location">{job.location || 'Location not specified'}</p>
       <p className="job-type">{formatJobType(job.type)}</p>
-      {job.salary && (
+      {job.salary && job.salary.min && job.salary.max && job.salary.currency && (
         <p className="job-salary">
           {formatSalary(job.salary.min, job.salary.max, job.salary.currency)}
         </p>
       )}
       <div className="job-tags">
-        {job.tags.map((tag, index) => (
+        {Array.isArray(job.tags) && job.tags.map((tag, index) => (
           <span key={index} className="job-tag">{tag}</span>
         ))}
       </div>

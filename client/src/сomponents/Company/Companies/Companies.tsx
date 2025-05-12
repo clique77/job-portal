@@ -1,17 +1,22 @@
 import { useState, useEffect, useCallback } from 'react';
-import CompanyApi, { UserCompany } from '../../../api/CompanyApi';
+import CompanyApi, { UserCompany, Company } from '../../../api/CompanyApi';
 import './Companies.scss';
 import CompanyCard from '../CompanyCard/CompanyCard';
 import CreateCompanyForm from '../CreateCompanyForm/CreateCompanyForm';
 import DeleteCompanyModal from '../DeleteCompanyModal/DeleteCompanyModal';
+import { storage } from '../../../api/UserApi';
+import { useNavigate } from 'react-router-dom';
 
 const Companies: React.FC = () => {
   const [userCompanies, setUserCompanies] = useState<UserCompany[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [refreshCounter, setRefreshCounter] = useState(0);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [companyToDelete, setCompanyToDelete] = useState<{id: string, name: string} | null>(null);
+  const [authCheckComplete, setAuthCheckComplete] = useState(false);
+  const navigate = useNavigate();
 
   const cleanupInvalidData = (companies: UserCompany[]) => {
     return companies.filter(uc => {
@@ -23,96 +28,136 @@ const Companies: React.FC = () => {
     });
   };
 
+  // Separate auth check from data fetching
+  useEffect(() => {
+    const authCheckTimer = setTimeout(() => {
+      const token = storage.getToken();
+      
+      if (!token) {
+        console.warn('No auth token found - redirecting to login');
+        navigate('/login');
+      } else {
+        console.log('Auth token found, proceeding with component initialization');
+        setAuthCheckComplete(true);
+      }
+    }, 800); // Short delay to allow App.tsx auth check to complete
+    
+    return () => clearTimeout(authCheckTimer);
+  }, [navigate]);
+
   const fetchCompanies = useCallback(async () => {
     setError(null);
+    setIsLoading(true);
+    
     try {
-      const companies = await CompanyApi.getUserCompanies();
+      // Try to get cached companies while loading
+      const cachedCompanies = localStorage.getItem('cachedUserCompanies');
+      if (cachedCompanies) {
+        try {
+          const parsed = JSON.parse(cachedCompanies);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            console.log('Using cached companies while fetching fresh data');
+            setUserCompanies(cleanupInvalidData(parsed));
+          }
+        } catch (e) {
+          console.warn('Failed to parse cached companies:', e);
+        }
+      }
       
+      const companies = await CompanyApi.getUserCompanies();
       const cleanCompanies = cleanupInvalidData(companies);
       setUserCompanies(cleanCompanies);
     } catch (err) {
       console.error('Error fetching companies:', err);
       setError('Failed to fetch companies. Please try again.');
+      
+      if (err instanceof Error && err.message === 'Authentication failed') {
+        console.warn('Authentication error when fetching companies');
+        const cachedCompanies = localStorage.getItem('cachedUserCompanies');
+        if (cachedCompanies) {
+          try {
+            const parsed = JSON.parse(cachedCompanies);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              console.log('Using cached companies due to auth error');
+              setUserCompanies(cleanupInvalidData(parsed));
+              setError(null);
+            }
+          } catch (e) {
+            console.warn('Failed to parse cached companies:', e);
+          }
+        }
+      }
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchCompanies();
-  }, [fetchCompanies, refreshCounter]);
-
-  const handleCreateCompany = async () => {
-    setShowCreateForm(false);
-    
-    setRefreshCounter(c => c + 1);
-    
-    setTimeout(() => {
+    if (authCheckComplete) {
       fetchCompanies();
-    }, 1000);
+    }
+  }, [fetchCompanies, refreshCounter, authCheckComplete]);
+
+  const handleRetryFetch = () => {
+    setRefreshCounter(prev => prev + 1);
   };
 
-  const confirmDeleteCompany = (companyId: any, companyName: string) => {
-    if (!companyId) {
-      setError('Cannot delete: Invalid company ID');
-      return;
-    }
-    
-    let actualCompanyId;
-    let actualCompanyName = companyName || 'this company';
-    
-    if (typeof companyId === 'object' && companyId !== null) {
-      if ('_id' in companyId) {
-        actualCompanyId = companyId._id;
-        if ('name' in companyId) {
-          actualCompanyName = companyId.name;
-        }
-      } else {
-        setError('Failed to identify company for deletion.');
-        return;
-      }
-    } else {
-      actualCompanyId = companyId;
-    }
-
-    setCompanyToDelete({id: actualCompanyId, name: actualCompanyName});
-    setDeleteModalOpen(true);
+  const handleCreateCompany = () => {
+    setShowCreateForm(false);
+    setRefreshCounter(c => c + 1);
   };
 
-  const handleDeleteCompany = async () => {
-    if (!companyToDelete) return;
+  const handleDeleteCompany = async (companyId: string | object) => {
+    setDeleteModalOpen(false);
+    setCompanyToDelete(null);
     
     try {
-      const success = await CompanyApi.deleteCompany(companyToDelete.id);
-      
-      if (success) {
-        setUserCompanies(prev => prev.filter(uc => {
-          if (typeof uc.companyId === 'string') {
-            return uc.companyId !== companyToDelete.id;
-          }
-          if (typeof uc.companyId === 'object' && uc.companyId !== null) {
-            return (uc.companyId as any)._id !== companyToDelete.id;
-          }
-          return true;
-        }));
-        
-        setTimeout(() => {
-          setRefreshCounter(c => c + 1);
-        }, 500);
+      let id: string;
+      if (typeof companyId === 'object' && companyId !== null && '_id' in companyId) {
+        id = (companyId as any)._id;
+      } else if (typeof companyId === 'string') {
+        id = companyId;
       } else {
-        setError('Failed to delete company. Please try again.');
+        throw new Error('Invalid company ID');
       }
+      
+      await CompanyApi.deleteCompany(id);
+      
+      setRefreshCounter(c => c + 1);
     } catch (err) {
       console.error('Error deleting company:', err);
       setError('Failed to delete company. Please try again.');
     }
-    
-    setDeleteModalOpen(false);
-    setCompanyToDelete(null);
   };
 
-  const cancelDeleteCompany = () => {
-    setDeleteModalOpen(false);
-    setCompanyToDelete(null);
+  const confirmDeleteCompany = (companyId: string | object, companyName: string) => {
+    let id: string;
+    if (typeof companyId === 'object' && companyId !== null && '_id' in companyId) {
+      id = (companyId as any)._id;
+    } else if (typeof companyId === 'string') {
+      id = companyId;
+    } else {
+      console.error('Invalid company ID:', companyId);
+      return;
+    }
+    
+    setCompanyToDelete({ id, name: companyName });
+    setDeleteModalOpen(true);
   };
+
+  if (!authCheckComplete) {
+    return (
+      <div className="companies-container">
+        <div className="companies-content">
+          <div className="loading-companies">
+            <p>Verifying authentication...</p>
+            <div className="loading-shimmer"></div>
+            <div className="loading-shimmer"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="companies-container">
@@ -129,9 +174,22 @@ const Companies: React.FC = () => {
       </div>
 
       <div className="companies-content">
-        {error && <div className="error-message">{error}</div>}
+        {error && (
+          <div className="error-message">
+            {error}
+            <button onClick={handleRetryFetch} className="retry-button">
+              Retry
+            </button>
+          </div>
+        )}
 
-        {userCompanies.length === 0 ? (
+        {isLoading ? (
+          <div className="loading-companies">
+            <p>Loading your companies...</p>
+            <div className="loading-shimmer"></div>
+            <div className="loading-shimmer"></div>
+          </div>
+        ) : userCompanies.length === 0 ? (
           <div className="no-companies">
             <p>You don't have any companies yet.</p>
             <p>Create a company to start posting jobs!</p>
@@ -155,30 +213,25 @@ const Companies: React.FC = () => {
       </div>
 
       {showCreateForm && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <button 
-              className="close-modal" 
-              onClick={() => setShowCreateForm(false)}
-            >
-              &times;
-            </button>
-            <CreateCompanyForm 
-              onSubmit={handleCreateCompany}
-              onCancel={() => setShowCreateForm(false)}
-            />
-          </div>
-        </div>
+        <CreateCompanyForm 
+          onCancel={() => setShowCreateForm(false)}
+          onSubmit={handleCreateCompany}
+        />
       )}
-      
-      <DeleteCompanyModal
-        isOpen={deleteModalOpen}
-        companyName={companyToDelete?.name || 'this company'}
-        onConfirm={handleDeleteCompany}
-        onCancel={cancelDeleteCompany}
-      />
+
+      {deleteModalOpen && companyToDelete && (
+        <DeleteCompanyModal
+          isOpen={deleteModalOpen}
+          companyName={companyToDelete.name}
+          onCancel={() => {
+            setDeleteModalOpen(false);
+            setCompanyToDelete(null);
+          }}
+          onConfirm={() => handleDeleteCompany(companyToDelete.id)}
+        />
+      )}
     </div>
   );
-};
+}
 
 export default Companies; 
