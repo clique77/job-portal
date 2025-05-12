@@ -1,0 +1,204 @@
+.delete-job-modal-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease-out;
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .delete-job-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
+  }
+  
+  .delete-job-modal {
+    position: relative;
+    width: 100%;
+    max-width: 480px;
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    animation: slideUp 0.3s ease-out;
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #f1f5f9;
+      
+      h3 {
+        color: #1e3a8a;
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0;
+      }
+      
+      .close-btn {
+        background: none;
+        border: none;
+        color: #64748b;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        transition: all 0.2s;
+        
+        &:hover {
+          background-color: #f1f5f9;
+          color: #334155;
+        }
+        
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+    }
+    
+    .modal-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      
+      .warning-icon {
+        color: #ef4444;
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background-color: #fee2e2;
+      }
+      
+      p {
+        text-align: center;
+        margin: 0 0 1rem;
+        font-size: 1.05rem;
+        color: #334155;
+        
+        strong {
+          color: #1e3a8a;
+        }
+        
+        &.warning-text {
+          color: #64748b;
+          font-size: 0.9rem;
+          margin-bottom: 1.5rem;
+        }
+      }
+      
+      .error-message {
+        background-color: #fee2e2;
+        color: #b91c1c;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        
+        &::before {
+          content: "⚠️";
+          margin-right: 0.75rem;
+          font-size: 1rem;
+        }
+      }
+    }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid #f1f5f9;
+      
+      button {
+        padding: 0.75rem 1.25rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        
+        &.cancel-btn {
+          background-color: #f1f5f9;
+          color: #64748b;
+          border: 1px solid #e2e8f0;
+          
+          &:hover:not(:disabled) {
+            background-color: #e2e8f0;
+            color: #334155;
+          }
+        }
+        
+        &.confirm-btn {
+          background-color: #ef4444;
+          color: white;
+          border: none;
+          
+          &:hover:not(:disabled) {
+            background-color: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+          }
+          
+          &:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1);
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Add a style for when modal is open to prevent background scrolling */
+body.modal-open {
+  overflow: hidden;
+} 

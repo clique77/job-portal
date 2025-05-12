@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Job, JobsApi, JOB_TYPE_LABELS } from '../../../api/JobsApi';
+import CompanyApi from '../../../api/CompanyApi';
 import './JobCard.scss';
 
 interface JobCardProps {
@@ -22,6 +23,7 @@ const JobCard: React.FC<JobCardProps> = ({
   const [isSaved, setIsSaved] = useState(initialIsSaved);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [companyName, setCompanyName] = useState<string>(job.company);
 
   useEffect(() => {
     if (initialIsSaved === undefined) {
@@ -37,6 +39,22 @@ const JobCard: React.FC<JobCardProps> = ({
       checkIfSaved();
     }
   }, [job._id, initialIsSaved]);
+
+  useEffect(() => {
+    if (job.company && job.company.length === 24 && /^[0-9a-fA-F]{24}$/.test(job.company)) {
+      const fetchCompanyName = async () => {
+        try {
+          const company = await CompanyApi.getCompanyById(job.company);
+          if (company && company.name) {
+            setCompanyName(company.name);
+          }
+        } catch (error) {
+          console.error('Error fetching company details:', error);
+        }
+      };
+      fetchCompanyName();
+    }
+  }, [job.company]);
 
   const formatSalary = (min: number, max: number, currency: string) => {
     return `${currency} ${min.toLocaleString()} - ${max.toLocaleString()}`;
@@ -100,7 +118,7 @@ const JobCard: React.FC<JobCardProps> = ({
           )}
         </button>
       </div>
-      <p className="job-company">{job.company}</p>
+      <p className="job-company">{companyName}</p>
       <p className="job-location">{job.location}</p>
       <p className="job-type">{formatJobType(job.type)}</p>
       {job.salary && (

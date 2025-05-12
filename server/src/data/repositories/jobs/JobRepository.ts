@@ -31,6 +31,7 @@ export interface JobFilter {
   title?: string;
   category?: string;
   location?: string;
+  company?: string;
   type?: JobType;
   salary?: {
     min?: number;

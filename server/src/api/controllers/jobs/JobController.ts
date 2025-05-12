@@ -16,6 +16,7 @@ interface JobIdParams {
 interface JobFilterQuery {
   title?: string;
   location?: string;
+  company?: string;
   salary?: {
     min?: number;
     max?: number;
@@ -78,12 +79,15 @@ class JobController {
 
   async getAllJobs(request: FastifyRequest<{ Querystring: JobFilterQuery }>, reply: FastifyReply) {
     try {
-      const { title, location, salary, type, tags, status } = request.query;
+      const { title, location, company, salary, type, tags, status } = request.query;
       const { page, limit } = this.paginationService.getPaginationParams(request);
 
+      console.log("Jobs API - Filter params:", { title, location, company, type, status });
+      
       const filter: JobFilter = {
         title,
         location,
+        company,
         salary,
         type,
         tags,
@@ -91,6 +95,7 @@ class JobController {
       }
 
       const result = await this.jobService.getAllJobs({ page, limit, filter });
+      console.log(`Jobs API - Found ${result.jobs.length} jobs for filter`, filter);
       
       return reply.status(200).send({
         data: result.jobs,

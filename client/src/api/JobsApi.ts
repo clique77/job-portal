@@ -11,11 +11,12 @@ const getAuthHeaders = (includeContentType = true) => {
 };
 
 export enum JobType {
-  FULL_TIME = 'Full Time',
-  PART_TIME = 'Part Time',
-  CONTRACT = 'Contract',
-  INTERNSHIP = 'Internship',
-  TEMPORARY = 'Temporary',
+  FULL_TIME = 'FULL_TIME',
+  PART_TIME = 'PART_TIME',
+  CONTRACT = 'CONTRACT',
+  INTERNSHIP = 'INTERNSHIP',
+  FREELANCE = 'FREELANCE',
+  REMOTE = 'REMOTE',
 }
 
 export interface Job {
@@ -44,6 +45,41 @@ export interface Job {
   expiresAt: string;
 };
 
+export interface JobCreateData {
+  title: string;
+  description: string;
+  requirements: string;
+  company: string;
+  location: string;
+  salary: {
+    min: number;
+    max: number;
+    currency: string;
+  };
+  type: JobType;
+  category: string;
+  tags: string[];
+  status: 'ACTIVE' | 'CLOSED' | 'DRAFT';
+  expiresAt?: string;
+}
+
+export interface JobUpdateData {
+  title?: string;
+  description?: string;
+  requirements?: string;
+  location?: string;
+  salary?: {
+    min: number;
+    max: number;
+    currency: string;
+  };
+  type?: JobType;
+  category?: string;
+  tags?: string[];
+  status?: 'ACTIVE' | 'CLOSED' | 'DRAFT';
+  expiresAt?: string;
+}
+
 export const JOB_CATEGORIES = [
   'Software Development',
   'Design',
@@ -60,10 +96,12 @@ export const JOB_LOCATIONS = [
 ];
 
 export const JOB_TYPE_LABELS = {
-  'FULL_TIME': 'Full time',
-  'PART_TIME': 'Part time',
+  'FULL_TIME': 'Full Time',
+  'PART_TIME': 'Part Time',
   'CONTRACT': 'Contract',
   'INTERNSHIP': 'Internship',
+  'FREELANCE': 'Freelance',
+  'REMOTE': 'Remote',
 };
 
 export const JobsApi = {
@@ -123,6 +161,108 @@ export const JobsApi = {
     }
 
     return response.json();
+  },
+
+  createJob: async (jobData: JobCreateData): Promise<Job> => {
+    try {
+      const token = storage.getToken();
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/createJob`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(jobData),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create job');
+      }
+
+      const result = await response.json();
+      return result.job;
+    } catch (error) {
+      console.error('Error creating job:', error);
+      throw error;
+    }
+  },
+
+  updateJob: async (jobId: string, jobData: JobUpdateData): Promise<Job> => {
+    try {
+      const token = storage.getToken();
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/updateJob/${jobId}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(jobData),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update job');
+      }
+
+      const result = await response.json();
+      return result.job;
+    } catch (error) {
+      console.error('Error updating job:', error);
+      throw error;
+    }
+  },
+
+  deleteJob: async (jobId: string): Promise<boolean> => {
+    try {
+      const token = storage.getToken();
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/deleteJob/${jobId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete job');
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      throw error;
+    }
+  },
+
+  getCompanyJobs: async (companyId: string): Promise<Job[]> => {
+    try {
+      console.log(`Fetching jobs for company: ${companyId}`);
+      const response = await fetch(`${API_BASE_URL}/api/jobs?company=${companyId}`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to get company jobs');
+      }
+
+      const result = await response.json();
+      console.log('Company jobs response:', result);
+      return result.data;
+    } catch (error) {
+      console.error('Error getting company jobs:', error);
+      return [];
+    }
   },
 
   saveJob: async (jobId: string): Promise<void> => {

@@ -1,20 +1,29 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CompanyApi, { Company, UserCompany, CompanyRole } from '../../../api/CompanyApi';
+import { JobsApi, Job } from '../../../api/JobsApi';
 import EditCompanyForm from '../EditCompanyForm/EditCompanyForm';
 import DeleteCompanyModal from '../DeleteCompanyModal/DeleteCompanyModal';
+import JobsList from '../../Jobs/JobCompanyList/JobsList';
+import CreateJobForm from '../../Jobs/CreateJobForm/CreateJobForm';
 import './CompanyDetails.scss';
 
-const CompanyDetails: React.FC = () => {
+interface CompanyDetailsProps {
+  user: any;
+}
+
+const CompanyDetails: React.FC<CompanyDetailsProps> = () => {
   const { companyId } = useParams<{ companyId: string }>();
   const navigate = useNavigate();
   
   const [company, setCompany] = useState<Company | null>(null);
   const [userCompany, setUserCompany] = useState<UserCompany | null>(null);
   const [members, setMembers] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isCreatingJob, setIsCreatingJob] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
@@ -57,6 +66,10 @@ const CompanyDetails: React.FC = () => {
         if (userCompanyRelation) {
           const companyMembers = await CompanyApi.getCompanyMembers(companyId);
           setMembers(companyMembers);
+
+          // Fetch company jobs
+          const companyJobs = await JobsApi.getCompanyJobs(companyId);
+          setJobs(companyJobs);
         }
       } catch (err) {
         setError('Failed to load company details');
@@ -90,9 +103,25 @@ const CompanyDetails: React.FC = () => {
     }
   };
 
+  const handleCreateJob = async (job: Job) => {
+    setJobs(prevJobs => [job, ...prevJobs]);
+    setIsCreatingJob(false);
+  };
+
+  const handleUpdateJob = (updatedJob: Job) => {
+    setJobs(prevJobs => prevJobs.map(job => 
+      job._id === updatedJob._id ? updatedJob : job
+    ));
+  };
+
+  const handleDeleteJob = (jobId: string) => {
+    setJobs(prevJobs => prevJobs.filter(job => job._id !== jobId));
+  };
+
   const isOwner = userCompany?.role === CompanyRole.OWNER;
   const isAdmin = userCompany?.role === CompanyRole.ADMIN;
   const canEdit = isOwner || isAdmin;
+  const canManageJobs = isOwner || isAdmin;
 
   if (isLoading) {
     return <div className="loading-spinner">Loading company details...</div>;
@@ -113,6 +142,18 @@ const CompanyDetails: React.FC = () => {
           companyId={companyId || ''}
           onSubmit={handleUpdateCompany}
           onCancel={() => setIsEditing(false)}
+        />
+      </div>
+    );
+  }
+
+  if (isCreatingJob && companyId) {
+    return (
+      <div className="company-details-container">
+        <CreateJobForm 
+          companyId={companyId}
+          onSubmit={handleCreateJob}
+          onCancel={() => setIsCreatingJob(false)}
         />
       </div>
     );
@@ -189,6 +230,36 @@ const CompanyDetails: React.FC = () => {
           )}
         </section>
       )}
+
+      <section className="company-section jobs-section">
+        <div className="section-header">
+          <h2>Jobs ({jobs.length})</h2>
+          {canManageJobs && (
+            <button 
+              className="create-job-btn"
+              onClick={() => setIsCreatingJob(true)}
+            >
+              <span>+</span> Post New Job
+            </button>
+          )}
+        </div>
+        
+        {jobs.length > 0 ? (
+          <JobsList 
+            jobs={jobs} 
+            canManage={canManageJobs}
+            onUpdate={handleUpdateJob}
+            onDelete={handleDeleteJob}
+          />
+        ) : (
+          <div className="no-jobs">
+            <p>No jobs posted yet.</p>
+            {canManageJobs && (
+              <p>Click on "Post New Job" to create your first job posting.</p>
+            )}
+          </div>
+        )}
+      </section>
 
       <DeleteCompanyModal
         isOpen={showDeleteModal}

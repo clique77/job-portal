@@ -55,9 +55,11 @@ const JobList: React.FC = () => {
 
   useEffect(() => {
     const filtered = allJobs.filter(job => {
+      const isMongoId = job.company && job.company.length === 24 && /^[0-9a-fA-F]{24}$/.test(job.company);
+      
       const searchMatch = !filters.search || 
         job.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-        job.company.toLowerCase().includes(filters.search.toLowerCase()) ||
+        (!isMongoId && job.company.toLowerCase().includes(filters.search.toLowerCase())) ||
         job.description.toLowerCase().includes(filters.search.toLowerCase()) ||
         job.tags.some(tag => tag.toLowerCase().includes(filters.search.toLowerCase()));
 

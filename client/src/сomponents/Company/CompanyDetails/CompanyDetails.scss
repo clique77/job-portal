@@ -396,14 +396,12 @@
   }
   
   .company-section {
-    background-color: white;
-    border-radius: 16px;
-    padding: 2rem;
     margin-bottom: 2.5rem;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 16px;
     box-shadow: 0 5px 20px rgba(37, 99, 235, 0.08);
-    opacity: 0;
-    transform: translateY(20px);
-    animation: fadeInUp 0.6s 0.3s forwards ease-out;
+    animation: fadeInUp 0.6s 0.2s both ease-out;
     
     &:nth-child(3) {
       animation-delay: 0.4s;
@@ -411,6 +409,70 @@
     
     &:nth-child(4) {
       animation-delay: 0.5s;
+    }
+    
+    &.jobs-section {
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        
+        h2 {
+          margin: 0;
+        }
+        
+        .create-job-btn {
+          display: flex;
+          align-items: center;
+          padding: 0.75rem 1.25rem;
+          background: linear-gradient(135deg, #3b82f6, #2563eb);
+          color: white;
+          font-weight: 600;
+          border-radius: 8px;
+          cursor: pointer;
+          border: none;
+          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+          transition: all 0.3s ease;
+          
+          span {
+            font-size: 1.25rem;
+            margin-right: 0.5rem;
+            line-height: 1;
+          }
+          
+          &:hover {
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(37, 99, 235, 0.2);
+          }
+          
+          &:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+          }
+        }
+      }
+      
+      .no-jobs {
+        text-align: center;
+        padding: 2rem;
+        background-color: #f8fafc;
+        border-radius: 12px;
+        border: 2px dashed #bfdbfe;
+        
+        p {
+          margin: 0.5rem 0;
+          color: #64748b;
+          
+          &:first-child {
+            color: #1e40af;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+          }
+        }
+      }
     }
     
     h2 {

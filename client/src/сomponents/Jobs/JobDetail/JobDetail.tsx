@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { CSSTransition } from 'react-transition-group';
 import { JOB_TYPE_LABELS, JobsApi } from '../../../api/JobsApi';
 import ApplicationApi, { ApplicationStatus } from '../../../api/ApplicationApi';
+import CompanyApi from '../../../api/CompanyApi';
 import JobApplication from '../JobApplication/JobApplication';
 
 import './JobDetails.scss';
@@ -36,6 +37,7 @@ const JobDetails: React.FC<JobDetailsProps> = ({ jobId }) => {
   const [applicationStatus, setApplicationStatus] = useState<ApplicationStatus | null>(null);
   const [showApplication, setShowApplication] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [companyName, setCompanyName] = useState<string>('');
   const nodeRef = useRef(null);
 
   useEffect(() => {
@@ -48,6 +50,23 @@ const JobDetails: React.FC<JobDetailsProps> = ({ jobId }) => {
         setIsLoading(true);
         const data = await JobsApi.getJobById(jobId as string);
         setJob(data.job);
+        
+        if (data.job.company && data.job.company.length === 24 && /^[0-9a-fA-F]{24}$/.test(data.job.company)) {
+          try {
+            const company = await CompanyApi.getCompanyById(data.job.company);
+            if (company && company.name) {
+              setCompanyName(company.name);
+            } else {
+              setCompanyName(data.job.company);
+            }
+          } catch (error) {
+            console.error('Error fetching company details:', error);
+            setCompanyName(data.job.company);
+          }
+        } else {
+          setCompanyName(data.job.company);
+        }
+        
         await checkApplicationStatus();
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to fetch job details...');
@@ -105,7 +124,7 @@ const JobDetails: React.FC<JobDetailsProps> = ({ jobId }) => {
     <div className="job-details">
       <header className="job-details__header">
         <h1 className="job-details__title">{job.title || 'No Title'}</h1>
-        <div className="job-details__company">{job.company || 'Company not specified'}</div>
+        <div className="job-details__company">{companyName || 'Company not specified'}</div>
         <div className="job-details__location">{job.location || 'Location not specified'}</div>
       </header>
 
@@ -164,7 +183,7 @@ const JobDetails: React.FC<JobDetailsProps> = ({ jobId }) => {
                   <JobApplication
                     jobId={job._id}
                     jobTitle={job.title}
-                    company={job.company}
+                    company={companyName}
                     onSuccess={() => {
                       setShowApplication(false);
                       checkApplicationStatus();

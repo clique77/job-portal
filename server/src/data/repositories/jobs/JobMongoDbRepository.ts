@@ -25,6 +25,7 @@ export class JobMongoDBRepository implements IJobRepository {
 
   async findAll(skip: number, limit: number, filter?: JobFilter): Promise<IJob[]> {
     const query = this.buildQuery(filter);
+    console.log("MongoDB Query:", JSON.stringify(query, null, 2));
     return Jobs.find(query).populate('employer', 'name email').skip(skip).limit(limit).sort({ createdAt: -1 });
   }
 
@@ -34,6 +35,7 @@ export class JobMongoDBRepository implements IJobRepository {
 
   async count(filter?: JobFilter): Promise<number> {
     const query = this.buildQuery(filter);
+    console.log("MongoDB Count Query:", JSON.stringify(query, null, 2));
     return Jobs.countDocuments(query);
   }
 
@@ -260,6 +262,10 @@ export class JobMongoDBRepository implements IJobRepository {
 
     if (filter.employer) {
       query.employer = filter.employer;
+    }
+
+    if (filter.company) {
+      query.company = filter.company;
     }
 
     if (filter.status) {
