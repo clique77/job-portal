@@ -36,6 +36,17 @@ export default function(fastify: FastifyInstance, _options: any, done: () => voi
   }>('/api/jobs/:jobId/applicants/:applicantId/status', {
     preHandler: [authenticate, checkRole([UserRole.EMPLOYER, UserRole.ADMIN])]
   }, applicationController.updateApplicationStatus);
+  
+  fastify.post<{
+    Body: { 
+      jobId: string,
+      applicantId: string,
+      status: ApplicationStatus, 
+      notes?: string 
+    }
+  }>('/api/applications/update-status', {
+    preHandler: [authenticate, checkRole([UserRole.EMPLOYER, UserRole.ADMIN])]
+  }, applicationController.updateApplicationStatusProxy);
 
   done();
 }

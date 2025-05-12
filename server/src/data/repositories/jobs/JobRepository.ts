@@ -32,6 +32,7 @@ export interface JobFilter {
   category?: string;
   location?: string;
   company?: string;
+  _companyId?: string;
   type?: JobType;
   salary?: {
     min?: number;
@@ -65,7 +66,8 @@ export interface IJobRepository {
   addApplicant(jobId: string, applicationData: {
     applicant: string,
     status?: ApplicationStatus,
-    notes?: string
+    notes?: string,
+    resumeId?: string
   }): Promise<boolean>;
   removeApplicant(jobId: string, applicantId: string): Promise<boolean>;
   getApplicants(jobId: string): Promise<IApplication[]>;

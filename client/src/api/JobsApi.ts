@@ -2,12 +2,26 @@ import { storage } from './UserApi';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
+/**
+ * Generates authorization headers for API requests
+ * @param includeContentType Whether to include the Content-Type header (should be false for DELETE requests or when not sending a JSON body)
+ * @returns Headers object with authorization and optional content-type
+ */
 const getAuthHeaders = (includeContentType = true) => {
   const token = storage.getToken();
-  return {
-    ...(includeContentType ? { 'Content-Type': 'application/json' } : {}),
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-  };
+  const headers: Record<string, string> = {};
+  
+  // Only include Content-Type for requests with a body
+  if (includeContentType) {
+    headers['Content-Type'] = 'application/json';
+  }
+  
+  // Include Authorization if we have a token
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  return headers;
 };
 
 export enum JobType {
@@ -226,7 +240,7 @@ export const JobsApi = {
       
       const response = await fetch(`${API_BASE_URL}/api/deleteJob/${jobId}`, {
         method: 'DELETE',
-        headers: getAuthHeaders(),
+        headers: getAuthHeaders(false),
         credentials: 'include',
       });
 
@@ -245,20 +259,36 @@ export const JobsApi = {
   getCompanyJobs: async (companyId: string): Promise<Job[]> => {
     try {
       console.log(`Fetching jobs for company: ${companyId}`);
-      const response = await fetch(`${API_BASE_URL}/api/jobs?company=${companyId}`, {
+      localStorage.removeItem(`companyJobs_${companyId}`);
+      
+      const response = await fetch(`${API_BASE_URL}/api/companies/${companyId}/jobs`, {
         method: 'GET',
         headers: getAuthHeaders(),
         credentials: 'include',
+        cache: 'no-cache'
       });
+
+      console.log('Company jobs API response status:', response.status);
 
       if (!response.ok) {
         const error = await response.json();
+        console.error('API error fetching company jobs:', error);
         throw new Error(error.message || 'Failed to get company jobs');
       }
 
       const result = await response.json();
       console.log('Company jobs response:', result);
-      return result.data;
+      
+      if (result.data && Array.isArray(result.data)) {
+        console.log(`Successfully loaded ${result.data.length} jobs for company ${companyId}`);
+        return result.data;
+      } else if (Array.isArray(result)) {
+        console.log(`Successfully loaded ${result.length} jobs for company ${companyId} (direct array response)`);
+        return result;
+      } else {
+        console.error('Invalid company jobs response format:', result);
+        return [];
+      }
     } catch (error) {
       console.error('Error getting company jobs:', error);
       return [];

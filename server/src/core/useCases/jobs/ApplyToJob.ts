@@ -44,7 +44,7 @@ export class ApplyToJob implements IApplyToJobUseCase {
         applicant: userId,
         status: ApplicationStatus.PENDING,
         notes: notes || '',
-        resumeId: resumeId || null,
+        resumeId: resumeId || undefined,
       }
 
       const result = await this.jobRepository.addApplicant(jobId, applicationData);

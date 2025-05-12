@@ -39,6 +39,20 @@ interface Application {
   };
 }
 
+interface Applicant {
+  _id: string;
+  applicant: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  status: string;
+  appliedAt: string;
+  updatedAt: string;
+  notes?: string;
+  resumeId?: string;
+}
+
 const ApplicationApi = {
   getUserApplications: async (): Promise<Application[] | undefined> => {
     try {
@@ -99,6 +113,13 @@ const ApplicationApi = {
       if (!token) {
         throw new Error('Authentication required');
       }
+
+      console.log('Applying to job with data:', {
+        jobId,
+        notes: data.notes || 'No notes',
+        hasResumeId: !!data.resumeId,
+        resumeId: data.resumeId
+      });
       
       const response = await fetch(`${API_BASE_URL}/api/jobs/${jobId}/apply`, {
         method: 'POST',
@@ -116,7 +137,9 @@ const ApplicationApi = {
         throw new Error(error.message || 'Failed to apply to job');
       }
 
-      return response.json();
+      const result = await response.json();
+      console.log('Application response:', result);
+      return result;
     } catch (error) {
       console.error('Error applying to job: ', error);
       throw error;
@@ -148,6 +171,122 @@ const ApplicationApi = {
       return response.json();
     } catch (error) {
       console.error('Error withdrawing application: ', error);
+      throw error;
+    }
+  },
+  
+  getJobApplicants: async (jobId: string): Promise<Applicant[]> => {
+    try {
+      const token = localStorage.getItem('jobPortalToken');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/api/jobs/${jobId}/applicants`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+        credentials: 'include',
+      });
+
+      if (response.status === 401) {
+        throw new Error('Authentication required');
+      }
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch job applicants');
+      }
+
+      const data = await response.json();
+      return data.data || [];
+    } catch (error) {
+      console.error('Error fetching job applicants: ', error);
+      throw error;
+    }
+  },
+  
+  updateApplicationStatus: async (
+    jobId: string, 
+    applicantId: string, 
+    status: string,
+    notes?: string
+  ): Promise<boolean> => {
+    try {
+      const token = localStorage.getItem('jobPortalToken');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+      
+      console.log(`Trying to update application status: ${status} for job: ${jobId}, applicant: ${applicantId}`);
+      
+      // First attempt using PATCH
+      let patchFailed = false;
+      try {
+        const patchResponse = await fetch(`${API_BASE_URL}/api/jobs/${jobId}/applicants/${applicantId}/status`, {
+          method: 'PATCH',
+          headers: getAuthHeaders(),
+          credentials: 'include',
+          body: JSON.stringify({ status, notes }),
+        });
+        
+        if (patchResponse.ok) {
+          console.log('PATCH method successful');
+          const data = await patchResponse.json();
+          return data.success || false;
+        } else {
+          console.log(`PATCH method failed with status: ${patchResponse.status}`);
+          patchFailed = true;
+        }
+      } catch (patchError) {
+        console.log('PATCH method failed with error:', patchError);
+        patchFailed = true;
+      }
+      
+      // If PATCH failed, use our proxy POST method
+      if (patchFailed) {
+        console.log('Attempting fallback with POST method');
+        
+        const postData = { 
+          jobId, 
+          applicantId, 
+          status, 
+          notes 
+        };
+        
+        console.log('Sending data to proxy:', postData);
+        
+        const response = await fetch(`${API_BASE_URL}/api/applications/update-status`, {
+          method: 'POST',
+          headers: getAuthHeaders(),
+          credentials: 'include',
+          body: JSON.stringify(postData),
+        });
+
+        if (response.status === 401) {
+          throw new Error('Authentication required');
+        }
+
+        console.log(`POST response status: ${response.status}`);
+        
+        if (!response.ok) {
+          // Try to parse error if possible
+          try {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to update application status');
+          } catch (jsonError) {
+            // Handle non-JSON responses
+            throw new Error(`Failed to update application status. Server responded with: ${response.status} ${response.statusText}`);
+          }
+        }
+
+        const data = await response.json();
+        console.log('POST method response:', data);
+        return data.success || false;
+      }
+      
+      throw new Error('Failed to update application status through both methods');
+    } catch (error) {
+      console.error('Error updating application status: ', error);
       throw error;
     }
   }

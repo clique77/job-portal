@@ -11,6 +11,10 @@ export default function(fastify: FastifyInstance, _options: any, done: () => voi
     Params: { id: string }
   }>('/api/getJob/:id', jobController.getJobById);
 
+  fastify.get<{
+    Params: { companyId: string }
+  }>('/api/companies/:companyId/jobs', jobController.getCompanyJobs);
+
   fastify.post<{
     Body: JobCreateData
   }>('/api/createJob', {

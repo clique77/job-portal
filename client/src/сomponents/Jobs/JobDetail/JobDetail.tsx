@@ -4,6 +4,8 @@ import { JOB_TYPE_LABELS, JobsApi } from '../../../api/JobsApi';
 import ApplicationApi, { ApplicationStatus } from '../../../api/ApplicationApi';
 import CompanyApi from '../../../api/CompanyApi';
 import JobApplication from '../JobApplication/JobApplication';
+import JobApplicantsList from '../JobApplicantsList/JobApplicantsList';
+import { useAuth } from '../../../hooks/useAuth';
 
 import './JobDetails.scss';
 
@@ -38,7 +40,9 @@ const JobDetails: React.FC<JobDetailsProps> = ({ jobId }) => {
   const [showApplication, setShowApplication] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [companyName, setCompanyName] = useState<string>('');
+  const [isJobOwner, setIsJobOwner] = useState<boolean>(false);
   const nodeRef = useRef(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     setShowApplication(false);
@@ -50,6 +54,11 @@ const JobDetails: React.FC<JobDetailsProps> = ({ jobId }) => {
         setIsLoading(true);
         const data = await JobsApi.getJobById(jobId as string);
         setJob(data.job);
+        
+        // Check if the current user is the job owner
+        if (user && data.job.employer && user.id === data.job.employer) {
+          setIsJobOwner(true);
+        }
         
         if (data.job.company && data.job.company.length === 24 && /^[0-9a-fA-F]{24}$/.test(data.job.company)) {
           try {
@@ -78,7 +87,7 @@ const JobDetails: React.FC<JobDetailsProps> = ({ jobId }) => {
     if (jobId) {
       fetchJobDetails();
     }
-  }, [jobId]);
+  }, [jobId, user]);
 
   const checkApplicationStatus = async () => {
     if (jobId) {
@@ -168,7 +177,13 @@ const JobDetails: React.FC<JobDetailsProps> = ({ jobId }) => {
         )}
       </section>
 
-      {job.status === 'ACTIVE' && (
+      {(isJobOwner || window.location.pathname.includes('/employer/jobs/')) && (
+        <section className="job-details__applicants">
+          <JobApplicantsList jobId={jobId} />
+        </section>
+      )}
+
+      {job.status === 'ACTIVE' && !isJobOwner && !window.location.pathname.includes('/employer/jobs/') && (
         <div className="job-details__actions">
           {!applicationStatus?.hasApplied ? (
             <>

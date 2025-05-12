@@ -37,7 +37,7 @@ app.register(multipart, {
 });
 
 app.register(fastifyStatic, {
-  root: path.join(__dirname, '../../uploads'),
+  root: config.uploads.directory,
   prefix: '/uploads/',
   decorateReply: false
 });

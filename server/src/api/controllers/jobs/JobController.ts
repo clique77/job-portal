@@ -4,6 +4,9 @@ import { IPaginationService } from "../../../core/services/common/pagination/int
 import { IJobService } from "../../../core/services/jobs/interfaces/JobServiceInterfaces";
 import { JobCreateData, JobFilter, JobUpdateData } from "../../../data/repositories/jobs/JobRepository";
 import { JobType } from "../../../data/models/Jobs";
+import { getUserCompanyRepository } from "../../../data/repositories/UserCompany/UserCompanyRepository";
+import Jobs, { IJob } from "../../../data/models/Jobs";
+import { IUserCompany } from "../../../data/models/UserCompany";
 
 interface GetJobParams {
   id: string;
@@ -17,6 +20,7 @@ interface JobFilterQuery {
   title?: string;
   location?: string;
   company?: string;
+  employer?: string;
   salary?: {
     min?: number;
     max?: number;
@@ -46,6 +50,7 @@ class JobController {
     this.isJobSaved = this.isJobSaved.bind(this);
     this.getSavedJobs = this.getSavedJobs.bind(this);
     this.getUniqueLocations = this.getUniqueLocations.bind(this);
+    this.getCompanyJobs = this.getCompanyJobs.bind(this);
   }
 
   async createJob(request: FastifyRequest<{ Body: JobCreateData }>, reply: FastifyReply) {
@@ -79,10 +84,17 @@ class JobController {
 
   async getAllJobs(request: FastifyRequest<{ Querystring: JobFilterQuery }>, reply: FastifyReply) {
     try {
-      const { title, location, company, salary, type, tags, status } = request.query;
+      const { title, location, company, salary, type, tags, status, employer } = request.query;
       const { page, limit } = this.paginationService.getPaginationParams(request);
 
-      console.log("Jobs API - Filter params:", { title, location, company, type, status });
+      console.log("Jobs API - Filter params:", { 
+        title, 
+        location, 
+        company, 
+        type, 
+        status, 
+        employer 
+      });
       
       const filter: JobFilter = {
         title,
@@ -92,6 +104,7 @@ class JobController {
         type,
         tags,
         status,
+        employer
       }
 
       const result = await this.jobService.getAllJobs({ page, limit, filter });
@@ -220,6 +233,76 @@ class JobController {
         data: locations
       });
     } catch (error) {
+      return this.errorHandlerService.handleError(request, reply, (error as Error), 500);
+    }
+  }
+
+  async getCompanyJobs(request: FastifyRequest<{ Params: { companyId: string } }>, reply: FastifyReply) {
+    try {
+      const { companyId } = request.params;
+      const { page, limit } = this.paginationService.getPaginationParams(request);
+      
+      console.log(`Getting jobs for company ID: ${companyId}`);
+      
+      // Get company details
+      const companyService = require('../../../core/services/company/CompanyService').default;
+      const company = await companyService.getCompanyById(companyId);
+      
+      if (!company) {
+        console.log(`Company with ID ${companyId} not found`);
+        return reply.status(200).send([]);
+      }
+      
+      console.log(`Found company: ${company.name}`);
+
+      // Get UserCompany relationships for this company
+      const userCompanyRepository = getUserCompanyRepository();
+      const companyMembers = await userCompanyRepository.findByCompany(companyId);
+      
+      console.log(`Found ${companyMembers.length} members for company ${companyId}`);
+      
+      let allJobs: IJob[] = [];
+      
+      // 1. First approach: Use company name to find jobs
+      const nameFilter: JobFilter = { company: company.name };
+      const companyNameResults = await this.jobService.getAllJobs({ 
+        page: 1, 
+        limit: 100, 
+        filter: nameFilter,
+        sort: { createdAt: -1 } 
+      });
+      
+      console.log(`Found ${companyNameResults.jobs.length} jobs with company name "${company.name}"`);
+      allJobs = allJobs.concat(companyNameResults.jobs);
+      
+      // 2. Second approach: Find jobs created by company members
+      if (companyMembers.length > 0) {
+        console.log('Fetching jobs for company members...');
+        
+        const memberUserIds = companyMembers.map((member: IUserCompany) => member.userId.toString());
+        
+        for (const userId of memberUserIds) {
+          console.log(`Finding jobs for company member: ${userId}`);
+          const userJobs = await this.jobService.findByEmployer(userId, 0, 20);
+          console.log(`Found ${userJobs.length} jobs for company member ${userId}`);
+          
+          // Add jobs if not already in the results 
+          userJobs.forEach((job: IJob) => {
+            if (!allJobs.some(existingJob => existingJob._id?.toString() === job._id?.toString())) {
+              allJobs.push(job);
+            }
+          });
+        }
+      }
+      
+      // Sort final results by date descending
+      allJobs.sort((a: IJob, b: IJob) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      
+      console.log(`Found total of ${allJobs.length} unique jobs for company ${company.name}`);
+      
+      return reply.status(200).send(allJobs);
+    } catch (error) {
+      console.error('Error in getCompanyJobs:', error);
       return this.errorHandlerService.handleError(request, reply, (error as Error), 500);
     }
   }

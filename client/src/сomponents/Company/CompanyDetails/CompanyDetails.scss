@@ -412,62 +412,82 @@
     }
     
     &.jobs-section {
+      margin-top: 2rem;
+      background: #f8fafc;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.06);
+      border: 1px solid #e2e8f0;
+      
       .section-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 1.5rem;
         
-        h2 {
-          margin: 0;
+        .section-title {
+          h2 {
+            margin: 0 0 0.5rem 0;
+            color: #1e40af;
+            font-size: 1.8rem;
+            font-weight: 700;
+          }
+          
+          .section-description {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin: 0;
+          }
         }
         
         .create-job-btn {
           display: flex;
           align-items: center;
-          padding: 0.75rem 1.25rem;
-          background: linear-gradient(135deg, #3b82f6, #2563eb);
+          gap: 0.5rem;
+          background-color: #2563eb;
           color: white;
-          font-weight: 600;
-          border-radius: 8px;
-          cursor: pointer;
           border: none;
-          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+          padding: 0.75rem 1.25rem;
+          border-radius: 8px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
           transition: all 0.3s ease;
+          box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
           
           span {
-            font-size: 1.25rem;
-            margin-right: 0.5rem;
+            font-size: 1.3rem;
             line-height: 1;
           }
           
           &:hover {
-            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            background-color: #1d4ed8;
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(37, 99, 235, 0.2);
+            box-shadow: 0 6px 15px rgba(37, 99, 235, 0.25);
           }
           
           &:active {
             transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+            box-shadow: 0 2px 5px rgba(37, 99, 235, 0.2);
           }
         }
       }
       
       .no-jobs {
+        background-color: white;
+        border-radius: 10px;
+        padding: 3rem 2rem;
         text-align: center;
-        padding: 2rem;
-        background-color: #f8fafc;
-        border-radius: 12px;
-        border: 2px dashed #bfdbfe;
+        border: 2px dashed #e2e8f0;
         
         p {
-          margin: 0.5rem 0;
           color: #64748b;
+          font-size: 1.1rem;
+          margin: 0.5rem 0;
           
           &:first-child {
-            color: #1e40af;
-            font-size: 1.1rem;
+            color: #334155;
+            font-size: 1.3rem;
             font-weight: 600;
             margin-bottom: 1rem;
           }

@@ -127,6 +127,10 @@ const JobSchema = new Schema<IJob>(
       },
       notes: {
         type: String
+      },
+      resumeId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Resume'
       }
     }],
     expiresAt: {

@@ -20,6 +20,7 @@ export interface IJobService {
   getJobById(jobId: string): Promise<IJob | null>;
   getAllJobs(options: getAllJobsOptions): Promise<getAllJobsParams>;
   deleteJob(jobId: string, userId: string): Promise<boolean>;
+  findByEmployer(employerId: string, skip: number, limit: number): Promise<IJob[]>;
   
   saveJob(userId: string, jobId: string): Promise<boolean>;
   unsaveJob(userId: string, jobId: string): Promise<boolean>;

@@ -96,6 +96,17 @@ export class JobService implements IJobService {
     const jobRepository = getJobRepository();
     return jobRepository.getUniqueLocations();
   }
+
+  async findByEmployer(employerId: string, skip: number, limit: number): Promise<IJob[]> {
+    try {
+      const jobRepository = getJobRepository();
+      console.log(`Service: Finding jobs for employer ID: ${employerId}`);
+      return jobRepository.findByEmployer(employerId, skip, limit);
+    } catch (error) {
+      console.error(`Error finding jobs for employer ${employerId}:`, error);
+      return [];
+    }
+  }
 }
 
 const jobService = new JobService();

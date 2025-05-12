@@ -1,6 +1,6 @@
 import Registration from './сomponents/Registration/Registration';
 import JobList from './сomponents/Jobs/JobList/JobList';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import NavBar from './сomponents/NavBar/NavBar';
 import Authentication from './сomponents/Authentication/Authentication';
 import { useState, useEffect, JSX, useCallback } from 'react';
@@ -10,6 +10,8 @@ import SavedJobs from './сomponents/Jobs/SavedJobs/SavedJobs';
 import RoleBasedRoute from './сomponents/Authentication/RoleBasedRoute';
 import Companies from './сomponents/Company/Companies/Companies';
 import CompanyDetails from './сomponents/Company/CompanyDetails/CompanyDetails';
+import JobDetail from './сomponents/Jobs/JobDetail/JobDetail';
+import EmployerJobDetail from './сomponents/Jobs/EmployerJobDetail/EmployerJobDetail';
 
 const ProtectedRoute = ({ user, children }: { user: User | null, children: JSX.Element}) => {
   if (!user) {
@@ -17,6 +19,12 @@ const ProtectedRoute = ({ user, children }: { user: User | null, children: JSX.E
   }
   return children;
 }
+
+// JobDetailWrapper to extract jobId from URL params
+const JobDetailWrapper = () => {
+  const { jobId } = useParams<{ jobId: string }>();
+  return <JobDetail jobId={jobId || ''} />;
+};
 
 function AppContent() {
   const [user, setUser] = useState<User | null>(null);
@@ -110,7 +118,7 @@ function AppContent() {
           {/* Employer routes */}
           <Route path='/companies' element={
             <RoleBasedRoute user={user} allowedRoles={[UserRole.EMPLOYER, UserRole.ADMIN]}>
-              <Companies user={user} />
+              <Companies />
             </RoleBasedRoute>
           } />
           <Route path='/companies/:companyId' element={
@@ -121,6 +129,12 @@ function AppContent() {
           <Route path='/companies/:companyId/edit' element={
             <RoleBasedRoute user={user} allowedRoles={[UserRole.EMPLOYER, UserRole.ADMIN]}>
               <CompanyDetails user={user} />
+            </RoleBasedRoute>
+          } />
+          {/* Special route for employers to view job applicants */}
+          <Route path='/employer/jobs/:jobId' element={
+            <RoleBasedRoute user={user} allowedRoles={[UserRole.EMPLOYER, UserRole.ADMIN]}>
+              <EmployerJobDetail />
             </RoleBasedRoute>
           } />
           

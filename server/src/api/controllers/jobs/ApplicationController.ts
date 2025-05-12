@@ -27,6 +27,15 @@ interface GetUserApplicationsRequest {
   Querystring: { page?: number; limit?: number };
 }
 
+interface UpdateApplicationStatusProxyRequest {
+  Body: {
+    jobId: string;
+    applicantId: string;
+    status: ApplicationStatus;
+    notes?: string;
+  }
+}
+
 class ApplicationController {
   private applicationService: IApplicationService;
   private errorHandlerService: IErrorHandlerService;
@@ -40,6 +49,7 @@ class ApplicationController {
     this.getUserApplications = this.getUserApplications.bind(this);
     this.getJobApplicants = this.getJobApplicants.bind(this);
     this.updateApplicationStatus = this.updateApplicationStatus.bind(this);
+    this.updateApplicationStatusProxy = this.updateApplicationStatusProxy.bind(this);
   }
 
   async applyToJob(request: FastifyRequest<ApplyToJobRequest>, reply: FastifyReply) {
@@ -48,6 +58,14 @@ class ApplicationController {
       const { notes, resumeId } = request.body;
       // @ts-ignore
       const userId = request.user.id;
+      
+      console.log(`Application request for job ${jobId} from user ${userId}:`, {
+        jobId,
+        userId,
+        notes: notes || 'No notes',
+        hasResumeId: !!resumeId,
+        resumeId: resumeId || 'No resume provided'
+      });
 
       const result = await this.applicationService.applyToJob(jobId, userId, notes, resumeId);
 
@@ -137,6 +155,54 @@ class ApplicationController {
         data: result
       });
     } catch (error) {
+      return this.errorHandlerService.handleError(request, reply, (error as Error), 400);
+    }
+  }
+
+  async updateApplicationStatusProxy(request: FastifyRequest<UpdateApplicationStatusProxyRequest>, reply: FastifyReply) {
+    try {
+      const { jobId, applicantId, status, notes } = request.body;
+      
+      // Log the incoming request data
+      console.log('updateApplicationStatusProxy received:', {
+        jobId, 
+        applicantId, 
+        status, 
+        notes
+      });
+      
+      // Validate the status is an allowed value
+      const validStatuses = ['PENDING', 'REVIEWING', 'INTERVIEWED', 'REJECTED', 'OFFERED', 'HIRED', 'WITHDRAWN'];
+      if (!validStatuses.includes(status)) {
+        console.error(`Invalid status received: ${status}`);
+        return reply.status(400).send({
+          success: false,
+          message: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
+        });
+      }
+      
+      // @ts-ignore
+      const userId = request.user.id;
+      
+      console.log(`Updating status for job: ${jobId}, applicant: ${applicantId}, status: ${status}`);
+
+      const result = await this.applicationService.updateApplicationStatus(
+        jobId,
+        applicantId,
+        status,
+        userId,
+        notes
+      );
+
+      console.log('Status update result:', result);
+
+      return reply.status(200).send({
+        success: true,
+        message: "Application status updated successfully",
+        data: result
+      });
+    } catch (error) {
+      console.error('Error in updateApplicationStatusProxy:', error);
       return this.errorHandlerService.handleError(request, reply, (error as Error), 400);
     }
   }

@@ -56,8 +56,10 @@ class ResumeController {
       // @ts-ignore
       const userId = request.user.id;
       
+      // Create the uploads directory if it doesn't exist
       await mkdir(config.uploads.directory, { recursive: true });
 
+      // Create a consistent filename with timestamp
       const fileName = `${Date.now()}-${data.filename}`;
       const filePath = path.join(config.uploads.directory, fileName);
 
@@ -65,7 +67,7 @@ class ResumeController {
 
       const resumeData = {
         fileName: data.filename,
-        filePath: fileName,
+        filePath: fileName, // Store just the filename, not the full path
         fileType: data.mimetype,
         fileSize: data.file.bytesRead
       };
@@ -87,14 +89,25 @@ class ResumeController {
       //@ts-ignore
       const userId = request.user.id;
 
+      console.log(`Get resume request for ID: ${id} from user: ${userId}`);
+
       const resume = await this.resumeService.getResumeById(id, userId);
 
       if (!resume) {
+        console.log(`Resume not found for ID: ${id}`);
         return reply.status(404).send({ message: 'Resume not found' });
       }
 
+      console.log('Successfully retrieved resume:', {
+        id: resume._id,
+        fileName: resume.fileName,
+        fileSize: resume.fileSize,
+        jobSeekerId: resume.jobSeekerId
+      });
+
       return reply.send({ resume });
     } catch (error) {
+      console.error(`Error getting resume ${request.params.id}:`, error);
       return this.errorHandlerService.handleError(request, reply, error as Error, 400);
     }
   }

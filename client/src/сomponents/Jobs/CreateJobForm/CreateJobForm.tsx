@@ -14,7 +14,7 @@ const CreateJobForm: React.FC<CreateJobFormProps> = ({ companyId, onSubmit, onCa
     title: '',
     description: '',
     requirements: '',
-    company: companyId,
+    company: '',
     location: '',
     salary: {
       min: 0,
@@ -141,14 +141,18 @@ const CreateJobForm: React.FC<CreateJobFormProps> = ({ companyId, onSubmit, onCa
       return;
     }
     
-    setIsLoading(true);
-    setError(null);
-
     try {
-      const job = await JobsApi.createJob(formData);
+      setIsLoading(true);
+      setError(null);
+      
+      // Create job with company name but it will be linked to employer through auth
+      const job = await JobsApi.createJob({
+        ...formData
+      });
+      
       onSubmit(job);
     } catch (err) {
-      setError('An error occurred while creating the job.');
+      setError(err instanceof Error ? err.message : 'An error occurred while creating the job');
       console.error('Create job error:', err);
     } finally {
       setIsLoading(false);

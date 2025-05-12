@@ -1,0 +1,141 @@
+.employer-job-detail {
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+  margin: 2rem auto;
+  max-width: 1200px;
+  
+  &__loading,
+  &__error,
+  &__not-found {
+    text-align: center;
+    padding: 3rem;
+    font-size: 1.1rem;
+  }
+  
+  &__loading {
+    color: #2563eb;
+  }
+  
+  &__error {
+    color: #dc2626;
+  }
+  
+  &__not-found {
+    color: #6b7280;
+  }
+  
+  &__header {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 1.5rem;
+  }
+  
+  &__title {
+    font-size: 1.8rem;
+    color: #1e3a8a;
+    margin: 0 0 0.5rem;
+  }
+  
+  &__company {
+    font-size: 1.2rem;
+    color: #4b5563;
+    margin: 0.2rem 0;
+  }
+  
+  &__location {
+    font-size: 1rem;
+    color: #6b7280;
+    margin: 0.2rem 0;
+  }
+  
+  &__status {
+    display: inline-block;
+    margin-top: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    
+    &--active {
+      background-color: #ecfdf5;
+      color: #059669;
+    }
+    
+    &--closed {
+      background-color: #fef2f2;
+      color: #dc2626;
+    }
+    
+    &--draft {
+      background-color: #f3f4f6;
+      color: #6b7280;
+    }
+  }
+  
+  &__content {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 2rem;
+    
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  &__info {
+    background-color: #f9fafb;
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+  
+  &__section {
+    h2 {
+      color: #1e3a8a;
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+    }
+  }
+  
+  &__field {
+    margin-bottom: 1.5rem;
+    
+    h3 {
+      color: #4b5563;
+      margin: 0 0 0.5rem;
+      font-size: 1.1rem;
+    }
+    
+    p {
+      color: #1f2937;
+      line-height: 1.5;
+      margin: 0;
+    }
+  }
+  
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  &__tag {
+    background-color: #e0f2fe;
+    color: #0369a1;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+  }
+  
+  &__applicants {
+    h2 {
+      color: #1e3a8a;
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+    }
+  }
+} 

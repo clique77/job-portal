@@ -57,19 +57,32 @@ export const ResumeApi = {
 
   uploadResume: async (formData: FormData) => {
     const headers = getAuthHeaders(false);
-    const response = await fetch(`${API_BASE_URL}/api/resumes`, {
-      method: 'POST',
-      headers,
-      body: formData,
-      credentials: 'include',
-    });
+    
+    console.log('Uploading resume...');
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/resumes`, {
+        method: 'POST',
+        headers,
+        body: formData,
+        credentials: 'include',
+      });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to upload resume');
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('Resume upload failed:', error);
+        throw new Error(error.message || 'Failed to upload resume');
+      }
+
+      const result = await response.json();
+      console.log('Resume upload success:', {
+        resumeId: result.resume?._id,
+        fileName: result.resume?.fileName
+      });
+      return result;
+    } catch (error) {
+      console.error('Resume upload error:', error);
+      throw error;
     }
-
-    return response.json();
   },
 
   deleteResume: async (resumeId: string) => {

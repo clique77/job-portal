@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Job, JOB_TYPE_LABELS } from '../../../api/JobsApi';
 import EditJobForm from '../EditJobForm/EditJobForm';
 import DeleteJobModal from '../DeleteJobModal/DeleteJobModal';
@@ -8,13 +9,16 @@ interface JobsListProps {
   jobs: Job[];
   canManage: boolean;
   onUpdate: (job: Job) => void;
-  onDelete: (jobId: string) => void;
+  onDelete: (jobId: string) => Promise<void> | void;
 }
 
 const JobsList: React.FC<JobsListProps> = ({ jobs, canManage, onUpdate, onDelete }) => {
+  const navigate = useNavigate();
   const [editingJobId, setEditingJobId] = useState<string | null>(null);
   const [deletingJobId, setDeletingJobId] = useState<string | null>(null);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleEditClick = (job: Job) => {
     setSelectedJob(job);
@@ -26,17 +30,38 @@ const JobsList: React.FC<JobsListProps> = ({ jobs, canManage, onUpdate, onDelete
     setDeletingJobId(job._id);
   };
 
+  const handleViewApplicants = (jobId: string) => {
+    navigate(`/employer/jobs/${jobId}`);
+  };
+
   const handleJobUpdated = (updatedJob: Job) => {
     onUpdate(updatedJob);
     setEditingJobId(null);
     setSelectedJob(null);
   };
 
-  const handleJobDeleted = () => {
-    if (selectedJob) {
-      onDelete(selectedJob._id);
-      setDeletingJobId(null);
-      setSelectedJob(null);
+  const handleJobDeleted = async () => {
+    if (selectedJob && !isDeleting) {
+      try {
+        setIsDeleting(true);
+        setError(null);
+        
+        await onDelete(selectedJob._id);
+        
+        setDeletingJobId(null);
+        setSelectedJob(null);
+      } catch (err) {
+        const errorMessage = err instanceof Error 
+          ? err.message 
+          : 'Unknown error occurred during deletion';
+        
+        console.error('Error deleting job:', err);
+        setError(errorMessage);
+        
+        return false;
+      } finally {
+        setIsDeleting(false);
+      }
     }
   };
 
@@ -81,6 +106,17 @@ const JobsList: React.FC<JobsListProps> = ({ jobs, canManage, onUpdate, onDelete
             {canManage && (
               <div className="job-actions">
                 <button 
+                  className="view-applicants-btn"
+                  onClick={() => handleViewApplicants(job._id)}
+                  aria-label="View applicants"
+                  title="View job details and applicants"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 5C8.14 5 4.96 7.73 3.84 11.5C4.96 15.27 8.14 18 12 18C15.86 18 19.04 15.27 20.16 11.5C19.04 7.73 15.86 5 12 5ZM12 16C9.88 16 8.16 14 8.16 11.5C8.16 9 9.88 7 12 7C14.12 7 15.84 9 15.84 11.5C15.84 14 14.12 16 12 16Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 13.5C13.1046 13.5 14 12.6046 14 11.5C14 10.3954 13.1046 9.5 12 9.5C10.8954 9.5 10 10.3954 10 11.5C10 12.6046 10.8954 13.5 12 13.5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                <button 
                   className="edit-job-btn"
                   onClick={() => handleEditClick(job)}
                   aria-label="Edit job"
@@ -104,7 +140,7 @@ const JobsList: React.FC<JobsListProps> = ({ jobs, canManage, onUpdate, onDelete
             )}
           </div>
           
-          <div className="job-meta">
+          <div className="job-summary">
             <span className="job-location">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M21 10C21 17 12 23 12 23C12 23 3 17 3 10C3 7.61305 3.94821 5.32387 5.63604 3.63604C7.32387 1.94821 9.61305 1 12 1C14.3869 1 16.6761 1.94821 18.364 3.63604C20.0518 5.32387 21 7.61305 21 10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -112,13 +148,15 @@ const JobsList: React.FC<JobsListProps> = ({ jobs, canManage, onUpdate, onDelete
               </svg>
               {job.location}
             </span>
+            
             <span className="job-type">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M16 4H18C18.5304 4 19.0391 4.21071 19.4142 4.58579C19.7893 4.96086 20 5.46957 20 6V20C20 20.5304 19.7893 21.0391 19.4142 21.4142C19.0391 21.7893 18.5304 22 18 22H6C5.46957 22 4.96086 21.7893 4.58579 21.4142C4.21071 21.0391 4 20.5304 4 20V6C4 5.46957 4.21071 4.96086 4.58579 4.58579C4.96086 4.21071 5.46957 4 6 4H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M15 2H9C8.44772 2 8 2.44772 8 3V5C8 5.55228 8.44772 6 9 6H15C15.5523 6 16 5.55228 16 5V3C16 2.44772 15.5523 2 15 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              {JOB_TYPE_LABELS[job.type] || job.type}
+              {JOB_TYPE_LABELS[job.type as keyof typeof JOB_TYPE_LABELS] || job.type}
             </span>
+            
             <span className="job-salary">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 1V23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -141,9 +179,19 @@ const JobsList: React.FC<JobsListProps> = ({ jobs, canManage, onUpdate, onDelete
                 <span key={index} className="job-tag">{tag}</span>
               ))}
             </div>
-            <div className="job-dates">
-              <span>Posted: {formatDate(job.createdAt)}</span>
-              {job.expiresAt && <span>Expires: {formatDate(job.expiresAt)}</span>}
+            <div className="job-meta">
+              <div className="job-dates">
+                <span>Posted: {formatDate(job.createdAt)}</span>
+                {job.expiresAt && <span>Expires: {formatDate(job.expiresAt)}</span>}
+              </div>
+              {canManage && (
+                <button
+                  className="view-applicants-button"
+                  onClick={() => handleViewApplicants(job._id)}
+                >
+                  View Applicants <span className="arrow">→</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -157,6 +205,8 @@ const JobsList: React.FC<JobsListProps> = ({ jobs, canManage, onUpdate, onDelete
           onCancel={() => setDeletingJobId(null)}
         />
       )}
+      
+      {error && <div className="error-message">{error}</div>}
     </div>
   );
 };
