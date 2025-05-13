@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CompanyApi, { Company, CompanyCreateData } from '../../../api/CompanyApi';
 import './CreateCompanyForm.scss';
 
@@ -6,12 +6,14 @@ interface CreateCompanyFormProps {
   onSubmit: (company: Company) => void;
   onCancel: () => void;
   initialData?: Partial<CompanyCreateData>;
+  isOpen: boolean;
 }
 
 const CreateCompanyForm: React.FC<CreateCompanyFormProps> = ({ 
   onSubmit, 
   onCancel,
-  initialData = {}
+  initialData = {},
+  isOpen
 }) => {
   const [formData, setFormData] = useState<CompanyCreateData>({
     name: initialData.name || '',
@@ -21,6 +23,17 @@ const CreateCompanyForm: React.FC<CreateCompanyFormProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Handle modal animation
+  useEffect(() => {
+    if (isOpen) {
+      // Short delay to allow CSS transition to work
+      setTimeout(() => setIsVisible(true), 50);
+    } else {
+      setIsVisible(false);
+    }
+  }, [isOpen]);
 
   const validateForm = (): boolean => {
     const errors: {[key: string]: string} = {};
@@ -83,7 +96,8 @@ const CreateCompanyForm: React.FC<CreateCompanyFormProps> = ({
       console.log('API response for company creation:', company); // Debug log
       
       if (company) {
-        // Add a small delay before submitting to ensure data is processed
+        // Close the modal with animation then submit
+        setIsVisible(false);
         setTimeout(() => {
           onSubmit(company);
           console.log('Company created and submitted to parent component:', company);
@@ -99,100 +113,116 @@ const CreateCompanyForm: React.FC<CreateCompanyFormProps> = ({
     }
   };
 
+  const handleCancel = () => {
+    setIsVisible(false);
+    setTimeout(() => onCancel(), 300);
+  };
+
+  // Don't render anything if the modal is not open
+  if (!isOpen) return null;
+
   return (
-    <div className="create-company-form">
-      <h2>Create New Company</h2>
-      
-      {error && <div className="error-message">{error}</div>}
+    <div className={`create-company-modal-overlay ${isVisible ? 'visible' : ''}`} onClick={handleCancel}>
+      <div className="create-company-form" onClick={e => e.stopPropagation()}>
+        <button className="close-button" onClick={handleCancel}>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        
+        <h2>Create New Company</h2>
+        
+        {error && <div className="error-message">{error}</div>}
 
-      <form onSubmit={handleSubmit}>
-        <div className={`form-group ${validationErrors.name ? 'has-error' : ''}`}>
-          <label htmlFor="name">Company Name *</label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            placeholder="Enter company name"
-            disabled={isLoading}
-          />
-          {validationErrors.name && <div className="error-text">{validationErrors.name}</div>}
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div className={`form-group ${validationErrors.name ? 'has-error' : ''}`}>
+            <label htmlFor="name">Company Name *</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              placeholder="Enter company name"
+              disabled={isLoading}
+            />
+            {validationErrors.name && <div className="error-text">{validationErrors.name}</div>}
+          </div>
 
-        <div className={`form-group ${validationErrors.description ? 'has-error' : ''}`}>
-          <label htmlFor="description">Description *</label>
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            required
-            placeholder="Describe your company"
-            rows={5}
-            disabled={isLoading}
-          />
-          {validationErrors.description && <div className="error-text">{validationErrors.description}</div>}
-        </div>
+          <div className={`form-group ${validationErrors.description ? 'has-error' : ''}`}>
+            <label htmlFor="description">Description *</label>
+            <textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              required
+              placeholder="Describe your company"
+              rows={5}
+              disabled={isLoading}
+            />
+            {validationErrors.description && <div className="error-text">{validationErrors.description}</div>}
+          </div>
 
-        <div className={`form-group ${validationErrors.logoUrl ? 'has-error' : ''}`}>
-          <label htmlFor="logoUrl">Logo URL (optional)</label>
-          <input
-            type="url"
-            id="logoUrl"
-            name="logoUrl"
-            value={formData.logoUrl}
-            onChange={handleChange}
-            placeholder="https://example.com/logo.png"
-            disabled={isLoading}
-          />
-          {validationErrors.logoUrl && <div className="error-text">{validationErrors.logoUrl}</div>}
-          {formData.logoUrl && (
-            <div className="logo-preview">
-              <img 
-                src={formData.logoUrl} 
-                alt="Company logo preview" 
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'none';
-                  setValidationErrors(prev => ({ 
-                    ...prev, 
-                    logoUrl: 'Unable to load image from URL' 
-                  }));
-                }}
-                onLoad={(e) => {
-                  (e.target as HTMLImageElement).style.display = 'block';
-                  if (validationErrors.logoUrl === 'Unable to load image from URL') {
-                    setValidationErrors(prev => {
-                      const newErrors = {...prev};
-                      delete newErrors.logoUrl;
-                      return newErrors;
-                    });
-                  }
-                }}
-              />
-            </div>
-          )}
-        </div>
+          <div className={`form-group ${validationErrors.logoUrl ? 'has-error' : ''}`}>
+            <label htmlFor="logoUrl">Logo URL (optional)</label>
+            <input
+              type="url"
+              id="logoUrl"
+              name="logoUrl"
+              value={formData.logoUrl}
+              onChange={handleChange}
+              placeholder="https://example.com/logo.png"
+              disabled={isLoading}
+            />
+            {validationErrors.logoUrl && <div className="error-text">{validationErrors.logoUrl}</div>}
+            {formData.logoUrl && (
+              <div className="logo-preview">
+                <img 
+                  src={formData.logoUrl} 
+                  alt="Company logo preview" 
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                    setValidationErrors(prev => ({ 
+                      ...prev, 
+                      logoUrl: 'Unable to load image from URL' 
+                    }));
+                  }}
+                  onLoad={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'block';
+                    if (validationErrors.logoUrl === 'Unable to load image from URL') {
+                      setValidationErrors(prev => {
+                        const newErrors = {...prev};
+                        delete newErrors.logoUrl;
+                        return newErrors;
+                      });
+                    }
+                  }}
+                />
+              </div>
+            )}
+          </div>
 
-        <div className="form-actions">
-          <button 
-            type="button" 
-            className="cancel-btn" 
-            onClick={onCancel}
-            disabled={isLoading}
-          >
-            Cancel
-          </button>
-          <button 
-            type="submit" 
-            className="submit-btn" 
-            disabled={isLoading}
-          >
-            {isLoading ? 'Creating...' : 'Create Company'}
-          </button>
-        </div>
-      </form>
+          <div className="form-actions">
+            <button 
+              type="button" 
+              className="cancel-btn" 
+              onClick={handleCancel}
+              disabled={isLoading}
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              className="submit-btn" 
+              disabled={isLoading}
+            >
+              {isLoading ? 'Creating...' : 'Create Company'}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

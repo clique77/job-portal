@@ -97,17 +97,14 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ resumeId, onError }) => {
   return (
     <div className="pdf-viewer-container">
       <div className="pdf-viewer-header">
-        <div className="header-title">PDF Document</div>
-        <div className="header-actions">
-          <a 
-            href={pdfUrl} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="download-button"
-          >
-            Open in New Tab
-          </a>
-        </div>
+        <a 
+          href={pdfUrl} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="download-button"
+        >
+          Open in New Tab
+        </a>
       </div>
       <div className="pdf-viewer-frame">
         {/* Using object tag for better PDF support */}

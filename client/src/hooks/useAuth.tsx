@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
         return;
       }
-
+          
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
       const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
         method: 'GET',
@@ -135,7 +135,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           console.log('useAuth: Using cached user data for non-401 error');
           setUser(cachedUser);
         } else {
-          setUser(null);
+        setUser(null);
         }
       }
     } catch (error) {
@@ -147,7 +147,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.log('useAuth: Using cached user on error');
         setUser(cachedUser);
       } else {
-        setUser(null);
+      setUser(null);
       }
     } finally {
       setIsLoading(false);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Job, JobsApi, JOB_TYPE_LABELS } from "../../../api/JobsApi";
 import JobDetails from '../JobDetail/JobDetail';
 import JobCard from '../JobCard/JobCard';
@@ -19,7 +19,15 @@ const JobList: React.FC = () => {
   });
   const [locations, setLocations] = useState<string[]>([]);
   const navigate = useNavigate();
+  const { jobId } = useParams<{ jobId: string }>();
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
+  const [isNavigating, setIsNavigating] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (jobId) {
+      setSelectedJob(jobId);
+    }
+  }, [jobId]);
 
   useEffect(() => {
     const fetchLocations = async () => {
@@ -80,8 +88,16 @@ const JobList: React.FC = () => {
   };
 
   const handleJobClick = (jobId: string) => {
+    if (isNavigating || selectedJob === jobId) return;
+    
+    setIsNavigating(true);
     setSelectedJob(jobId);
-    navigate(`/jobs/${jobId}`);
+    
+    navigate(`/jobs/${jobId}`, { replace: true });
+    
+    setTimeout(() => {
+      setIsNavigating(false);
+    }, 300);
   };
 
   const getCurrentPageJobs = () => {

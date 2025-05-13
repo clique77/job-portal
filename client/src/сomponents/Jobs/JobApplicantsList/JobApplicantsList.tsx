@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ApplicationApi from '../../../api/ApplicationApi';
 import './JobApplicantsList.scss';
 import PDFViewer from '../../Resume/PDFViewer/PDFViewer';
+import ApplicantProfile from '../../Profile/ApplicantProfile/ApplicantProfile';
 
 interface JobApplicantsListProps {
   jobId: string;
@@ -14,6 +15,7 @@ const JobApplicantsList: React.FC<JobApplicantsListProps> = ({ jobId, companyId 
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedResumeId, setSelectedResumeId] = useState<string | { _id: string } | null>(null);
+  const [selectedApplicantId, setSelectedApplicantId] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string>('');
@@ -114,6 +116,16 @@ const JobApplicantsList: React.FC<JobApplicantsListProps> = ({ jobId, companyId 
     
     console.log('Viewing resume with ID:', resumeId);
     setSelectedResumeId(resumeId);
+  };
+
+  const handleViewProfile = (applicantId: string) => {
+    if (!applicantId) {
+      alert('Cannot view profile: Applicant ID is missing');
+      return;
+    }
+    
+    console.log('Viewing profile for applicant:', applicantId);
+    setSelectedApplicantId(applicantId);
   };
 
   const handleBack = () => {
@@ -221,75 +233,83 @@ const JobApplicantsList: React.FC<JobApplicantsListProps> = ({ jobId, companyId 
             <div className="search-count">{applicants.length} applicant{applicants.length !== 1 ? 's' : ''}</div>
           </div>
           
-          <div className="applicants-table">
-            <div className="applicants-header">
-              <div className="col-name">Applicant</div>
-              <div className="col-date">Applied On</div>
-              <div className="col-status">Status</div>
-            </div>
-            
+        <div className="applicants-table">
+          <div className="applicants-header">
+            <div className="col-name">Applicant</div>
+            <div className="col-date">Applied On</div>
+            <div className="col-status">Status</div>
+          </div>
+          
             <div className="applicants-list">
               {applicants.map((applicant) => {
                 const statusColor = getStatusColor(applicant.status);
                 return (
                   <div key={applicant._id} className="applicant-card">
                     <div className="applicant-main-info applicant-main-info-three-col">
-                      <div className="col-name">
-                        <div className="applicant-name">{applicant.applicant.name}</div>
+              <div className="col-name">
+                <div className="applicant-name">{applicant.applicant.name}</div>
                         <div className="applicant-email">
                           {applicant.applicant.email}
                         </div>
                         
-                        <div className="resume-badge-container">
+                        <div className="action-buttons">
                           {applicant.resumeId ? (
-                            <div className="resume-badge has-resume" onClick={() => handleViewResume(applicant.resumeId)}>
+                            <button 
+                              className="action-button view-resume-button"
+                              onClick={() => handleViewResume(applicant.resumeId)}
+                            >
                               View Resume
-                            </div>
+                            </button>
                           ) : (
-                            <div className="resume-badge no-resume">
-                              No Resume
-                            </div>
+                            <span className="no-resume-label">No Resume</span>
                           )}
+                          
+                          <button
+                            className="action-button view-profile-button"
+                            onClick={() => handleViewProfile(applicant.applicant._id)}
+                          >
+                            View Profile
+                          </button>
                         </div>
-                      </div>
-                      
-                      <div className="col-date">
+              </div>
+              
+              <div className="col-date">
                         <div className="date-applied">
-                          {formatDate(applicant.appliedAt)}
+                {formatDate(applicant.appliedAt)}
                         </div>
-                      </div>
-                      
-                      <div className="col-status">
+              </div>
+              
+              <div className="col-status">
                         <div className="status-info">
                           <div 
                             className="status-indicator" 
                             style={{backgroundColor: statusColor}}
                           ></div>
-                          <select 
-                            value={applicant.status}
+                <select 
+                  value={applicant.status}
                             onChange={(e) => handleStatusChange(applicant.applicant._id, e.target.value, applicant.applicant.name)}
                             className={`status-select status-${applicant.status.toLowerCase()}`}
                             style={{borderColor: statusColor}}
-                          >
-                            <option value="PENDING">Pending</option>
-                            <option value="REVIEWING">Reviewing</option>
-                            <option value="INTERVIEWED">Interviewed</option>
-                            <option value="REJECTED">Rejected</option>
-                            <option value="OFFERED">Offered</option>
-                            <option value="HIRED">Hired</option>
+                >
+                  <option value="PENDING">Pending</option>
+                  <option value="REVIEWING">Reviewing</option>
+                  <option value="INTERVIEWED">Interviewed</option>
+                  <option value="REJECTED">Rejected</option>
+                  <option value="OFFERED">Offered</option>
+                  <option value="HIRED">Hired</option>
                             <option value="WITHDRAWN">Withdrawn</option>
-                          </select>
+                </select>
                         </div>
                       </div>
-                    </div>
-                    
+              </div>
+              
                     {applicant.notes && (
                       <div className="notes-section">
                         <span className="notes-label">Notes:</span>
                         {applicant.notes}
                       </div>
-                    )}
-                  </div>
+                )}
+              </div>
                 );
               })}
             </div>
@@ -310,8 +330,15 @@ const JobApplicantsList: React.FC<JobApplicantsListProps> = ({ jobId, companyId 
           </div>
         </div>
       )}
+      
+      {selectedApplicantId && (
+        <ApplicantProfile
+          userId={selectedApplicantId}
+          onClose={() => setSelectedApplicantId(null)}
+        />
+      )}
     </div>
   );
 };
 
-export default JobApplicantsList;
+export default JobApplicantsList; 

@@ -217,6 +217,28 @@
           position: relative;
           margin-bottom: 1.5rem;
           
+          &.has-error {
+            input, textarea {
+              border-color: #e53e3e !important;
+              background-color: #fff5f5 !important;
+            }
+            
+            .error-message {
+              color: #e53e3e;
+              font-size: 0.85rem;
+              margin-top: 0.5rem;
+              font-weight: 500;
+              display: flex;
+              align-items: center;
+              gap: 0.25rem;
+              
+              &::before {
+                content: "⚠️";
+                font-size: 0.75rem;
+              }
+            }
+          }
+          
           label {
             display: flex;
             align-items: center;

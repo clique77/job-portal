@@ -161,14 +161,26 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = () => {
   };
 
   const handleDeleteJob = async (jobId: string) => {
+    if (!jobId) {
+      console.error('No job ID provided for deletion');
+      setError('Failed to delete job: No job ID provided');
+      return;
+    }
+    
     try {
+      console.log(`Attempting to delete job with ID: ${jobId}`);
+      
       const success = await JobsApi.deleteJob(jobId);
       
       if (success) {
         console.log(`Job ${jobId} deleted successfully`);
         setJobs(prevJobs => prevJobs.filter(job => job._id !== jobId));
         
+        try {
         await fetchCompanyJobs();
+        } catch (fetchError) {
+          console.error('Error refreshing jobs after deletion:', fetchError);
+        }
       } else {
         console.error('Failed to delete job, API returned false');
         setError('Failed to delete job. Please try again.');
@@ -267,30 +279,6 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = () => {
         <h2>About</h2>
         <p className="company-description">{company.description}</p>
       </section>
-      
-      {userCompany && (
-        <section className="company-section">
-          <h2>Team Members ({members.length})</h2>
-          
-          {members.length > 0 ? (
-            <div className="members-list">
-              {members.map((member: any) => (
-                <div key={member.userId || (member.user && member.user._id)} className="member-item">
-                  <div className="member-name">{member.user?.name || 'Unknown User'}</div>
-                  <div className="member-role">{member.role || 'Member'}</div>
-                  {(isOwner || (isAdmin && member.role !== CompanyRole.OWNER)) && (
-                    <div className="member-actions">
-                      {/* Member actions would go here */}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p>No team members found.</p>
-          )}
-        </section>
-      )}
 
       <section className="company-section jobs-section">
         <div className="section-header">

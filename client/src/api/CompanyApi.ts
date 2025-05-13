@@ -281,7 +281,7 @@ const CompanyApi = {
       });
 
       await handleApiResponse(response);
-      
+
       const data = await response.json();
       console.log('Raw getUserCompanies response:', data);
       

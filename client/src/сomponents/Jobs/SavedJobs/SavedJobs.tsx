@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Job, JobsApi } from '../../../api/JobsApi';
 import JobCard from '../JobCard/JobCard';
 import JobDetails from '../JobDetail/JobDetail';
@@ -14,6 +14,8 @@ const SavedJobs: React.FC = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalJobs, setTotalJobs] = useState(0);
+  const [isNavigating, setIsNavigating] = useState<boolean>(false);
+  const lastNavigationTimeRef = useRef<number>(0);
   const limit = 8; // Number of jobs per page
   const navigate = useNavigate();
   const { jobId } = useParams();
@@ -89,8 +91,24 @@ const SavedJobs: React.FC = () => {
   };
 
   const handleJobClick = (jobId: string) => {
+    // Prevent rapid clicking from causing navigation issues
+    if (isNavigating || selectedJob === jobId) return;
+    
+    const currentTime = Date.now();
+    // Add debounce to avoid multiple rapid navigation attempts
+    if (currentTime - lastNavigationTimeRef.current < 300) {
+      return;
+    }
+    
+    lastNavigationTimeRef.current = currentTime;
+    setIsNavigating(true);
     setSelectedJob(jobId);
     navigate(`/saved-jobs/${jobId}`, { replace: true });
+    
+    // Reset navigation lock after a short delay
+    setTimeout(() => {
+      setIsNavigating(false);
+    }, 300);
   };
 
   const handlePageChange = (newPage: number) => {
@@ -137,19 +155,19 @@ const SavedJobs: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="saved-jobs-grid">
-              {savedJobs.map(job => (
-                <JobCard
-                  key={job._id}
-                  job={job}
-                  onJobClick={handleJobClick}
-                  onUnsave={() => handleUnsaveJob(job._id)}
-                  isSaved={true}
-                  isUnsaving={isUnsaving === job._id}
-                  isSelected={selectedJob === job._id}
-                />
-              ))}
-            </div>
+          <div className="saved-jobs-grid">
+            {savedJobs.map(job => (
+              <JobCard
+                key={job._id}
+                job={job}
+                onJobClick={handleJobClick}
+                onUnsave={() => handleUnsaveJob(job._id)}
+                isSaved={true}
+                isUnsaving={isUnsaving === job._id}
+                isSelected={selectedJob === job._id}
+              />
+            ))}
+          </div>
             
             {totalPages > 1 && (
               <div className="pagination">

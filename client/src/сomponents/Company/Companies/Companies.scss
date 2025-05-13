@@ -34,6 +34,25 @@
     }
   }
   
+  // Simple spin animation
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  // Remove pulse animation as it may cause the impression of multiple spinners
+  @keyframes pulse {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  
   // Add shimmer animation for the loading card effect
   @keyframes shimmer {
     0% {
@@ -42,15 +61,6 @@
     100% {
       background-position: 1000px 0;
     }
-  }
-  
-  // Add text loading animation
-  @keyframes loadingDots {
-    0% { content: "."; }
-    25% { content: ".."; }
-    50% { content: "..."; }
-    75% { content: ".."; }
-    100% { content: "."; }
   }
   
   .companies-page-header {
@@ -209,22 +219,22 @@
       gap: 1.5rem;
       min-height: 400px;
       
+      .loading-spinner {
+        border: 2px solid #e2e8f0;
+        border-top: 2px solid #3b82f6;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 0.8s linear infinite;
+      }
+      
       p {
-        color: #3b82f6;
-        font-size: 1.2rem;
-        font-weight: 600;
+        color: #64748b;
+        font-size: 1rem;
+        font-weight: 500;
         margin: 0;
-        letter-spacing: 0;
+        letter-spacing: 0.2px;
         animation: fadeIn 0.6s 0.4s both ease-out;
-        position: relative;
-        
-        &::after {
-          content: "";
-          display: inline-block;
-          animation: loadingDots 2s infinite;
-          padding-left: 2px;
-          font-weight: bold;
-        }
       }
       
       .loading-shimmer {

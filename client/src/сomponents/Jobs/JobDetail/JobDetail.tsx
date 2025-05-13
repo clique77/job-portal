@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { CSSTransition } from 'react-transition-group';
 import { JOB_TYPE_LABELS, JobsApi } from '../../../api/JobsApi';
 import ApplicationApi, { ApplicationStatus } from '../../../api/ApplicationApi';
@@ -41,65 +41,131 @@ const JobDetails: React.FC<JobDetailsProps> = ({ jobId }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [companyName, setCompanyName] = useState<string>('');
   const [isJobOwner, setIsJobOwner] = useState<boolean>(false);
+  
+  // Refs to prevent infinite loops and excessive API calls
+  const initialLoadDoneRef = useRef<boolean>(false);
+  const lastFetchTimeRef = useRef<number>(0);
+  const isMountedRef = useRef<boolean>(true);
   const nodeRef = useRef(null);
+  const loadingJobRef = useRef<string | null>(null);
+  
   const { user } = useAuth();
 
+  // Reset on unmount
   useEffect(() => {
-    setShowApplication(false);
+    isMountedRef.current = true;
+    
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  // Debounced job loading function
+  const debouncedLoadJob = useCallback(() => {
+    if (!jobId || !isMountedRef.current) return;
+    
+    // If already loading this job, don't trigger another load
+    if (loadingJobRef.current === jobId) return;
+    
+    const currentTime = Date.now();
+    // Enforce a minimum delay between job loading calls (debouncing)
+    if (currentTime - lastFetchTimeRef.current > 300) {
+      lastFetchTimeRef.current = currentTime;
+      loadingJobRef.current = jobId;
+      loadJobDetails();
+    } else {
+      // If we're clicking too fast, queue up this job load for later
+      setTimeout(() => {
+        if (isMountedRef.current && loadingJobRef.current !== jobId) {
+          lastFetchTimeRef.current = Date.now();
+          loadingJobRef.current = jobId;
+          loadJobDetails();
+        }
+      }, 300);
+    }
   }, [jobId]);
 
+  // Reset on job ID change and trigger job loading
   useEffect(() => {
-    const fetchJobDetails = async () => {
-      try {
-        setIsLoading(true);
-        const data = await JobsApi.getJobById(jobId as string);
-        setJob(data.job);
-        
-        // Check if the current user is the job owner
-        if (user && data.job.employer && user.id === data.job.employer) {
-          setIsJobOwner(true);
-        }
-        
-        if (data.job.company && data.job.company.length === 24 && /^[0-9a-fA-F]{24}$/.test(data.job.company)) {
-          try {
-            const company = await CompanyApi.getCompanyById(data.job.company);
-            if (company && company.name) {
-              setCompanyName(company.name);
-            } else {
-              setCompanyName(data.job.company);
-            }
-          } catch (error) {
-            console.error('Error fetching company details:', error);
-            setCompanyName(data.job.company);
-          }
-        } else {
-          setCompanyName(data.job.company);
-        }
-        
-        await checkApplicationStatus();
-      } catch (error) {
-        setError(error instanceof Error ? error.message : 'Failed to fetch job details...');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     if (jobId) {
-      fetchJobDetails();
+      setShowApplication(false);
+      initialLoadDoneRef.current = false;
+      debouncedLoadJob();
     }
-  }, [jobId, user]);
+  }, [jobId, debouncedLoadJob]);
 
   const checkApplicationStatus = async () => {
-    if (jobId) {
-      try {
-        const status = await ApplicationApi.checkApplication(jobId);
+    if (!jobId || !isMountedRef.current) return;
+    
+    try {
+      const status = await ApplicationApi.checkApplication(jobId);
+      
+      if (!isMountedRef.current) return;
+      
+      if (!applicationStatus || 
+          applicationStatus.hasApplied !== status?.hasApplied || 
+          applicationStatus.status !== status?.status) {
         setApplicationStatus(status || { hasApplied: false, status: undefined });
-      } catch (error) {
-        console.error('Error checking application status:', error);
+      }
+    } catch (error) {
+      console.error('Error checking application status:', error);
+    }
+  };
+
+  // Main function to load job details
+  const loadJobDetails = async () => {
+    if (!jobId || !isMountedRef.current) return;
+    
+    try {
+      setIsLoading(true);
+      
+      const data = await JobsApi.getJobById(jobId);
+      
+      if (!isMountedRef.current) return;
+      
+      setJob(data.job);
+      
+      // Check if the current user is the job owner
+      if (user && data.job.employer && user.id === data.job.employer) {
+        setIsJobOwner(true);
+      } else {
+        setIsJobOwner(false);
+      }
+      
+      if (data.job.company && data.job.company.length === 24 && /^[0-9a-fA-F]{24}$/.test(data.job.company)) {
+        try {
+          const company = await CompanyApi.getCompanyById(data.job.company);
+          if (company && company.name) {
+            setCompanyName(company.name);
+          } else {
+            setCompanyName(data.job.company);
+          }
+        } catch (error) {
+          console.error('Error fetching company details:', error);
+          setCompanyName(data.job.company);
+        }
+      } else {
+        setCompanyName(data.job.company);
+      }
+      
+      // Only check application status on initial load
+      if (!initialLoadDoneRef.current) {
+        await checkApplicationStatus();
+        initialLoadDoneRef.current = true;
+      }
+    } catch (error) {
+      if (isMountedRef.current) {
+        setError(error instanceof Error ? error.message : 'Failed to fetch job details...');
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setIsLoading(false);
+        loadingJobRef.current = null;
       }
     }
   };
 
+  // Helper functions
   const getStatusClassName = (status?: string) => {
     if (!status) return '';
     return status.toLowerCase().replace('_', '-');
@@ -117,6 +183,7 @@ const JobDetails: React.FC<JobDetailsProps> = ({ jobId }) => {
     return JOB_TYPE_LABELS[type as keyof typeof JOB_TYPE_LABELS] || type;
   }
 
+  // Component rendering
   if (isLoading) {
     return <div className="job-details__loading">Loading...</div>
   }
@@ -201,7 +268,7 @@ const JobDetails: React.FC<JobDetailsProps> = ({ jobId }) => {
                     company={companyName}
                     onSuccess={() => {
                       setShowApplication(false);
-                      checkApplicationStatus();
+                      setApplicationStatus({ hasApplied: true, status: 'PENDING' });
                     }}
                     onCancel={() => setShowApplication(false)}
                   />

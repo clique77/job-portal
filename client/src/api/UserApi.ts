@@ -376,5 +376,45 @@ export const UserApi = {
     
     storage.saveUser(mergedUser);
     return mergedUser;
+  },
+  
+  getUserById: async (userId: string): Promise<User | null> => {
+    const token = storage.getToken();
+    if (!token) return null;
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.warn('Authentication token is invalid or expired');
+          return null;
+        }
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to fetch user profile');
+      }
+
+      const responseData = await response.json();
+      const userData = responseData.user || responseData;
+      
+      if (userData && userData._id && !userData.id) {
+        return {
+          ...userData,
+          id: userData._id
+        };
+      }
+      
+      return userData;
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      return null;
+    }
   }
 };

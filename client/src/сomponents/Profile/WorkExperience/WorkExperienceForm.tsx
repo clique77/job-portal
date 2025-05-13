@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User, UserApi } from '../../../api/UserApi';
 import { toast } from 'react-toastify';
 import './WorkExperienceForm.scss';
@@ -29,15 +29,66 @@ const WorkExperienceForm: React.FC<WorkExperienceFormProps> = ({ user, onUpdate 
     current: false,
     description: ''
   });
+  const [validationErrors, setValidationErrors] = useState<{
+    endDate?: string;
+  }>({});
+
+  // Format date for input
+  const formatDateForInput = (date: Date | undefined): string => {
+    if (!date) return '';
+    
+    try {
+      // Create a new date to avoid timezone issues
+      const d = new Date(date);
+      return d.toISOString().split('T')[0];
+    } catch (err) {
+      console.error("Error formatting date:", err);
+      return '';
+    }
+  };
+
+  // Validate the form
+  const validateForm = (): boolean => {
+    const errors: { endDate?: string } = {};
+    
+    if (!newExperience.current && newExperience.endDate) {
+      // Check if end date is before start date
+      if (new Date(newExperience.endDate) < new Date(newExperience.startDate)) {
+        errors.endDate = "End date cannot be earlier than start date";
+      }
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Reset validation errors when form values change
+  useEffect(() => {
+    if (validationErrors.endDate && !newExperience.current) {
+      // Re-validate end date when it changes
+      if (newExperience.endDate && new Date(newExperience.endDate) >= new Date(newExperience.startDate)) {
+        setValidationErrors({});
+      }
+    }
+  }, [newExperience.endDate, newExperience.startDate, newExperience.current, validationErrors.endDate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      return;
+    }
+    
     try {
-      if (newExperience.current) {
-        delete newExperience.endDate;
+      // Create a copy to avoid mutating the original state
+      const experienceToSubmit = {...newExperience};
+      
+      if (experienceToSubmit.current) {
+        delete experienceToSubmit.endDate;
       }
       
-      const updatedExperiences = [...experiences, newExperience];
+      const updatedExperiences = [...experiences, experienceToSubmit];
       const updatedUser = await UserApi.updateUserProfile({
         ...user,
         workExperience: updatedExperiences
@@ -53,6 +104,7 @@ const WorkExperienceForm: React.FC<WorkExperienceFormProps> = ({ user, onUpdate 
         current: false,
         description: ''
       });
+      setValidationErrors({});
       toast.success('Work experience added successfully');
     } catch (error) {
       toast.error('Failed to add work experience');
@@ -72,6 +124,33 @@ const WorkExperienceForm: React.FC<WorkExperienceFormProps> = ({ user, onUpdate 
       toast.success('Work experience deleted successfully');
     } catch (error) {
       toast.error('Failed to delete work experience');
+    }
+  };
+
+  // Handler for date changes
+  const handleDateChange = (field: 'startDate' | 'endDate', value: string) => {
+    if (!value) {
+      if (field === 'startDate') {
+        // If start date is cleared, set to today
+        setNewExperience({...newExperience, startDate: new Date()});
+      } else {
+        // If end date is cleared, remove it
+        const updated = {...newExperience};
+        delete updated.endDate;
+        setNewExperience(updated);
+      }
+      return;
+    }
+    
+    try {
+      const dateValue = new Date(value);
+      
+      // Check that the date is valid
+      if (!isNaN(dateValue.getTime())) {
+        setNewExperience({...newExperience, [field]: dateValue});
+      }
+    } catch (error) {
+      console.error(`Error parsing date ${value}:`, error);
     }
   };
 
@@ -150,8 +229,9 @@ const WorkExperienceForm: React.FC<WorkExperienceFormProps> = ({ user, onUpdate 
                 </label>
                 <input
                   type="date"
-                  value={new Date(newExperience.startDate).toISOString().split('T')[0]}
-                  onChange={e => setNewExperience({...newExperience, startDate: new Date(e.target.value)})}
+                  value={formatDateForInput(newExperience.startDate)}
+                  onChange={e => handleDateChange('startDate', e.target.value)}
+                  max={!newExperience.current && newExperience.endDate ? formatDateForInput(newExperience.endDate) : undefined}
                   required
                 />
               </div>
@@ -167,15 +247,19 @@ const WorkExperienceForm: React.FC<WorkExperienceFormProps> = ({ user, onUpdate 
                 </div>
               </div>
               {!newExperience.current && (
-                <div className="form-group">
+                <div className={`form-group ${validationErrors.endDate ? 'has-error' : ''}`}>
                   <label>
                     End Date
                   </label>
                   <input
                     type="date"
-                    value={newExperience.endDate ? new Date(newExperience.endDate).toISOString().split('T')[0] : ''}
-                    onChange={e => setNewExperience({...newExperience, endDate: new Date(e.target.value)})}
+                    value={formatDateForInput(newExperience.endDate)}
+                    onChange={e => handleDateChange('endDate', e.target.value)}
+                    min={formatDateForInput(newExperience.startDate)}
                   />
+                  {validationErrors.endDate && (
+                    <div className="error-message">{validationErrors.endDate}</div>
+                  )}
                 </div>
               )}
               <div className="form-group">

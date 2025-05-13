@@ -212,12 +212,11 @@ const Companies: React.FC = () => {
         )}
       </div>
 
-      {showCreateForm && (
-        <CreateCompanyForm 
-          onCancel={() => setShowCreateForm(false)}
-          onSubmit={handleCreateCompany}
-        />
-      )}
+      <CreateCompanyForm 
+        onCancel={() => setShowCreateForm(false)}
+        onSubmit={handleCreateCompany}
+        isOpen={showCreateForm}
+      />
 
       {deleteModalOpen && companyToDelete && (
         <DeleteCompanyModal

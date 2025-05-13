@@ -46,7 +46,11 @@ const JobsList: React.FC<JobsListProps> = ({ jobs, canManage, onUpdate, onDelete
         setIsDeleting(true);
         setError(null);
         
+        if (typeof onDelete === 'function') {
         await onDelete(selectedJob._id);
+        } else {
+          throw new Error('Delete handler not available');
+        }
         
         setDeletingJobId(null);
         setSelectedJob(null);

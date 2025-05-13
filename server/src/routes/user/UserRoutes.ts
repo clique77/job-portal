@@ -19,6 +19,19 @@ export default function(fastify: FastifyInstance, _opts: any, done: () => void) 
     preValidation: [authenticate]
   }, userController.getCurrentUser);
 
+  fastify.get('/api/users/:id', {
+    preValidation: [authenticate],
+    schema: {
+      params: {
+        type: 'object',
+        required: ['id'],
+        properties: {
+          id: { type: 'string' }
+        }
+      }
+    }
+  }, userController.getUserById);
+
   fastify.get('/api/users', {
     preValidation: [authenticate]
   }, userController.getAllUsers);

@@ -238,6 +238,9 @@ export const JobsApi = {
         throw new Error('Authentication required');
       }
       
+      // Log the deletion attempt with proper console.log
+      console.log(`Attempting to delete job ID: ${jobId}`);
+      
       const response = await fetch(`${API_BASE_URL}/api/deleteJob/${jobId}`, {
         method: 'DELETE',
         headers: getAuthHeaders(false),
@@ -246,11 +249,14 @@ export const JobsApi = {
 
       if (!response.ok) {
         const error = await response.json();
+        console.error(`Error response from delete job API: ${JSON.stringify(error)}`);
         throw new Error(error.message || 'Failed to delete job');
       }
 
+      console.log(`Successfully deleted job ID: ${jobId}`);
       return true;
     } catch (error) {
+      // Ensure error is properly logged
       console.error('Error deleting job:', error);
       throw error;
     }

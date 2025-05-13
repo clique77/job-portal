@@ -27,6 +27,7 @@ export class UserController {
     this.updateUserProfile = this.updateUserProfile.bind(this);
     this.updatePassword = this.updatePassword.bind(this);
     this.updateProfilePicture = this.updateProfilePicture.bind(this);
+    this.getUserById = this.getUserById.bind(this);
   }
 
   async getCurrentUser(request: FastifyRequest, reply: FastifyReply) {
@@ -35,6 +36,21 @@ export class UserController {
       const userId = request.user.id;
 
       const user = await this.userService.getUserById(userId);
+      if (!user) {
+        return reply.status(404).send({ message: 'User not found' });
+      }
+
+      return { user };
+    } catch (error) {
+      return this.errorHandlerService.handleError(request, reply, error as Error, 500);
+    }
+  }
+
+  async getUserById(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const { id } = request.params as { id: string };
+      
+      const user = await this.userService.getUserById(id);
       if (!user) {
         return reply.status(404).send({ message: 'User not found' });
       }
