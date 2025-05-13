@@ -202,24 +202,74 @@ const CompanyApi = {
       }
       
       console.log('Updating company with ID:', companyId);
-      const response = await fetch(`${API_BASE_URL}/api/companies/${companyId}`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        credentials: 'include',
-        body: JSON.stringify(companyData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update company');
-      }
-
-      const data = await response.json();
-
-      if (data.company && data.company._id && !data.company.id) {
-        data.company.id = data.company._id;
+      console.log('Update data:', companyData);
+      
+      // Get authentication info for debugging
+      const token = localStorage.getItem('jobPortalToken');
+      const userData = localStorage.getItem('jobPortalUser');
+      let userId = '';
+      let isAdmin = false;
+      
+      if (userData) {
+        try {
+          const user = JSON.parse(userData);
+          userId = user.id || user._id;
+          isAdmin = user.role === 'admin';
+          console.log('Current user ID:', userId, 'Is admin:', isAdmin);
+        } catch (e) {
+          console.error('Error parsing user data:', e);
+        }
       }
       
-      return data.company || null;
+      if (!token) {
+        console.warn('No authentication token found for update operation');
+      }
+      
+      const headers = getAuthHeaders();
+      console.log('Using headers for update:', headers);
+      
+      const apiEndpoint = `${API_BASE_URL}/api/companies/${companyId}`;
+      console.log('Using API endpoint:', apiEndpoint);
+      
+      const cleanCompanyData = {
+        name: companyData.name,
+        description: companyData.description,
+        logoUrl: companyData.logoUrl
+      };
+      
+      console.log('Sending clean company data:', cleanCompanyData);
+      
+      const response = await fetch(apiEndpoint, {
+        method: 'PUT',
+        headers: headers,
+        credentials: 'include',
+        body: JSON.stringify(cleanCompanyData),
+      });
+
+      const responseData = await response.json();
+      
+      if (!response.ok) {
+        console.error('Server returned error for company update:', responseData);
+        throw new Error(`Failed to update company: ${responseData.message || responseData.error || 'Unknown error'}`);
+      }
+
+      console.log('Company update response:', responseData);
+      
+      let companyObj = null;
+      
+      if (responseData.company) {
+        companyObj = responseData.company;
+      } else if (responseData.data) {
+        companyObj = responseData.data;
+      } else if (responseData._id) {
+        companyObj = responseData;
+      }
+
+      if (companyObj && companyObj._id && !companyObj.id) {
+        companyObj.id = companyObj._id;
+      }
+      
+      return companyObj;
     } catch (error) {
       console.error('Error updating company:', error);
       return null;
@@ -445,6 +495,61 @@ const CompanyApi = {
     } catch (error) {
       console.error('Error updating user role:', error);
       return null;
+    }
+  },
+
+  // Direct API call method as a workaround for company updates not applying
+  directCompanyUpdate: async (companyId: string, updateData: {
+    name?: string;
+    description?: string;
+    logoUrl?: string;
+  }): Promise<boolean> => {
+    try {
+      if (!companyId) {
+        console.error('No company ID provided for direct update');
+        return false;
+      }
+
+      // Get token for auth header
+      const token = localStorage.getItem('jobPortalToken');
+      if (!token) {
+        console.error('No auth token available for direct update');
+        return false;
+      }
+
+      // Create clean update data object
+      const data = {
+        name: updateData.name,
+        description: updateData.description,
+        logoUrl: updateData.logoUrl || ''
+      };
+
+      console.log('Performing direct update on company:', {
+        companyId,
+        updateData: data
+      });
+
+      // Make direct fetch call to standard API endpoint
+      const response = await fetch(`${API_BASE_URL}/api/companies/${companyId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Direct update failed:', errorData);
+        return false;
+      }
+
+      console.log('Direct update succeeded with status:', response.status);
+      return true;
+    } catch (error) {
+      console.error('Error in direct company update:', error);
+      return false;
     }
   }
 };

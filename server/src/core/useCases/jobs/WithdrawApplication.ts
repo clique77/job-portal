@@ -24,7 +24,7 @@ export class WithdrawApplication implements IWithdrawApplicationUseCase {
       }
 
       if (application.status !== ApplicationStatus.PENDING &&
-        application.status !== ApplicationStatus.UNDER_REVIEW) {
+        application.status !== ApplicationStatus.REVIEWING) {
         throw new Error('Application is not in pending or under review');
       }
 

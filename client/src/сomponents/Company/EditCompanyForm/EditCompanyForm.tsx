@@ -96,7 +96,6 @@ const EditCompanyForm: React.FC<EditCompanyFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate form before submission
     if (!validateForm()) {
       return;
     }
@@ -105,14 +104,51 @@ const EditCompanyForm: React.FC<EditCompanyFormProps> = ({
     setError(null);
 
     try {
-      console.log('Updating company with data:', formData); // Debug log
-      const company = await CompanyApi.updateCompany(companyId, formData);
+      const updateData = {
+        name: formData.name,
+        description: formData.description,
+        logoUrl: formData.logoUrl || ''
+      };
       
-      if (company) {
-        console.log('Company updated successfully:', company); // Debug log
-        onSubmit(company);
+      console.log('Updating company with data:', updateData);
+      
+      // First try the direct update method
+      const success = await CompanyApi.directCompanyUpdate(companyId, updateData);
+      
+      if (success) {
+        console.log('Direct update successful');
+        
+        // Fetch the updated company to get the latest data
+        const updatedCompany = await CompanyApi.getCompanyById(companyId);
+        
+        if (updatedCompany) {
+          console.log('Updated company fetched successfully:', updatedCompany);
+          onSubmit(updatedCompany);
+        } else {
+          // If we can't fetch the updated company, create a temporary one with our form data
+          console.log('Could not fetch updated company, using form data');
+          onSubmit({
+            _id: companyId,
+            id: companyId,
+            name: updateData.name || '',
+            description: updateData.description || '',
+            logoUrl: updateData.logoUrl || '',
+            createdBy: '',
+            createdAt: '',
+            updatedAt: ''
+          });
+        }
       } else {
-        setError('Failed to update company. Please try again.');
+        // Fall back to the regular update method
+        console.log('Direct update failed, trying regular update method');
+        const company = await CompanyApi.updateCompany(companyId, updateData);
+        
+        if (company) {
+          console.log('Company updated successfully with regular method:', company);
+          onSubmit(company);
+        } else {
+          setError('Failed to update company. Please try again.');
+        }
       }
     } catch (err) {
       setError('An error occurred while updating the company.');

@@ -6,6 +6,7 @@ import applicationRoutes from './job/ApplicationRoutes';
 import resumeRoutes from './resume/ResumeRoutes';
 import companyRoutes from './company/CompanyRoutes';
 import userCompanyRoutes from './company/UserCompanyRoutes';
+import adminRoutes from './admin/AdminRoutes';
 
 export default async function routes(fastify: FastifyInstance) {
   fastify.register(authRoutes);
@@ -15,6 +16,7 @@ export default async function routes(fastify: FastifyInstance) {
   fastify.register(resumeRoutes);
   fastify.register(companyRoutes);
   fastify.register(userCompanyRoutes);
+  fastify.register(adminRoutes);
 
   fastify.get('/api/health', async () => {
     return { status: 'ok', message: 'Server is running' };

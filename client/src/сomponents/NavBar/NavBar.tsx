@@ -46,17 +46,8 @@ const NavBar = ({ user, isLoading, onLogout }: NavBarProps) => {
     } else if (user.role === UserRole.ADMIN) {
       return (
         <>
-          <Link to="/jobs" className="nav-link">
-            Browse Jobs
-          </Link>
-          <Link to="/companies" className="nav-link">
-            Companies
-          </Link>
-          <Link to="/saved-jobs" className="nav-link">
-            Saved Jobs
-          </Link>
-          <Link to="/my-applications" className="nav-link applications-link">
-            My Applications
+          <Link to="/admin" className="nav-link admin-link">
+            Admin Dashboard
           </Link>
         </>
       );

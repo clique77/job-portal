@@ -1,24 +1,38 @@
 export enum ApplicationStatus {
   PENDING = 'PENDING',
-  UNDER_REVIEW = 'UNDER_REVIEW',
-  INTERVIEW_SCHEDULED = 'INTERVIEW_SCHEDULED',
+  REVIEWING = 'REVIEWING',
+  INTERVIEWED = 'INTERVIEWED',
   REJECTED = 'REJECTED',
-  ACCEPTED = 'ACCEPTED'
+  OFFERED = 'OFFERED',
+  HIRED = 'HIRED',
+  WITHDRAWN = 'WITHDRAWN'
 }
 
 export const validStatusTransitions: Record<ApplicationStatus, ApplicationStatus[]> = {
   [ApplicationStatus.PENDING]: [
-    ApplicationStatus.UNDER_REVIEW,
-    ApplicationStatus.REJECTED
+    ApplicationStatus.REVIEWING,
+    ApplicationStatus.REJECTED,
+    ApplicationStatus.WITHDRAWN
   ],
-  [ApplicationStatus.UNDER_REVIEW]: [
-    ApplicationStatus.INTERVIEW_SCHEDULED,
-    ApplicationStatus.REJECTED
+  [ApplicationStatus.REVIEWING]: [
+    ApplicationStatus.INTERVIEWED,
+    ApplicationStatus.REJECTED,
+    ApplicationStatus.WITHDRAWN
   ],
-  [ApplicationStatus.INTERVIEW_SCHEDULED]: [
-    ApplicationStatus.ACCEPTED,
-    ApplicationStatus.REJECTED
+  [ApplicationStatus.INTERVIEWED]: [
+    ApplicationStatus.OFFERED,
+    ApplicationStatus.REJECTED,
+    ApplicationStatus.WITHDRAWN
+  ],
+  [ApplicationStatus.OFFERED]: [
+    ApplicationStatus.HIRED,
+    ApplicationStatus.REJECTED,
+    ApplicationStatus.WITHDRAWN
+  ],
+  [ApplicationStatus.HIRED]: [
+    ApplicationStatus.REJECTED,
+    ApplicationStatus.WITHDRAWN
   ],
   [ApplicationStatus.REJECTED]: [],
-  [ApplicationStatus.ACCEPTED]: []
+  [ApplicationStatus.WITHDRAWN]: []
 };

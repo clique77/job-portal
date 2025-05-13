@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import ApplicationApi from '../../../api/ApplicationApi';
 import ApplicationJobDetail from './ApplicationJobDetail';
-import './MyApplications.scss';
+import './JobSeekerApplications.scss';
 
 interface Application {
   job: {

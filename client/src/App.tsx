@@ -11,7 +11,8 @@ import RoleBasedRoute from './сomponents/Authentication/RoleBasedRoute';
 import Companies from './сomponents/Company/Companies/Companies';
 import CompanyDetails from './сomponents/Company/CompanyDetails/CompanyDetails';
 import EmployerJobDetail from './сomponents/Jobs/EmployerJobDetail/EmployerJobDetail';
-import MyApplications from './сomponents/Jobs/MyApplications/MyApplications';
+import MyApplications from './сomponents/Jobs/JobSeekerApplications/JobSeekerApplications';
+import AdminDashboard from './сomponents/Admin/Dashboard/AdminDashboard';
 
 const ProtectedRoute = ({ user, isLoading, children }: { user: User | null, isLoading: boolean, children: JSX.Element}) => {
   // First, check if authentication is still being verified
@@ -198,9 +199,11 @@ function AppContent() {
           <Route path='/' element={
             user?.role === UserRole.EMPLOYER ? 
               <Navigate to='/companies' replace /> : 
-              <RoleBasedRoute user={user} isLoading={isLoading} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
-                <JobList />
-              </RoleBasedRoute>
+              user?.role === UserRole.ADMIN ?
+                <Navigate to='/admin' replace /> :
+                <RoleBasedRoute user={user} isLoading={isLoading} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
+                  <JobList />
+                </RoleBasedRoute>
           } />
           
           {/* Job seeker routes */}
@@ -235,6 +238,13 @@ function AppContent() {
           <Route path='/employer/jobs/:jobId' element={
             <RoleBasedRoute user={user} isLoading={isLoading} allowedRoles={[UserRole.EMPLOYER, UserRole.ADMIN]}>
               <EmployerJobDetail />
+            </RoleBasedRoute>
+          } />
+          
+          {/* Admin routes */}
+          <Route path='/admin' element={
+            <RoleBasedRoute user={user} isLoading={isLoading} allowedRoles={[UserRole.ADMIN]}>
+              <AdminDashboard user={user} />
             </RoleBasedRoute>
           } />
           

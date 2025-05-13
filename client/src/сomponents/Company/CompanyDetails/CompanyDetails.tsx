@@ -114,9 +114,30 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = () => {
     }
   };
 
-  const handleUpdateCompany = (updatedCompany: Company) => {
-    setCompany(updatedCompany);
+  const handleUpdateCompany = async (updatedCompany: Company) => {
+    console.log('Company updated, new data:', updatedCompany);
+    
+    setIsLoading(true);
     setIsEditing(false);
+    
+    try {
+      await fetchCompanyData();
+      console.log('Company data refreshed after update');
+    } catch (err) {
+      console.error('Error refreshing company data:', err);
+      
+      const companyId = updatedCompany._id || updatedCompany.id || '';
+      const normalizedCompany: Company = {
+        ...updatedCompany,
+        _id: companyId,
+        id: companyId
+      };
+      
+      console.log('Using returned company data instead:', normalizedCompany);
+      setCompany(normalizedCompany);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDeleteCompany = async () => {

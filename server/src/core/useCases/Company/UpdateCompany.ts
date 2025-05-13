@@ -14,13 +14,57 @@ export class UpdateCompany implements IUpdateCompanyUseCase {
   }
 
   async execute(companyId: string, companyData: CompanyUpdateData, userId: string): Promise<ICompany | null> {
-    // Verify that the user has appropriate permissions (owner or admin)
-    const userCompany = await this.userCompanyRepository.findByUserAndCompany(userId, companyId);
+    console.log(`UpdateCompany: User ${userId} attempting to update company ${companyId}`);
     
-    if (!userCompany || ![CompanyRole.OWNER, CompanyRole.ADMIN].includes(userCompany.role)) {
-      throw new Error('Unauthorized: User does not have permission to update this company');
-    }
+    try {
+      const userCompany = await this.userCompanyRepository.findByUserAndCompany(userId, companyId);
+      
+      if (userCompany) {
+        console.log(`UpdateCompany: Found UserCompany relationship with role: ${userCompany.role}`);
+      } else {
+        console.log(`UpdateCompany: No UserCompany relationship found`);
+      }
+      
+      const hasUserCompanyPermission = userCompany && 
+        [CompanyRole.OWNER, CompanyRole.ADMIN].includes(userCompany.role);
 
-    return this.companyRepository.update(companyId, companyData);
+      if (hasUserCompanyPermission) {
+        console.log(`UpdateCompany: User has permission via UserCompany relationship`);
+      } else {
+        const company = await this.companyRepository.findById(companyId);
+        
+        if (!company) {
+          console.log(`UpdateCompany: Company ${companyId} not found`);
+          throw new Error(`Company not found with ID: ${companyId}`);
+        }
+        
+        const creatorId = company.createdBy ? company.createdBy.toString() : 'undefined';
+        console.log('UpdateCompany: Creator check -', {
+          companyId: companyId,
+          creatorId: creatorId,
+          userId: userId.toString(),
+          isMatch: creatorId === userId.toString()
+        });
+        
+        const creatorIdStr = company.createdBy ? company.createdBy.toString() : '';
+        const userIdStr = userId.toString();
+        
+        if (!creatorIdStr || creatorIdStr !== userIdStr) {
+          console.log(`UpdateCompany: User ${userId} is not the creator of company ${companyId}`);
+          
+          throw new Error('You do not have permission to update this company. Only company owners or administrators can update company details.');
+        }
+        
+        console.log(`UpdateCompany: User is the creator of the company`);
+      }
+      
+      console.log(`UpdateCompany: Proceeding with update for company ${companyId}`);
+      const updatedCompany = await this.companyRepository.update(companyId, companyData);
+      console.log(`UpdateCompany: Update complete for company ${companyId}`);
+      return updatedCompany;
+    } catch (error) {
+      console.error('UpdateCompany: Error occurred:', error);
+      throw error;
+    }
   }
 } 
