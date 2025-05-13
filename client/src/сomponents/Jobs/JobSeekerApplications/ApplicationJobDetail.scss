@@ -1,0 +1,68 @@
+.application-job-detail {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  
+  .job-details-container {
+    margin-bottom: 30px;
+  }
+  
+  .withdraw-application-container {
+    width: 100%;
+    margin-top: 60px;
+    padding: 20px;
+    background-color: #fff5f5;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid #ffcdd2;
+    position: relative;
+    
+    &::before {
+      content: "Application Controls";
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      background-color: white;
+      padding: 0 10px;
+      font-size: 0.875rem;
+      color: #f44336;
+      font-weight: 600;
+      border-radius: 4px;
+      border: 1px solid #ffebee;
+    }
+    
+    .withdraw-application-btn {
+      width: 100%;
+      padding: 15px;
+      background: #f44336;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: 0.5px;
+      
+      &::before {
+        content: "✕";
+        font-size: 1.2rem;
+        line-height: 0;
+      }
+      
+      &:hover {
+        background: #d32f2f;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+      }
+      
+      &:active {
+        transform: translateY(0);
+      }
+    }
+  }
+} 

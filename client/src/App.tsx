@@ -1,17 +1,17 @@
 import Registration from './сomponents/Registration/Registration';
 import JobList from './сomponents/Jobs/JobList/JobList';
-import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import NavBar from './сomponents/NavBar/NavBar';
 import Authentication from './сomponents/Authentication/Authentication';
-import { useState, useEffect, JSX, useCallback } from 'react';
+import { useState, useEffect, JSX } from 'react';
 import { User, UserApi, UserRole, storage } from './api/UserApi';
 import Profile from './сomponents/Profile/Profile';
 import SavedJobs from './сomponents/Jobs/SavedJobs/SavedJobs';
 import RoleBasedRoute from './сomponents/Authentication/RoleBasedRoute';
 import Companies from './сomponents/Company/Companies/Companies';
 import CompanyDetails from './сomponents/Company/CompanyDetails/CompanyDetails';
-import JobDetail from './сomponents/Jobs/JobDetail/JobDetail';
 import EmployerJobDetail from './сomponents/Jobs/EmployerJobDetail/EmployerJobDetail';
+import MyApplications from './сomponents/Jobs/MyApplications/MyApplications';
 
 const ProtectedRoute = ({ user, isLoading, children }: { user: User | null, isLoading: boolean, children: JSX.Element}) => {
   // First, check if authentication is still being verified
@@ -27,45 +27,10 @@ const ProtectedRoute = ({ user, isLoading, children }: { user: User | null, isLo
   return children;
 }
 
-// JobDetailWrapper to extract jobId from URL params
-const JobDetailWrapper = () => {
-  const { jobId } = useParams<{ jobId: string }>();
-  return <JobDetail jobId={jobId || ''} />;
-};
 
 function AppContent() {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  const verifyAuth = useCallback(async () => {
-    const token = storage.getToken();
-    
-    if (!token) {
-      console.log('No token found, user is not authenticated');
-      setUser(null);
-      setIsLoading(false);
-      return;
-    }
-    
-    setIsLoading(true);
-    try {
-      console.log('Verifying authentication...');
-      const userData = await UserApi.getCurrentUser();
-      
-      if (userData && userData.id && userData.email) {
-        console.log('Authentication successful, user data loaded:', userData.email);
-        setUser(userData);
-      } else {
-        console.log('Authentication failed, no valid user data returned');
-        setUser(null);
-      }
-    } catch (error) {
-      console.error('Auth verification error:', error);
-      setUser(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
     // Set a flag to handle component unmounting and signal auth checking
@@ -291,6 +256,16 @@ function AppContent() {
           <Route path='/saved-jobs/:jobId' element={
             <RoleBasedRoute user={user} isLoading={isLoading} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
               <SavedJobs />
+            </RoleBasedRoute>
+          } />
+          <Route path='/my-applications' element={
+            <RoleBasedRoute user={user} isLoading={isLoading} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
+              <MyApplications />
+            </RoleBasedRoute>
+          } />
+          <Route path='/my-applications/:jobId' element={
+            <RoleBasedRoute user={user} isLoading={isLoading} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
+              <MyApplications />
             </RoleBasedRoute>
           } />
         </Routes>

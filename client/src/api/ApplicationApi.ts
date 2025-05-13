@@ -155,7 +155,7 @@ const ApplicationApi = {
       
       const response = await fetch(`${API_BASE_URL}/api/jobs/${jobId}/withdraw`, {
         method: 'DELETE',
-        headers: getAuthHeaders(),
+        headers: getAuthHeaders(false),
         credentials: 'include',
       });
 
@@ -164,11 +164,15 @@ const ApplicationApi = {
       }
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Error withdrawing application');
+        try {
+          const error = await response.json();
+          throw new Error(error.message || 'Error withdrawing application');
+        } catch (e) {
+          throw new Error(`Error withdrawing application: ${response.statusText}`);
+        }
       }
-
-      return response.json();
+      
+      return;
     } catch (error) {
       console.error('Error withdrawing application: ', error);
       throw error;

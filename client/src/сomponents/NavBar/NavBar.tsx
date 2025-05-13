@@ -38,6 +38,9 @@ const NavBar = ({ user, isLoading, onLogout }: NavBarProps) => {
           <Link to="/saved-jobs" className="nav-link">
             Saved Jobs
           </Link>
+          <Link to="/my-applications" className="nav-link applications-link">
+            My Applications
+          </Link>
         </>
       );
     } else if (user.role === UserRole.ADMIN) {
@@ -51,6 +54,9 @@ const NavBar = ({ user, isLoading, onLogout }: NavBarProps) => {
           </Link>
           <Link to="/saved-jobs" className="nav-link">
             Saved Jobs
+          </Link>
+          <Link to="/my-applications" className="nav-link applications-link">
+            My Applications
           </Link>
         </>
       );

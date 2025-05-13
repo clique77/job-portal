@@ -67,6 +67,21 @@
     }
   }
 
+  .applications-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #64748b;
+
+    &:hover {
+      color: #1a237e;
+    }
+
+    &::before {
+      font-size: 1.25rem;
+    }
+  }
+
   .user-name {
     color: #64748b;
     font-weight: 500;
