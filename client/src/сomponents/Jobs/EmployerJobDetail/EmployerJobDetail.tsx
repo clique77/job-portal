@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import { JOB_TYPE_LABELS, JobsApi } from '../../../api/JobsApi';
 import CompanyApi from '../../../api/CompanyApi';
 import JobApplicantsList from '../JobApplicantsList/JobApplicantsList';
-import { useAuth } from '../../../hooks/useAuth';
 import './EmployerJobDetail.scss';
 
 interface JobDetails {
@@ -32,7 +31,6 @@ const EmployerJobDetail = () => {
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [companyName, setCompanyName] = useState<string>('');
-  const { user } = useAuth();
 
   useEffect(() => {
     const fetchJobDetails = async () => {

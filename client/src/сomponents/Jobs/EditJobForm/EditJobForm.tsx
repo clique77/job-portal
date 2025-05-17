@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { JobsApi, Job, JobUpdateData, JobType, JOB_CATEGORIES, JOB_TYPE_LABELS } from '../../../api/JobsApi';
+import { JobsApi, Job, JobUpdateData, JOB_CATEGORIES, JOB_TYPE_LABELS } from '../../../api/JobsApi';
 import './EditJobForm.scss';
 
 interface EditJobFormProps {

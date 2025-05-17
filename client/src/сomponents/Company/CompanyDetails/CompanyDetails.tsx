@@ -20,7 +20,6 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = () => {
   
   const [company, setCompany] = useState<Company | null>(null);
   const [userCompany, setUserCompany] = useState<UserCompany | null>(null);
-  const [members, setMembers] = useState<any[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,9 +65,6 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = () => {
       setUserCompany(userCompanyRelation || null);
       
       if (userCompanyRelation) {
-        const companyMembers = await CompanyApi.getCompanyMembers(companyId);
-        setMembers(companyMembers);
-
         await fetchCompanyJobs();
       }
     } catch (err) {

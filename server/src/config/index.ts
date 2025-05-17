@@ -11,8 +11,8 @@ const config = {
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
   cookieSecret: process.env.COOKIE_SECRET || process.env.COOKIE_FALLBACK_SECRET,
   uploads: {
-    directory: path.join(__dirname, '../../../uploads'),
-    maxSize: 10 * 1024 * 1024,
+    directory: process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads'),
+    maxSize: parseInt(process.env.MAX_UPLOAD_SIZE || '5242880', 10),
   }
 }
 

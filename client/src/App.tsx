@@ -13,6 +13,7 @@ import CompanyDetails from './сomponents/Company/CompanyDetails/CompanyDetails'
 import EmployerJobDetail from './сomponents/Jobs/EmployerJobDetail/EmployerJobDetail';
 import MyApplications from './сomponents/Jobs/JobSeekerApplications/JobSeekerApplications';
 import AdminDashboard from './сomponents/Admin/Dashboard/AdminDashboard';
+import SitePassword from './сomponents/SitePassword/SitePassword';
 
 const ProtectedRoute = ({ user, isLoading, children }: { user: User | null, isLoading: boolean, children: JSX.Element}) => {
   // First, check if authentication is still being verified
@@ -30,6 +31,7 @@ const ProtectedRoute = ({ user, isLoading, children }: { user: User | null, isLo
 
 
 function AppContent() {
+  const [isAccessGranted, setIsAccessGranted] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -188,6 +190,10 @@ function AppContent() {
     }
   };
   
+  if (!isAccessGranted) {
+    return <SitePassword onAccessGranted={() => setIsAccessGranted(true)} />;
+  }
+
   return (
     <>
       <div className='navigation'>

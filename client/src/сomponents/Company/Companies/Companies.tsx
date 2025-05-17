@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import CompanyApi, { UserCompany, Company } from '../../../api/CompanyApi';
+import CompanyApi, { UserCompany } from '../../../api/CompanyApi';
 import './Companies.scss';
 import CompanyCard from '../CompanyCard/CompanyCard';
 import CreateCompanyForm from '../CreateCompanyForm/CreateCompanyForm';
