@@ -7,21 +7,24 @@ import path from 'path';
 import config from '../../../config';
 import { mkdir } from 'fs/promises';
 import { createWriteStream } from 'fs';
-import { pipeline } from 'stream/promises'; 
+import { pipeline } from 'stream/promises';
+import { S3Service } from '../../../core/services/storage/S3Service';
 
 export class UserController {
   private userService: IUserService;
   private errorHandlerService: IErrorHandlerService;
   private paginationService: IPaginationService;
+  private s3Service: S3Service;
 
   constructor(
     userService: IUserService,
-    errorHandlerService: IErrorHandlerService, 
-    paginationService: IPaginationService, 
+    errorHandlerService: IErrorHandlerService,
+    paginationService: IPaginationService
   ) {
     this.userService = userService;
     this.errorHandlerService = errorHandlerService;
     this.paginationService = paginationService;
+    this.s3Service = new S3Service();
     this.getCurrentUser = this.getCurrentUser.bind(this);
     this.getAllUsers = this.getAllUsers.bind(this);
     this.updateUserProfile = this.updateUserProfile.bind(this);
@@ -137,16 +140,15 @@ export class UserController {
         });
       }
   
-      const uploadDir = path.join(config.uploads.directory, 'profile-pictures');
-      await mkdir(uploadDir, { recursive: true });
+      // Upload to S3
+      const fileUrl = await this.s3Service.uploadFile(
+        data.file,
+        data.filename,
+        data.mimetype,
+        'profile-pictures'
+      );
   
-      const fileName = `${Date.now()}-${data.filename}`;
-      const filePath = path.join(uploadDir, fileName);
-  
-      await pipeline(data.file, createWriteStream(filePath));
-  
-      const profilePictureUrl = `/uploads/profile-pictures/${fileName}`;
-      const updatedUser = await this.userService.updateProfilePicture(userId, profilePictureUrl);
+      const updatedUser = await this.userService.updateProfilePicture(userId, fileUrl);
   
       if (!updatedUser) {
         return reply.status(404).send({ message: 'Failed to update profile picture' });

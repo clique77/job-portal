@@ -2,10 +2,7 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { IResumeService } from '../../../core/services/Resume/interfaces/IResumeService';
 import { IErrorHandlerService } from '../../../core/services/common/error-handler/interfaces/ErrorHandlerInterfaces';
 import { IPaginationService } from '../../../core/services/common/pagination/interfaces/PaginationServiceInterfaces';
-import { pipeline } from 'stream/promises';
-import { createWriteStream } from 'fs';
-import { mkdir } from 'fs/promises';
-import path from 'path';
+import { S3Service } from '../../../core/services/storage/S3Service';
 import config from '../../../config';
 
 interface CreateResumeBody {
@@ -19,6 +16,7 @@ class ResumeController {
   private resumeService: IResumeService;
   private errorHandlerService: IErrorHandlerService;
   private paginationService: IPaginationService;
+  private s3Service: S3Service;
 
   constructor(
     resumeService: IResumeService,
@@ -28,6 +26,7 @@ class ResumeController {
     this.resumeService = resumeService;
     this.errorHandlerService = errorHandlerService;
     this.paginationService = paginationService;
+    this.s3Service = new S3Service();
 
     this.createResume = this.createResume.bind(this);
     this.getResumeById = this.getResumeById.bind(this);
@@ -56,18 +55,17 @@ class ResumeController {
       // @ts-ignore
       const userId = request.user.id;
       
-      // Create the uploads directory if it doesn't exist
-      await mkdir(config.uploads.directory, { recursive: true });
-
-      // Create a consistent filename with timestamp
-      const fileName = `${Date.now()}-${data.filename}`;
-      const filePath = path.join(config.uploads.directory, fileName);
-
-      await pipeline(data.file, createWriteStream(filePath));
+      // Upload to S3
+      const fileUrl = await this.s3Service.uploadFile(
+        data.file,
+        data.filename,
+        data.mimetype,
+        'resumes'
+      );
 
       const resumeData = {
         fileName: data.filename,
-        filePath: fileName, // Store just the filename, not the full path
+        filePath: fileUrl,
         fileType: data.mimetype,
         fileSize: data.file.bytesRead
       };

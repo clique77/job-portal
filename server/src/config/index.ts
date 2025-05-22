@@ -13,6 +13,12 @@ const config = {
   uploads: {
     directory: process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads'),
     maxSize: parseInt(process.env.MAX_UPLOAD_SIZE || '5242880', 10),
+  },
+  aws: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+    region: process.env.AWS_REGION || 'us-east-1',
+    bucketName: process.env.AWS_BUCKET_NAME || ''
   }
 }
 
