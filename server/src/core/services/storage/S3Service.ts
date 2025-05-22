@@ -28,7 +28,6 @@ export class S3Service {
       Key: key,
       Body: fileStream,
       ContentType: mimeType,
-      ACL: 'public-read'
     };
 
     try {

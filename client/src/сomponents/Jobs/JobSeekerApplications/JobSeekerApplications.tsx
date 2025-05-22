@@ -86,6 +86,7 @@ const MyApplications: React.FC = () => {
   const lastNavigationTimeRef = useRef<number>(0);
   const navigate = useNavigate();
   const { jobId } = useParams();
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (jobId) {
@@ -123,19 +124,22 @@ const MyApplications: React.FC = () => {
     fetchApplications();
   }, []);
 
+  const isMobile = () => window.innerWidth <= 700;
+
   const handleJobClick = (jobId: string) => {
     if (isNavigating || selectedJob === jobId) return;
-    
     const currentTime = Date.now();
     if (currentTime - lastNavigationTimeRef.current < 300) {
       return;
     }
-    
     lastNavigationTimeRef.current = currentTime;
     setIsNavigating(true);
     setSelectedJob(jobId);
-    navigate(`/my-applications/${jobId}`, { replace: true });
-    
+    if (isMobile()) {
+      setShowModal(true);
+    } else {
+      navigate(`/my-applications/${jobId}`, { replace: true });
+    }
     setTimeout(() => {
       setIsNavigating(false);
     }, 300);
@@ -172,6 +176,11 @@ const MyApplications: React.FC = () => {
     setShowConfirmation(false);
     setJobToWithdraw(null);
     setWithdrawError(null);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedJob(null);
   };
 
   if (isLoading) {
@@ -224,13 +233,26 @@ const MyApplications: React.FC = () => {
         )}
       </div>
 
-      {selectedJob && (
+      {selectedJob && !isMobile() && (
         <div className="job-details-section">
           <ApplicationJobDetail 
             jobId={selectedJob}
             isPending={applications.find(app => app.job._id === selectedJob)?.application.status.toUpperCase() === 'PENDING'}
             onWithdraw={() => handleWithdrawClick(selectedJob)}
           />
+        </div>
+      )}
+
+      {selectedJob && isMobile() && showModal && (
+        <div className="job-details-modal-overlay" onClick={closeModal}>
+          <div className="job-details-modal" onClick={e => e.stopPropagation()}>
+            <button className="close-modal-btn" onClick={closeModal}>&times;</button>
+            <ApplicationJobDetail 
+              jobId={selectedJob}
+              isPending={applications.find(app => app.job._id === selectedJob)?.application.status.toUpperCase() === 'PENDING'}
+              onWithdraw={() => handleWithdrawClick(selectedJob)}
+            />
+          </div>
         </div>
       )}
 

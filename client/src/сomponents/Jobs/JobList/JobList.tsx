@@ -5,6 +5,8 @@ import JobDetails from '../JobDetail/JobDetail';
 import JobCard from '../JobCard/JobCard';
 import './JobList.scss';
 
+const isMobile = () => window.innerWidth <= 700;
+
 const JobList: React.FC = () => {
   const [allJobs, setAllJobs] = useState<Job[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<Job[]>([]);
@@ -22,6 +24,7 @@ const JobList: React.FC = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
   const [isNavigating, setIsNavigating] = useState<boolean>(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (jobId) {
@@ -89,15 +92,21 @@ const JobList: React.FC = () => {
 
   const handleJobClick = (jobId: string) => {
     if (isNavigating || selectedJob === jobId) return;
-    
     setIsNavigating(true);
     setSelectedJob(jobId);
-    
-    navigate(`/jobs/${jobId}`, { replace: true });
-    
+    if (isMobile()) {
+      setShowModal(true);
+    } else {
+      navigate(`/jobs/${jobId}`, { replace: true });
+    }
     setTimeout(() => {
       setIsNavigating(false);
     }, 300);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedJob(null);
   };
 
   const getCurrentPageJobs = () => {
@@ -186,9 +195,18 @@ const JobList: React.FC = () => {
         )}
       </div>
 
-      {selectedJob && (
+      {/* Desktop/Tablet: Side panel, Mobile: Modal */}
+      {selectedJob && !isMobile() && (
         <div className="job-details-section">
           <JobDetails jobId={selectedJob} />
+        </div>
+      )}
+      {selectedJob && isMobile() && showModal && (
+        <div className="job-details-modal-overlay" onClick={closeModal}>
+          <div className="job-details-modal" onClick={e => e.stopPropagation()}>
+            <button className="close-modal-btn" onClick={closeModal}>&times;</button>
+            <JobDetails jobId={selectedJob} />
+          </div>
         </div>
       )}
     </div>

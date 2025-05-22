@@ -19,6 +19,8 @@ const SavedJobs: React.FC = () => {
   const limit = 8; // Number of jobs per page
   const navigate = useNavigate();
   const { jobId } = useParams();
+  const isMobile = () => window.innerWidth <= 700;
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     if (jobId) {
@@ -91,21 +93,19 @@ const SavedJobs: React.FC = () => {
   };
 
   const handleJobClick = (jobId: string) => {
-    // Prevent rapid clicking from causing navigation issues
     if (isNavigating || selectedJob === jobId) return;
-    
     const currentTime = Date.now();
-    // Add debounce to avoid multiple rapid navigation attempts
     if (currentTime - lastNavigationTimeRef.current < 300) {
       return;
     }
-    
     lastNavigationTimeRef.current = currentTime;
     setIsNavigating(true);
     setSelectedJob(jobId);
-    navigate(`/saved-jobs/${jobId}`, { replace: true });
-    
-    // Reset navigation lock after a short delay
+    if (isMobile()) {
+      setShowModal(true);
+    } else {
+      navigate(`/saved-jobs/${jobId}`, { replace: true });
+    }
     setTimeout(() => {
       setIsNavigating(false);
     }, 300);
@@ -116,6 +116,11 @@ const SavedJobs: React.FC = () => {
     // Reset selected job when changing pages
     setSelectedJob(null);
     navigate('/saved-jobs', { replace: true });
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedJob(null);
   };
 
   if (isLoading) {
@@ -194,9 +199,18 @@ const SavedJobs: React.FC = () => {
         )}
       </div>
 
-      {selectedJob && (
+      {/* Desktop/Tablet: Side panel, Mobile: Modal */}
+      {selectedJob && !isMobile() && (
         <div className="job-details-section">
           <JobDetails jobId={selectedJob} />
+        </div>
+      )}
+      {selectedJob && isMobile() && showModal && (
+        <div className="job-details-modal-overlay" onClick={closeModal}>
+          <div className="job-details-modal" onClick={e => e.stopPropagation()}>
+            <button className="close-modal-btn" onClick={closeModal}>&times;</button>
+            <JobDetails jobId={selectedJob} />
+          </div>
         </div>
       )}
     </div>

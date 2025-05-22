@@ -521,6 +521,77 @@
   }
 }
 
+@media (max-width: 700px) {
+  .profile-container {
+    padding: 0 0.3rem;
+    margin: 0.5rem auto;
+  }
+  .profile-card {
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,128,0.08);
+    .profile-cover {
+      height: 90px;
+    }
+    .profile-header {
+      padding: 0 1rem;
+      margin-top: 0.5rem;
+      h2 {
+        font-size: 1.1rem;
+      }
+      .edit-profile-btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.95rem;
+        border-radius: 8px;
+      }
+    }
+  }
+  .profile-picture {
+    width: 80px;
+    height: 80px;
+    margin-left: 1rem;
+    margin-top: -40px;
+    img, .profile-picture-placeholder {
+      font-size: 2.2rem;
+      border-width: 3px;
+    }
+  }
+  .profile-content {
+    padding: 0 0.7rem 1rem;
+  }
+  .profile-section {
+    margin-bottom: 1.1rem;
+    .section-title {
+      font-size: 1.05rem;
+      margin-bottom: 0.7rem;
+      padding-bottom: 0.5rem;
+      &::after {
+        width: 30px;
+        height: 2px;
+      }
+    }
+  }
+  .profile-info {
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+    .info-group {
+      font-size: 0.97rem;
+      label {
+        font-size: 0.93rem;
+      }
+      .link-item, .bio, .company, .dates, .description {
+        font-size: 0.97rem;
+      }
+    }
+  }
+  .meta-item, .profile-badge {
+    font-size: 0.93rem;
+  }
+  .social-links a {
+    font-size: 0.97rem;
+    padding: 0.2rem 0.5rem;
+  }
+}
+
 // Floating animation for profile picture
 @keyframes float {
   0%, 100% { transform: translateY(0); }

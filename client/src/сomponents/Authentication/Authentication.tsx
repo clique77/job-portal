@@ -61,6 +61,13 @@ const Authentication = ({ onLoginSuccess }: AuthenticationProps) => {
     <div className="container">
       <main>
         <section className="login-section">
+          <div className="login-logo">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+              <rect x="5" y="11" width="14" height="8" rx="3" fill="#6366f1"/>
+              <path d="M8 11V8a4 4 0 1 1 8 0v3" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="12" cy="15" r="1.5" fill="#fff"/>
+            </svg>
+          </div>
           <h2>Login</h2>
 
           {error && <div className="error-message">{error}</div>}
