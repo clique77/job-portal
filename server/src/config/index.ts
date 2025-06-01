@@ -3,6 +3,10 @@ import path from 'path';
 
 dotenv.config();
 
+const rootDir = path.resolve(__dirname, '../../..');
+
+const uploadsDir = path.join(rootDir, 'uploads');
+
 const config = {
   port: parseInt(process.env.PORT || '3000', 10),
   mongoUri: process.env.MONGO_URI || 'mongodb://localhost:27017/job-portal',
@@ -11,7 +15,7 @@ const config = {
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
   cookieSecret: process.env.COOKIE_SECRET || process.env.COOKIE_FALLBACK_SECRET,
   uploads: {
-    directory: process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads'),
+    directory: uploadsDir,
     maxSize: parseInt(process.env.MAX_UPLOAD_SIZE || '5242880', 10),
   },
   aws: {
@@ -21,5 +25,7 @@ const config = {
     bucketName: process.env.AWS_BUCKET_NAME || ''
   }
 }
+
+console.log('Final uploads directory:', config.uploads.directory);
 
 export default config;

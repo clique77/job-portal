@@ -2,8 +2,10 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { IResumeService } from '../../../core/services/Resume/interfaces/IResumeService';
 import { IErrorHandlerService } from '../../../core/services/common/error-handler/interfaces/ErrorHandlerInterfaces';
 import { IPaginationService } from '../../../core/services/common/pagination/interfaces/PaginationServiceInterfaces';
-import { S3Service } from '../../../core/services/storage/S3Service';
 import config from '../../../config';
+import { createWriteStream } from 'fs';
+import path from 'path';
+import { mkdir } from 'fs/promises';
 
 interface CreateResumeBody {
   fileName: string;
@@ -16,7 +18,6 @@ class ResumeController {
   private resumeService: IResumeService;
   private errorHandlerService: IErrorHandlerService;
   private paginationService: IPaginationService;
-  private s3Service: S3Service;
 
   constructor(
     resumeService: IResumeService,
@@ -26,7 +27,6 @@ class ResumeController {
     this.resumeService = resumeService;
     this.errorHandlerService = errorHandlerService;
     this.paginationService = paginationService;
-    this.s3Service = new S3Service();
 
     this.createResume = this.createResume.bind(this);
     this.getResumeById = this.getResumeById.bind(this);
@@ -54,17 +54,27 @@ class ResumeController {
 
       // @ts-ignore
       const userId = request.user.id;
-      
-      // Upload to S3
-      const fileUrl = await this.s3Service.uploadFile(
-        data.file,
-        data.filename,
-        data.mimetype,
-        'resumes'
-      );
+
+      // Save to local disk
+      const uploadDir = config.uploads.directory;
+      await mkdir(uploadDir, { recursive: true });
+
+      // Generate unique filename
+      const timestamp = Date.now();
+      const filename = `${timestamp}-${data.filename}`;
+      const filePath = path.join(uploadDir, filename);
+
+      await new Promise((resolve, reject) => {
+        const writeStream = createWriteStream(filePath);
+        data.file.pipe(writeStream);
+        data.file.on('end', resolve);
+        data.file.on('error', reject);
+      });
+
+      const fileUrl = `/uploads/${data.filename}`;
 
       const resumeData = {
-        fileName: data.filename,
+        fileName: filename,
         filePath: fileUrl,
         fileType: data.mimetype,
         fileSize: data.file.bytesRead

@@ -1,4 +1,4 @@
-import fastify from 'fastify';
+import fastify, { FastifyInstance } from 'fastify';
 import jwt from '@fastify/jwt';
 import cookie from '@fastify/cookie';
 import multipart from '@fastify/multipart';
@@ -8,6 +8,36 @@ import cors from '@fastify/cors';
 import database from './data/MongodbConnection';
 import path from 'path';
 import fastifyStatic from '@fastify/static';
+
+const bootstrapFastify = (): FastifyInstance => {
+  const server = fastify({
+      exposeHeadRoutes: false,
+      connectionTimeout: 20000,
+      ignoreTrailingSlash: false,
+      logger: config.nodeEnv !== 'development' ? false : {
+          level: "debug",
+          transport: {
+              target: "pino-pretty",
+              options: {
+                  colorize: true,
+                  translateTime: "HH:MM:ss Z",
+                  ignore: "pid,hostname",
+              },
+          },
+      },
+      disableRequestLogging: true,
+  });
+
+  if (config.nodeEnv === 'development') {
+      server.ready(() => {
+          console.log('\nAPI Structure\n', server.printRoutes());
+      });
+  }
+
+  return server;
+};
+
+const app = bootstrapFastify();
 
 export const build = async () => {
   app.addContentTypeParser('application/json', { parseAs: 'string' }, (req, body, done) => {
@@ -25,9 +55,6 @@ export const build = async () => {
 
   return app;
 }
-const app = fastify({
-  logger: true,
-});
 
 app.register(multipart, {
   limits: {

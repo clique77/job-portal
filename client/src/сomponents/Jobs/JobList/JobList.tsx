@@ -3,9 +3,18 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Job, JobsApi, JOB_TYPE_LABELS } from "../../../api/JobsApi";
 import JobDetails from '../JobDetail/JobDetail';
 import JobCard from '../JobCard/JobCard';
+import { motion, AnimatePresence } from 'framer-motion';
 import './JobList.scss';
 
-const isMobile = () => window.innerWidth <= 700;
+const listVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.07, delayChildren: 0.1 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0 },
+};
 
 const JobList: React.FC = () => {
   const [allJobs, setAllJobs] = useState<Job[]>([]);
@@ -24,7 +33,14 @@ const JobList: React.FC = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
   const [isNavigating, setIsNavigating] = useState<boolean>(false);
-  const [showModal, setShowModal] = useState(false);
+  const [isMobileView, setIsMobileView] = useState<boolean>(window.innerWidth <= 768);
+  const [savedJobIds, setSavedJobIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobileView(window.innerWidth <= 768);
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     if (jobId) {
@@ -65,6 +81,18 @@ const JobList: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const fetchSavedJobs = async () => {
+      try {
+        const res = await JobsApi.getSavedJobs(1, 100);
+        setSavedJobIds(res.jobs.map((job: Job) => job._id));
+      } catch (e) {
+        setSavedJobIds([]);
+      }
+    };
+    fetchSavedJobs();
+  }, []);
+
+  useEffect(() => {
     const filtered = allJobs.filter(job => {
       const isMongoId = job.company && job.company.length === 24 && /^[0-9a-fA-F]{24}$/.test(job.company);
       
@@ -85,6 +113,23 @@ const JobList: React.FC = () => {
     setPage(1);
   }, [filters, allJobs]);
 
+  useEffect(() => {
+    if (isMobileView && selectedJob) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100vw';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    };
+  }, [isMobileView, selectedJob]);
+
   const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = event.target;
     setFilters(prev => ({ ...prev, [name]: value }));
@@ -94,9 +139,7 @@ const JobList: React.FC = () => {
     if (isNavigating || selectedJob === jobId) return;
     setIsNavigating(true);
     setSelectedJob(jobId);
-    if (isMobile()) {
-      setShowModal(true);
-    } else {
+    if (!isMobileView) {
       navigate(`/jobs/${jobId}`, { replace: true });
     }
     setTimeout(() => {
@@ -105,7 +148,6 @@ const JobList: React.FC = () => {
   };
 
   const closeModal = () => {
-    setShowModal(false);
     setSelectedJob(null);
   };
 
@@ -122,6 +164,10 @@ const JobList: React.FC = () => {
 
         <div className="job-filters">
           <div className="search-box">
+            <svg className="search-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="9" cy="9" r="7" stroke="#90caf9" strokeWidth="2" fill="#e3f2fd" />
+              <line x1="14.2" y1="14.2" x2="18" y2="18" stroke="#1976d2" strokeWidth="2" strokeLinecap="round" />
+            </svg>
             <input
               type="text"
               name="search"
@@ -130,9 +176,9 @@ const JobList: React.FC = () => {
               placeholder="Search by keywords..."
             />
           </div>
-
           <div className="filter-group">
             <select
+              className="select-animated"
               name="location"
               value={filters.location}
               onChange={handleFilterChange}
@@ -142,8 +188,8 @@ const JobList: React.FC = () => {
                 <option key={location} value={location}>{location}</option>
               ))}
             </select>
-
             <select
+              className="select-animated"
               name="type"
               value={filters.type}
               onChange={handleFilterChange}
@@ -164,15 +210,31 @@ const JobList: React.FC = () => {
           <div className="no-jobs">No jobs found</div>
         ) : (
           <>
-            <div className="job-cards">
-              {getCurrentPageJobs().map((job) => (
-                <JobCard
-                  key={job._id}
-                  job={job}
-                  onJobClick={handleJobClick}
-                />
-              ))}
-            </div>
+            <motion.div
+              className="job-cards"
+              variants={listVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <AnimatePresence>
+                {getCurrentPageJobs().map((job) => (
+                  <motion.div
+                    key={job._id}
+                    variants={itemVariants}
+                    exit={{ opacity: 0, y: 30 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <JobCard
+                      job={job}
+                      onJobClick={handleJobClick}
+                      isSaved={savedJobIds.includes(job._id)}
+                      isUnsaving={false}
+                      isSelected={selectedJob === job._id}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
 
             {totalPages > 1 && (
               <div className="pagination">
@@ -195,17 +257,24 @@ const JobList: React.FC = () => {
         )}
       </div>
 
-      {/* Desktop/Tablet: Side panel, Mobile: Modal */}
-      {selectedJob && !isMobile() && (
+      {/* Desktop/Tablet: Side panel */}
+      {selectedJob && !isMobileView && (
         <div className="job-details-section">
           <JobDetails jobId={selectedJob} />
         </div>
       )}
-      {selectedJob && isMobile() && showModal && (
+
+      {/* Mobile: Bottom Sheet Modal */}
+      {selectedJob && isMobileView && (
         <div className="job-details-modal-overlay" onClick={closeModal}>
-          <div className="job-details-modal" onClick={e => e.stopPropagation()}>
+          <div
+            className="job-details-bottom-sheet"
+            onClick={e => e.stopPropagation()}
+          >
             <button className="close-modal-btn" onClick={closeModal}>&times;</button>
-            <JobDetails jobId={selectedJob} />
+            <div className="modal-content">
+              <JobDetails jobId={selectedJob} />
+            </div>
           </div>
         </div>
       )}

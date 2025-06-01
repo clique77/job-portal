@@ -14,6 +14,7 @@ import EmployerJobDetail from './сomponents/Jobs/EmployerJobDetail/EmployerJobD
 import MyApplications from './сomponents/Jobs/JobSeekerApplications/JobSeekerApplications';
 import AdminDashboard from './сomponents/Admin/Dashboard/AdminDashboard';
 import SitePassword from './сomponents/SitePassword/SitePassword';
+import Landing from './сomponents/Landing/Landing';
 
 const ProtectedRoute = ({ user, isLoading, children }: { user: User | null, isLoading: boolean, children: JSX.Element}) => {
   // First, check if authentication is still being verified
@@ -197,19 +198,23 @@ function AppContent() {
   return (
     <>
       <div className='navigation'>
-        <NavBar user={user} isLoading={isLoading} onLogout={handleLogout} /> 
+        <NavBar user={user} isLoading={isLoading} onLogout={handleLogout} />
       </div>
       <div className='App'>
         <Routes>
           {/* Home page - Role-based redirect */}
           <Route path='/' element={
-            user?.role === UserRole.EMPLOYER ? 
-              <Navigate to='/companies' replace /> : 
-              user?.role === UserRole.ADMIN ?
-                <Navigate to='/admin' replace /> :
-                <RoleBasedRoute user={user} isLoading={isLoading} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
-                  <JobList />
-                </RoleBasedRoute>
+            user ? (
+              user.role === UserRole.EMPLOYER ? 
+                <Navigate to='/companies' replace /> : 
+                user.role === UserRole.ADMIN ?
+                  <Navigate to='/admin' replace /> :
+                  <RoleBasedRoute user={user} isLoading={isLoading} allowedRoles={[UserRole.JOB_SEEKER, UserRole.ADMIN]}>
+                    <JobList />
+                  </RoleBasedRoute>
+            ) : (
+              <Landing />
+            )
           } />
           
           {/* Job seeker routes */}

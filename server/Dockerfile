@@ -30,7 +30,7 @@ RUN npm install --production
 COPY --from=builder /app/dist ./dist
 
 # Create uploads directory structure with proper permissions
-RUN mkdir -p /app/uploads/profile-pictures && \
+RUN mkdir -p /app/uploads/profile-pictures /app/uploads/resumes && \
     chown -R appuser:appgroup /app && \
     chmod -R 755 /app/uploads
 

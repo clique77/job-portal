@@ -8,13 +8,11 @@ import config from '../../../config';
 import { mkdir } from 'fs/promises';
 import { createWriteStream } from 'fs';
 import { pipeline } from 'stream/promises';
-import { S3Service } from '../../../core/services/storage/S3Service';
 
 export class UserController {
   private userService: IUserService;
   private errorHandlerService: IErrorHandlerService;
   private paginationService: IPaginationService;
-  private s3Service: S3Service;
 
   constructor(
     userService: IUserService,
@@ -24,7 +22,6 @@ export class UserController {
     this.userService = userService;
     this.errorHandlerService = errorHandlerService;
     this.paginationService = paginationService;
-    this.s3Service = new S3Service();
     this.getCurrentUser = this.getCurrentUser.bind(this);
     this.getAllUsers = this.getAllUsers.bind(this);
     this.updateUserProfile = this.updateUserProfile.bind(this);
@@ -139,14 +136,23 @@ export class UserController {
           message: `File size exceeds maximum limit of ${config.uploads.maxSize / 1024 / 1024}MB` 
         });
       }
-  
-      // Upload to S3
-      const fileUrl = await this.s3Service.uploadFile(
-        data.file,
-        data.filename,
-        data.mimetype,
-        'profile-pictures'
-      );
+
+      // Ensure uploads directory exists
+      const uploadDir = path.join(config.uploads.directory, 'profile-pictures');
+      console.log('Upload directory path:', uploadDir);
+      await mkdir(uploadDir, { recursive: true });
+
+      // Generate unique filename
+      const timestamp = Date.now();
+      const filename = `${timestamp}-${data.filename}`;
+      const filePath = path.join(uploadDir, filename);
+      console.log('Full file path:', filePath);
+
+      // Save file to local storage
+      await pipeline(data.file, createWriteStream(filePath));
+
+      // Create URL for the uploaded file
+      const fileUrl = `/uploads/profile-pictures/${filename}`;
   
       const updatedUser = await this.userService.updateProfilePicture(userId, fileUrl);
   
