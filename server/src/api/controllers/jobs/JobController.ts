@@ -50,7 +50,9 @@ class JobController {
     this.isJobSaved = this.isJobSaved.bind(this);
     this.getSavedJobs = this.getSavedJobs.bind(this);
     this.getUniqueLocations = this.getUniqueLocations.bind(this);
+    this.getUniqueTags = this.getUniqueTags.bind(this);
     this.getCompanyJobs = this.getCompanyJobs.bind(this);
+    this.getMaxSalary = this.getMaxSalary.bind(this);
   }
 
   async createJob(request: FastifyRequest<{ Body: JobCreateData }>, reply: FastifyReply) {
@@ -237,6 +239,19 @@ class JobController {
     }
   }
 
+  async getUniqueTags(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const tags = await this.jobService.getUniqueTags();
+      
+      return reply.status(200).send({
+        success: true,
+        data: tags
+      });
+    } catch (error) {
+      return this.errorHandlerService.handleError(request, reply, (error as Error), 500);
+    }
+  }
+
   async getCompanyJobs(request: FastifyRequest<{ Params: { companyId: string } }>, reply: FastifyReply) {
     try {
       const { companyId } = request.params;
@@ -303,6 +318,15 @@ class JobController {
       return reply.status(200).send(allJobs);
     } catch (error) {
       console.error('Error in getCompanyJobs:', error);
+      return this.errorHandlerService.handleError(request, reply, (error as Error), 500);
+    }
+  }
+
+  async getMaxSalary(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const maxSalary = await this.jobService.getMaxSalary();
+      return reply.status(200).send({ success: true, data: maxSalary });
+    } catch (error) {
       return this.errorHandlerService.handleError(request, reply, (error as Error), 500);
     }
   }

@@ -57,6 +57,10 @@ export default function(fastify: FastifyInstance, _options: any, done: () => voi
   }, jobController.getSavedJobs);
 
   fastify.get('/api/jobs/locations', jobController.getUniqueLocations);
+  
+  fastify.get('/api/jobs/tags', jobController.getUniqueTags);
+
+  // fastify.get('/api/jobs/max-salary', jobController.getMaxSalary); maybe will need it later
 
   done();
 }

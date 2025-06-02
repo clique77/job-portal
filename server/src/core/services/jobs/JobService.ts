@@ -97,6 +97,11 @@ export class JobService implements IJobService {
     return jobRepository.getUniqueLocations();
   }
 
+  async getUniqueTags(): Promise<string[]> {
+    const jobRepository = getJobRepository();
+    return jobRepository.getUniqueTags();
+  }
+
   async findByEmployer(employerId: string, skip: number, limit: number): Promise<IJob[]> {
     try {
       const jobRepository = getJobRepository();
@@ -106,6 +111,11 @@ export class JobService implements IJobService {
       console.error(`Error finding jobs for employer ${employerId}:`, error);
       return [];
     }
+  }
+
+  async getMaxSalary(): Promise<number> {
+    const jobRepository = getJobRepository();
+    return jobRepository.getMaxSalary();
   }
 }
 

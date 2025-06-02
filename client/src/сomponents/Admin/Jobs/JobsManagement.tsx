@@ -394,9 +394,7 @@ const JobsManagement = () => {
                 >
                   <option value="USD">USD</option>
                   <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                  <option value="CAD">CAD</option>
-                  <option value="AUD">AUD</option>
+                  <option value="UAH">UAH</option>
                 </select>
               </div>
             </div>

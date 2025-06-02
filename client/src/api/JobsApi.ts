@@ -440,5 +440,22 @@ export const JobsApi = {
       console.error('Error fetching job locations:', error);
       return JOB_LOCATIONS;
     }
-  }
+  },
+
+  getTags: async (): Promise<string[]> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/jobs/tags`);
+      
+      if (!response.ok) {
+        console.error('Failed to fetch tags:', response.status);
+        return [];
+      }
+      
+      const result = await response.json();
+      return result.data || [];
+    } catch (error) {
+      console.error('Error fetching job tags:', error);
+      return [];
+    }
+  },
 }

@@ -10,6 +10,7 @@ interface JobCardProps {
   isSaved?: boolean;
   isUnsaving?: boolean;
   isSelected?: boolean;
+  singleColumn?: boolean;
 }
 
 const JobCard: React.FC<JobCardProps> = ({ 
@@ -18,7 +19,8 @@ const JobCard: React.FC<JobCardProps> = ({
   onUnsave, 
   isSaved: initialIsSaved,
   isUnsaving = false,
-  isSelected = false
+  isSelected = false,
+  singleColumn = false
 }) => {
   if (!job || !job._id || !job.title) {
     console.error('Invalid job object received by JobCard:', job);
@@ -108,6 +110,15 @@ const JobCard: React.FC<JobCardProps> = ({
 
   const isLoadingState = isLoading || isUnsaving;
 
+  // Tag logic
+  const MAX_TAGS_GRID = 3;
+  let visibleTags = job.tags;
+  let hiddenCount = 0;
+  if (!singleColumn && Array.isArray(job.tags) && job.tags.length > MAX_TAGS_GRID) {
+    visibleTags = job.tags.slice(0, MAX_TAGS_GRID);
+    hiddenCount = job.tags.length - MAX_TAGS_GRID;
+  }
+
   return (
     <div 
       className={`job-card ${isSaved ? 'saved' : ''} ${isSelected ? 'selected' : ''}`}
@@ -137,9 +148,12 @@ const JobCard: React.FC<JobCardProps> = ({
         </p>
       )}
       <div className="job-tags">
-        {Array.isArray(job.tags) && job.tags.map((tag, index) => (
+        {Array.isArray(visibleTags) && visibleTags.map((tag, index) => (
           <span key={index} className="job-tag">{tag}</span>
         ))}
+        {!singleColumn && hiddenCount > 0 && (
+          <span className="job-tag job-tag-ellipsis">+{hiddenCount} more</span>
+        )}
       </div>
     </div>
   );

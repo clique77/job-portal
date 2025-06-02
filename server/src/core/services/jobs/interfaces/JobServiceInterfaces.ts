@@ -27,4 +27,6 @@ export interface IJobService {
   getSavedJobs(userId: string): Promise<IJob[]>;
   isJobSaved(userId: string, jobId: string): Promise<boolean>;
   getUniqueLocations(): Promise<string[]>;
+  getUniqueTags(): Promise<string[]>;
+  getMaxSalary(): Promise<number>;
 }

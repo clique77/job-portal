@@ -37,6 +37,7 @@ export interface JobFilter {
   salary?: {
     min?: number;
     max?: number;
+    currency?: string;
   };
   search?: string;
   employer?: string;
@@ -80,6 +81,8 @@ export interface IJobRepository {
   getApplication(jobId: string, applicantId: string): Promise<IApplication | null>;
   findJobsByApplicant(applicantId: string, skip: number, limit: number): Promise<IJob[]>;
   getUniqueLocations(): Promise<string[]>;
+  getUniqueTags(): Promise<string[]>;
+  getMaxSalary(): Promise<number>;
 }
 
 export const getJobRepository = (): IJobRepository => {

@@ -136,6 +136,19 @@ export class JobMongoDBRepository implements IJobRepository {
     }
   }
 
+  async getUniqueTags(): Promise<string[]> {
+    try {
+      const tags = await Jobs.distinct('tags');
+      
+      return tags
+        .filter(tag => tag && tag.trim() !== '')
+        .sort((a, b) => a.localeCompare(b));
+    } catch (error) {
+      console.error('Error getting unique tags:', error);
+      return [];
+    }
+  }
+
   async search(query: string, skip: number, limit: number): Promise<IJob[]> {
     const jobs = await Jobs.find(
       { $text: { $search: query } },
@@ -351,6 +364,19 @@ export class JobMongoDBRepository implements IJobRepository {
     return jobs;
   }
 
+  async getMaxSalary(): Promise<number> {
+    try {
+      const result = await Jobs.aggregate([
+        { $match: { 'salary.max': { $exists: true, $ne: null } } },
+        { $group: { _id: null, maxSalary: { $max: '$salary.max' } } }
+      ]);
+      return result.length > 0 ? result[0].maxSalary : 0;
+    } catch (error) {
+      console.error('Error getting max salary:', error);
+      return 0;
+    }
+  }
+
   private buildQuery(filter?: JobFilter): any {
     const query: any = {};
 
@@ -379,6 +405,10 @@ export class JobMongoDBRepository implements IJobRepository {
 
       if (filter.salary.max) {
         query['salary.max'] = { $lte: filter.salary.max };
+      }
+
+      if (filter.salary.currency) {
+        query['salary.currency'] = filter.salary.currency;
       }
     }
 

@@ -1,0 +1,297 @@
+.landing-page {
+  min-height: calc(100vh - 60px);
+  background: #f8fafc;
+  position: relative;
+}
+
+.hero-section {
+  background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+  color: white;
+  padding: 4rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+    opacity: 0.1;
+    z-index: 0;
+  }
+
+  .hero-bg-anim {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+    .floating-shape {
+      position: absolute;
+      animation: float 8s ease-in-out infinite;
+      &.shape1 {
+        left: 5%; top: 10%;
+        animation-delay: 0s;
+      }
+      &.shape2 {
+        right: 10%; bottom: 5%;
+        animation-delay: 2s;
+      }
+    }
+  }
+}
+
+@keyframes float {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-30px) scale(1.05); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+.hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+
+  h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+  }
+
+  p {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+  }
+}
+
+.cta-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+
+  .cta-btn {
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+
+    &.primary {
+      background: #fff;
+      color: #1a237e;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
+    }
+
+    &.secondary {
+      background: transparent;
+      color: #fff;
+      border: 2px solid #fff;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+      }
+    }
+  }
+}
+
+.features-section {
+  padding: 5rem 2rem;
+  background: #fff;
+
+  h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #1a237e;
+    margin-bottom: 3rem;
+  }
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  h3 {
+    color: #1a237e;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: #64748b;
+    line-height: 1.6;
+  }
+}
+
+.about-portal-section {
+  background: #f8fafc;
+  padding: 4rem 0 3rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 320px;
+
+  .about-portal-content.wide {
+    max-width: 1100px;
+    width: 100%;
+    background: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 2.5rem 2.5rem;
+    text-align: center;
+    margin: 0 auto;
+    h2 {
+      font-size: 2.8rem;
+      color: #1a237e;
+      font-weight: 900;
+      margin-bottom: 2.2rem;
+      letter-spacing: 0.01em;
+      .typewriter-heading {
+        font-family: inherit;
+      }
+    }
+    p {
+      font-size: 1.45rem;
+      color: #374151;
+      line-height: 1.8;
+      margin-bottom: 0;
+      font-weight: 500;
+      .typewriter-paragraph {
+        font-family: inherit;
+      }
+    }
+    .typewriter-cursor {
+      display: inline-block;
+      width: 1ch;
+      font-family: 'Fira Mono', 'Consolas', monospace;
+      color: #1976d2;
+      font-size: 1.2em;
+      animation: blink 1s steps(1) infinite;
+      vertical-align: baseline;
+    }
+  }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@media (max-width: 1100px) {
+  .about-portal-content.wide {
+    max-width: 98vw;
+    padding: 1.5rem 0.5rem;
+    h2 { font-size: 2rem; }
+    p { font-size: 1.08rem; }
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 3rem 1rem;
+
+    h1 {
+      font-size: 2rem;
+    }
+
+    p {
+      font-size: 1.1rem;
+    }
+  }
+
+  .cta-buttons {
+    flex-direction: column;
+    gap: 1rem;
+
+    .cta-btn {
+      width: 100%;
+      text-align: center;
+    }
+  }
+
+  .features-section {
+    padding: 3rem 1rem;
+
+    h2 {
+      font-size: 2rem;
+    }
+  }
+
+  .about-portal-section {
+    padding: 2.2rem 0 2rem 0;
+    min-height: 180px;
+    .about-portal-content.wide {
+      padding: 1.2rem 0.2rem;
+      h2 { font-size: 1.2rem; }
+      p { font-size: 0.98rem; }
+    }
+  }
+}
+
+.typewriter-container {
+  position: relative;
+  width: 100%;
+  
+  h2 {
+    min-height: 2.5em;
+    margin-bottom: 1em;
+  }
+}
+
+.typewriter-paragraph-container {
+  position: relative;
+  width: 100%;
+}
+
+.typewriter-heading,
+.typewriter-paragraph {
+  display: inline;
+}
+
+.typewriter-cursor {
+  display: inline-block;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  from, to { opacity: 1; }
+  50% { opacity: 0; }
+} 
