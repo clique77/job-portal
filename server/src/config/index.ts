@@ -23,9 +23,18 @@ const config = {
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
     region: process.env.AWS_REGION || 'us-east-1',
     bucketName: process.env.AWS_BUCKET_NAME || ''
+  },
+  smtp: {
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.SMTP_PORT || '587', 10),
+    secure: process.env.SMTP_SECURE === 'true',
+    user: process.env.SMTP_USER || '',
+    pass: process.env.SMTP_PASS || '',
+    from: process.env.SMTP_FROM || 'noreply@jobportal.com'
   }
 }
 
 console.log('Final uploads directory:', config.uploads.directory);
+console.log('SMTP config:', config.smtp);
 
 export default config;

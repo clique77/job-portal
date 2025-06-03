@@ -12,7 +12,7 @@ export class UserMongoDBRepository implements IUserRepository {
 
   async create(userData: UserCreateData): Promise<IUser> {
     const user = new User(userData);
-    return user.save();``
+    return user.save();
   }
 
   async findAll(skip: number, limit: number): Promise<IUser[]> {
@@ -49,4 +49,18 @@ export class UserMongoDBRepository implements IUserRepository {
       { new: true, select: '-password' }
     );
   }
+
+  async findOne(query: any): Promise<IUser | null> {
+    return User.findOne(query);
+  }
+
+  async update(id: string, data: Partial<IUser>): Promise<IUser | null> {
+    return User.findByIdAndUpdate(id, data, { new: true });
+  }
+
+  async delete(id: string): Promise<boolean> {
+    const result = await User.findByIdAndDelete(id);
+    return !!result;
+  }
 }
+

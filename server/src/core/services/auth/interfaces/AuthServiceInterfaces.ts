@@ -5,6 +5,9 @@ export interface RegisterData {
   email: string;
   password: string;
   role: UserRole;
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
+  isEmailVerified?: boolean;
 }
 
 export interface LoginData {
@@ -28,4 +31,6 @@ export interface IAuthService {
   register(data: RegisterData): Promise<AuthResponse>;
   login(data: LoginData): Promise<AuthResponse>;
   validateToken(token: string): any;
+  verifyEmail(token: string): Promise<boolean>;
+  resendVerificationEmail(userId: string): Promise<void>;
 }

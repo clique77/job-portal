@@ -20,6 +20,9 @@ export interface IUser extends mongoose.Document {
   bio: string;
   socialLinks: string[];
   profilePicture?: string;
+  isEmailVerified: boolean;
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
   workExperience: {
     company: string;
     position: string;
@@ -109,6 +112,12 @@ const userSchema = new mongoose.Schema<IUser>({
       trim: true
     }
   }],
+  isEmailVerified: {
+    type: Boolean,
+    default: false
+  },
+  emailVerificationToken: String,
+  emailVerificationExpires: Date
 }, {
   timestamps: true,
 });

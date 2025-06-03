@@ -96,41 +96,29 @@ h2 {
 }
 
 .job-filters {
-  background: transparent;
-  box-shadow: none;
-  border: none;
-  padding: 0 32px;
-  margin-bottom: 24px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 4px 24px rgba(33, 150, 243, 0.08);
+  border-radius: 2rem;
+  padding: 1rem 2rem;
+  margin-bottom: 2rem;
   display: flex;
   flex-direction: row;
-  gap: 12px;
+  gap: 1.2rem;
   align-items: center;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   justify-content: center;
   width: 100%;
   max-width: 1200px;
   overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  margin-left: auto;
-  margin-right: auto;
-  transition: max-width 0.2s, padding 0.2s;
-}
-
-.job-filters::-webkit-scrollbar {
-  display: none;
-}
-
-.job-filters:hover {
-  overflow-x: hidden;
+  backdrop-filter: blur(8px);
 }
 
 .job-filters .filter-group {
   display: flex;
   flex-direction: row;
-  gap: 8px;
+  gap: 1rem;
   align-items: center;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   margin-bottom: 0;
   width: auto;
   justify-content: center;
@@ -141,50 +129,62 @@ h2 {
 .job-filters .react-select__control,
 .tags-modal-btn {
   appearance: none;
-  background: #ececec;
+  background: #f8faff;
   border: 1.5px solid #e3eafc;
-  border-radius: 16px;
-  min-width: 130px;
-  max-width: 130px;
+  border-radius: 12px;
+  min-width: 120px;
+  max-width: 140px;
   width: 130px;
-  height: 40px;
+  height: 42px;
   padding: 0 18px;
-  font-size: 15px;
-  color: #222;
+  font-size: 0.9rem;
+  color: #1a237e;
   box-shadow: 0 2px 8px rgba(33, 150, 243, 0.06);
-  transition: box-shadow 0.2s, background 0.2s, border 0.2s;
-  position: relative;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
   cursor: pointer;
   margin-bottom: 0;
   line-height: 1.2;
   display: flex;
   align-items: center;
-  justify-content: center;
-  text-align: center;
+  justify-content: flex-start;
+  text-align: left;
+  font-weight: 500;
 }
 
 .job-filters select:focus,
 .job-filters input[type="number"]:focus,
 .job-filters .react-select__control--is-focused,
 .tags-modal-btn:focus {
-  background: #e3f2fd;
-  box-shadow: 0 0 0 2px #2196f3;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.15), 0 4px 16px rgba(33, 150, 243, 0.1);
   border-color: #2196f3;
+  transform: translateY(-1px);
 }
 
 .job-filters select:hover,
 .job-filters input[type="number"]:hover,
 .job-filters .react-select__control:hover,
 .tags-modal-btn:hover {
-  background: #f3f7fa;
+  background: #fff;
   border-color: #90caf9;
+  color: #1976d2;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.12);
+}
+
+.tags-modal-btn.selected,
+.job-filters select.selected {
+  background: #dbeafe;
+  color: #1976d2; 
+  font-weight: 600;
+  border-color: #1976d2;
 }
 
 .salary-filter {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 0.5rem;
   background: transparent;
   border: none;
   box-shadow: none;
@@ -193,15 +193,15 @@ h2 {
 }
 
 .salary-filter input[type="number"] {
-  min-width: 130px;
-  max-width: 130px;
-  width: 130px;
-  height: 40px;
-  border-radius: 16px;
+  min-width: 80px;
+  max-width: 110px;
+  width: 100px;
+  height: 42px;
+  border-radius: 2rem;
   border: 1.5px solid #e3eafc;
-  background: #ececec;
-  font-size: 15px;
-  padding: 0 18px;
+  background: #f4f7fb;
+  font-size: 1rem;
+  padding: 0 16px;
   box-shadow: 0 1px 4px rgba(33, 150, 243, 0.04);
   margin: 0;
   text-align: center;
@@ -215,12 +215,12 @@ h2 {
 }
 
 .salary-filter input[type="number"]::placeholder {
-  font-size: 13px;
+  font-size: 0.95rem;
   color: #b0b8d1;
 }
 
 .salary-filter span {
-  font-size: 18px;
+  font-size: 1.1rem;
   color: #b0b8d1;
   font-weight: 600;
   margin: 0 2px;
@@ -229,7 +229,7 @@ h2 {
 }
 
 .tags-filter {
-  min-width: 140px;
+  min-width: 120px;
   max-width: 200px;
   width: auto;
   flex: 0 0 auto;
@@ -271,10 +271,26 @@ h2 {
 }
 
 .job-filters select {
-  background-image: url('data:image/svg+xml;utf8,<svg fill="%23888" height="14" viewBox="0 0 20 20" width="14" xmlns="http://www.w3.org/2000/svg"><path d="M7.293 7.293a1 1 0 011.414 0L10 8.586l1.293-1.293a1 1 0 111.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z"/></svg>');
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%231976d2" height="16" viewBox="0 0 20 20" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M7.293 7.293a1 1 0 011.414 0L10 8.586l1.293-1.293a1 1 0 111.414 1.414l-2 2a1 1 0 01-1.414 0l-2-2a1 1 0 010-1.414z"/></svg>');
   background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 14px 14px;
+  background-position: right 12px center;
+  background-size: 16px 16px;
+  padding-right: 36px;
+}
+
+.job-filters select option {
+  text-align: left;
+  padding: 12px 18px;
+  font-size: 0.9rem;
+  color: #1a237e;
+  background: #fff;
+  transition: background 0.2s;
+}
+
+.job-filters select option:hover,
+.job-filters select option:focus {
+  background: #e3f2fd;
+  color: #1976d2;
 }
 
 .job-list {
@@ -428,47 +444,89 @@ h2 {
   .job-filters {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
-    padding: 0 8px;
-    width: 100%;
-    max-width: 100vw;
-    margin: 0 auto 18px auto;
-    overflow-x: visible;
-    box-sizing: border-box;
+    gap: 20px;
+    padding: 24px 10px 32px 10px;
+    min-height: 280px;
+    border-radius: 20px;
+    box-shadow: 0 6px 32px rgba(33, 150, 243, 0.13);
+    background: #f9fafd;
+    border: 1.5px solid #e3eafc;
   }
   .job-filters .filter-group {
     flex-direction: column;
     align-items: stretch;
-    gap: 12px;
+    gap: 14px;
     width: 100%;
     margin-bottom: 0;
     justify-content: flex-start;
+    display: flex;
+    flex-wrap: wrap;
   }
   .job-filters select,
-  .job-filters input[type="number"],
-  .tags-modal-btn {
+  .job-filters input[type="number"] {
+    width: 100%;
     min-width: 0;
     max-width: 100%;
-    width: 100%;
-    box-sizing: border-box;
+    border-radius: 12px;
+    height: 48px;
+    font-size: 1.08rem;
     margin-bottom: 0;
-    text-align: left;
-    font-size: 16px;
+    margin-top: 0;
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.07);
+    background: #fff;
+    padding: 0 18px;
   }
   .salary-filter {
     flex-direction: row;
-    gap: 6px;
+    gap: 10px;
     width: 100%;
     align-items: center;
     justify-content: flex-start;
+    margin-bottom: 0;
+    background: none;
+    box-shadow: none;
+    padding: 0;
+  }
+  .salary-filter input[type="number"] {
+    width: 32%;
+    min-width: 0;
+    font-size: 1.08rem;
+    border-radius: 12px;
+    height: 48px;
+    background: #f4f7fb;
+    box-shadow: 0 1px 4px rgba(33, 150, 243, 0.04);
+    padding: 0 12px;
+  }
+  .salary-filter span {
+    min-width: 10px;
+    margin: 0 2px;
+    font-size: 1.2rem;
+    color: #b0b8d1;
+    font-weight: 600;
+  }
+  .currency-select {
+    width: 80px !important;
+    min-width: 60px !important;
+    max-width: 100px !important;
+  }
+  .job-filters select[name="postedWithin"] {
+    width: 100%;
+    margin-top: 8px;
+    border-radius: 12px;
+    height: 48px;
+    font-size: 1.08rem;
   }
   .tags-filter {
     width: 100%;
-    min-width: 0;
-    max-width: 100%;
-    margin: 0;
+    margin-top: 10px;
+  }
+  .tags-modal-btn {
+    width: auto !important;
     display: flex;
-    align-items: stretch;
+    justify-content: center;
+    align-items: center;
+    margin-left: auto;
+    margin-right: auto;
   }
   .job-details-modal-overlay {
     position: fixed;
@@ -540,6 +598,12 @@ h2 {
     padding: 0 10px;
     position: relative;
     z-index: 1;
+  }
+
+  .job-filters select[name="location"] {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
   }
 }
 
@@ -777,13 +841,15 @@ body.modal-open {
 }
 
 .currency-select {
-  min-width: 60px !important;
-  max-width: 80px;
-  padding-left: 10px !important;
-  padding-right: 10px !important;
-  font-size: 13px !important;
+  min-width: 70px !important;
+  max-width: 90px;
+  padding-left: 12px !important;
+  padding-right: 32px !important;
+  font-size: 0.85rem !important;
   margin-left: 2px;
   margin-right: 2px;
+  font-weight: 600;
+  color: #1976d2;
 }
 
 .job-filters .react-select__menu {
@@ -937,4 +1003,16 @@ body.modal-open {
 }
 .modal-clear-btn:hover {
   background: #e3f2fd;
-} 
+}
+
+@keyframes filterPulse {
+  0% { box-shadow: 0 0 0 0 rgba(33,150,243,0.10); transform: scale(1); }
+  60% { box-shadow: 0 0 0 8px rgba(33,150,243,0.08); transform: scale(1.08); }
+  100% { box-shadow: 0 4px 16px 0 rgba(33,150,243,0.13); transform: scale(1.06); }
+}
+
+.job-filters select[name="location"] {
+  min-width: 140px;
+  max-width: 160px;
+  width: 150px;
+}               

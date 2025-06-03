@@ -25,7 +25,6 @@ const POSTED_WITHIN_OPTIONS = [
   { value: '30', label: 'Last 30 days' },
 ];
 
-// Modal for tags selection (moved outside JobList)
 interface TagsModalProps {
   isOpen: boolean;
   tags: string[];
@@ -224,7 +223,7 @@ const JobList: React.FC = () => {
     });
 
     setFilteredJobs(filtered);
-    setTotalPages(Math.ceil(filtered.length / 10));
+    setTotalPages(Math.ceil(filtered.length / 12));
     setPage(1);
   }, [filters, allJobs]);
 
@@ -267,17 +266,16 @@ const JobList: React.FC = () => {
   };
 
   const getCurrentPageJobs = () => {
-    const startIndex = (page - 1) * 10;
-    const endIndex = startIndex + 10;
+    const startIndex = (page - 1) * 12;
+    const endIndex = startIndex + 12;
     return filteredJobs.slice(startIndex, endIndex);
   };
 
-  // When opening the modal, sync modalSelectedTags with filters.selectedTags
   const openTagsModal = () => {
     setModalSelectedTags(filters.selectedTags);
     setIsTagsModalOpen(true);
   };
-  // When closing, apply changes
+  
   const closeTagsModal = (apply: boolean) => {
     setIsTagsModalOpen(false);
     if (apply) {

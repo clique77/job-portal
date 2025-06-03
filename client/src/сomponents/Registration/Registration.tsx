@@ -1,6 +1,5 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
 import './Registration.scss';
-import { useNavigate } from 'react-router-dom'
 import { UserApi, UserRole, RegisterData } from '../../api/UserApi';
 
 
@@ -15,7 +14,7 @@ const Registration = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
-  const navigate = useNavigate();
+  const [emailSent, setEmailSent] = useState<boolean>(false);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value } = event.target;
@@ -30,25 +29,40 @@ const Registration = () => {
     setLoading(true);
     setError('');
     setSuccess('');
+    setEmailSent(false);
 
     try {
       await UserApi.register(formData);
       setSuccess('Registration successful');
-
+      setEmailSent(true);
       setFormData({
         name: '',
         email: '',
         password: '',
         role: UserRole.JOB_SEEKER
-      })
-
-      navigate('/login');
+      });
+      // Do not navigate to login immediately
     } catch (error) {
       setError((error instanceof Error) ? error.message : 'An unexpected error');
       console.error('Registration error: ', error);
     } finally {
       setLoading(false);
     }
+  }
+
+  if (emailSent) {
+    return (
+      <div className="container">
+        <main>
+          <section className="register-section">
+            <h2>Registration Successful</h2>
+            <div className="success-message">
+              Please check your email and follow the link to verify your account before logging in.
+            </div>
+          </section>
+        </main>
+      </div>
+    );
   }
 
   return (

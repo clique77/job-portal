@@ -176,7 +176,8 @@ export const UserApi = {
       };
     }
     
-    storage.saveAuth(responseData);
+    // storage.saveAuth(responseData);
+    // for correct behaviour of registration and email verification
     return responseData;
   },
 

@@ -15,14 +15,13 @@ import MyApplications from './сomponents/Jobs/JobSeekerApplications/JobSeekerAp
 import AdminDashboard from './сomponents/Admin/Dashboard/AdminDashboard';
 import SitePassword from './сomponents/SitePassword/SitePassword';
 import Landing from './сomponents/Landing/Landing';
+import VerifyEmail from './сomponents/Registration/VerifyEmail';
 
 const ProtectedRoute = ({ user, isLoading, children }: { user: User | null, isLoading: boolean, children: JSX.Element}) => {
-  // First, check if authentication is still being verified
   if (isLoading) {
     return <div className="loading-auth">Verifying authentication...</div>;
   }
-  
-  // Only redirect if definitely not authenticated (after loading completes)
+
   if (!user) {
     return <Navigate to='/login' replace />;
   }
@@ -37,12 +36,10 @@ function AppContent() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Set a flag to handle component unmounting and signal auth checking
     let isMounted = true;
     let retryCount = 0;
     const maxRetries = 3;
     
-    // Signal that auth check is starting
     localStorage.setItem('authCheckInProgress', 'true');
     localStorage.setItem('lastAuthCheckStart', Date.now().toString());
     
@@ -65,21 +62,18 @@ function AppContent() {
         console.log('Verifying authentication...');
         const userData = await UserApi.getCurrentUser();
         
-        if (!isMounted) return; // Exit if component unmounted
+        if (!isMounted) return; 
         
         if (userData && userData.id && userData.email) {
           console.log('Authentication successful, user data loaded:', userData.email);
           setUser(userData);
-          // Reset retry count on success
           retryCount = 0;
           
-          // Store last successful auth time
           localStorage.setItem('lastAuthCheck', Date.now().toString());
           localStorage.setItem('authCheckInProgress', 'false');
         } else {
           console.log('Authentication failed, no valid user data returned');
           
-          // Try to recover user from storage as fallback
           const storedUser = storage.getUser();
           if (storedUser && storedUser.id && storedUser.email) {
             console.log('Using stored user data as fallback');
@@ -88,11 +82,10 @@ function AppContent() {
             setUser(null);
           }
           
-          // Only retry a few times to avoid infinite loops
           if (retryCount < maxRetries) {
             retryCount++;
             console.log(`Retrying authentication (${retryCount}/${maxRetries})...`);
-            setTimeout(performAuthCheck, 2000); // Retry after delay
+            setTimeout(performAuthCheck, 2000);
           } else {
             localStorage.setItem('authCheckInProgress', 'false');
           }
@@ -101,7 +94,6 @@ function AppContent() {
         if (isMounted) {
           console.error('Auth verification error:', error);
           
-          // Try to recover user from storage as fallback
           const storedUser = storage.getUser();
           if (storedUser && storedUser.id && storedUser.email) {
             console.log('Using stored user data as fallback after error');
@@ -110,11 +102,10 @@ function AppContent() {
             setUser(null);
           }
           
-          // Only retry a few times to avoid infinite loops
           if (retryCount < maxRetries) {
             retryCount++;
             console.log(`Retrying authentication after error (${retryCount}/${maxRetries})...`);
-            setTimeout(performAuthCheck, 3000); // Longer delay for errors
+            setTimeout(performAuthCheck, 3000);
           } else {
             localStorage.setItem('authCheckInProgress', 'false');
           }
@@ -131,7 +122,6 @@ function AppContent() {
     
     performAuthCheck();
     
-    // Watch for auth clear requests from other components
     const checkAuthClearRequests = setInterval(() => {
       if (isMounted) {
         const authClearRequested = localStorage.getItem('authClearRequested');
@@ -143,12 +133,10 @@ function AppContent() {
       }
     }, 1000);
     
-    // Setup periodic auth refresh to ensure token validity
     const authRefreshInterval = setInterval(() => {
       if (isMounted) {
         const lastCheck = localStorage.getItem('lastAuthCheck');
         const now = Date.now();
-        // Only refresh if last check was more than 15 minutes ago
         if (!lastCheck || now - parseInt(lastCheck) > 15 * 60 * 1000) {
           console.log('Performing periodic auth refresh...');
           localStorage.setItem('authCheckInProgress', 'true');
@@ -156,9 +144,8 @@ function AppContent() {
           performAuthCheck();
         }
       }
-    }, 10 * 60 * 1000); // Check every 10 minutes
+    }, 10 * 60 * 1000);
     
-    // Cleanup function to prevent state updates after unmount
     return () => {
       isMounted = false;
       localStorage.setItem('authCheckInProgress', 'false');
@@ -262,6 +249,7 @@ function AppContent() {
           {/* Public routes */}
           <Route path='/registration' element={<Registration/>} />
           <Route path='/login' element={<Authentication onLoginSuccess={handleLoginSuccess} />} />
+          <Route path='/verify-email' element={<VerifyEmail />} />
           
           {/* Protected routes for all logged-in users */}
           <Route path='/profile' element={

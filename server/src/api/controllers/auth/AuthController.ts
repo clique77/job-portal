@@ -28,6 +28,8 @@ export class AuthController {
     this.register = this.register.bind(this);
     this.login = this.login.bind(this);
     this.logout = this.logout.bind(this);
+    this.verifyEmail = this.verifyEmail.bind(this);
+    this.resendVerification = this.resendVerification.bind(this);
   }
 
   async register(request: FastifyRequest<{ Body: RegisterRequest }>, reply: FastifyReply) {
@@ -35,7 +37,8 @@ export class AuthController {
       const userData = request.body;
       const result = await this.authService.register(userData);
 
-      this.cookieService.setAuthCookie(reply, result.token);
+      // Don't set auth cookie after registration
+      // this.cookieService.setAuthCookie(reply, result.token);
       return result;
     } catch (error) {
       return this.errorHandlerService.handleError(request, reply, error as Error, 400);
@@ -58,11 +61,30 @@ export class AuthController {
     this.cookieService.clearAuthCookie(reply);
     return { message: 'Successfully logged out' };
   }
+
+  async verifyEmail(request: FastifyRequest<{ Params: { token: string } }>, reply: FastifyReply) {
+    try {
+      await this.authService.verifyEmail(request.params.token);
+      return { message: 'Email verified successfully' };
+    } catch (error) {
+      return this.errorHandlerService.handleError(request, reply, error as Error, 400);
+    }
+  }
+
+  async resendVerification(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const userId = (request.user as any).id;
+      await this.authService.resendVerificationEmail(userId);
+      return { message: 'Verification email sent successfully' };
+    } catch (error) {
+      return this.errorHandlerService.handleError(request, reply, error as Error, 400);
+    }
+  }
 }
 
-import authService from '../../../core/services/auth/AuthService';
-import cookieService from '../../../core/services/common/cookie/CookieService';
-import errorHandlerService from '../../../core/services/common/error-handler/ErrorHandlerService';
+import { authService } from '../../../core/services/auth/AuthService';
+import { cookieService } from '../../../core/services/common/cookie/CookieService';
+import { errorHandlerService } from '../../../core/services/common/error-handler/ErrorHandlerService';
 
 export const authController = new AuthController(authService, cookieService, errorHandlerService);
 export default authController;
